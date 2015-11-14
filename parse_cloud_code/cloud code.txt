@@ -1,0 +1,113 @@
+//Parse.Cloud.beforeSave("ListAttributes", function (request, response) {
+//
+//    ensureNotStale(request.object, response.error, function () {
+//
+//        // Update is not stale. Add any other code here
+//        var attributeName = request.object.get('attributeName');
+//        console.log('Ok to save ListAttributes ' + attributeName);
+//
+//        response.success();
+//    });
+//});
+//
+//Parse.Cloud.beforeSave("ListTitles", function (request, response) {
+//
+//    ensureNotStale(request.object, response.error, function () {
+//
+//        // Update is not stale. Add any other code here
+//        console.log('doing some work here with the fresh object');
+//
+//        response.success();
+//    });
+//});
+//
+//Parse.Cloud.beforeSave("ListItems", function (request, response) {
+//
+//
+//    ensureNotStale(request.object, response.error, function () {
+//
+//        // Update is not stale. Add any other code here
+//        console.log('Fresh object = ' + request.object.get('name'));
+//        var listTitle = request.object.get("ListTitle");
+//        console.log('Found ListTitle = ' + listTitle.get("name"));
+//        var sortKey = getListItemsSortKey(listTitle);
+//        console.log('sortKey = ' + sortKey);
+//        request.object.set('manualSortKey', sortKey);
+//
+//        response.success();
+//    });
+//});
+
+//function getListItemsSortKey(listTitle) {
+//    console.log('Starting getListItemsSortKey.');
+//    var listItems = Parse.Object.extend("ListItems");
+//    var query = new Parse.Query(listItems);
+//    query.equalTo("ListTitle", listTitle);
+//    query.find({
+//        success: function (results) {
+//            console.log('Found ' + results.length + ' ListItems.');
+//            // Do something with the returned Parse.Object values
+//            var sortKey = 0;
+//            for (var i = 0; i < results.length; i++) {
+//                var item = results[i];
+//                var itemSortKey = item.get('manualSortKey');
+//                if (itemSortKey > sortKey) {
+//                    sortKey = itemSortKey;
+//                }
+//            }
+//            sortKey++;
+//            return sortKey;
+//
+//        },
+//        error: function (error) {
+//            console.log("Error: " + error.code + " " + error.message);
+//        }
+//    });
+//
+//}
+
+function ensureNotStale(incommingObj, reject, resolve) {
+
+    var versionAttr = "version";
+    var className = incommingObj.className;
+    var id = incommingObj.id;
+
+    if (incommingObj.isNew()) {
+        console.log(className + ' "' + id + '" is new so setting ' + versionAttr + ' to 1');
+        incommingObj.set(versionAttr, 1);
+        resolve();
+        return;
+    }
+
+    var incomingVersion = incommingObj.get(versionAttr);
+    incommingObj.increment(versionAttr);
+
+    var query = new Parse.Query(className);
+    query.get(id, {
+        success: function (latest) {
+
+            var latestVersion = latest.get(versionAttr);
+            var upToDate = incomingVersion === latestVersion;
+
+            if (!upToDate) {
+                var msg = 'StaleUpdate: Could not update stale ' + className + ' "' + id + '". ' +
+                    'Incoming version was ' + incomingVersion + ', latest is ' + latestVersion;
+                console.log(msg);
+                reject(msg);
+            } else {
+                // console.log(className + ' "' + id + '" is up to date at version ' + latestVersion + '. Letting op proceed');
+                resolve();
+            }
+        },
+        error: function (object, error) {
+            if (error.code === Parse.Error.OBJECT_NOT_FOUND) {
+                // hmm, doesn't exist. Oh well, carry on
+                console.warn('Could not find previous ' + className + ' with ID "' + id + '"');
+                resolve();
+            } else {
+                console.error('Could not load previous ' + className + ' with ID "' + id + '". Error was: ' + error);
+                reject('Error checking for previous version of ' + className);
+            }
+        }
+    });
+}

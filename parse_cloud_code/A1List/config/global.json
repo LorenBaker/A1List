@@ -1,0 +1,14 @@
+{
+  "global": {
+    "parseVersion": "latest"
+  },
+  "applications": {
+    "A1List": {
+      "applicationId": "jPKE0gmjhsw5MKmEG94bPEd2bqmGv4ZsFuNEip1O",
+      "masterKey": "GIL9zKAPvfPGtaCe4MHJdMqIAE52nFb6MBb6Mxnu"
+    },
+    "_default": {
+      "link": "A1List"
+    }
+  }
+}

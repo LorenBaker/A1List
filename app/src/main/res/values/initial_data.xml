@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="list_title_names">
+        <item>List 4</item>
+        <item>List 3</item>
+        <item>List 2</item>
+        <item>List 1</item>
+    </string-array>
+
+    <string-array name="list_1_items">
+        <item>Item 01 - List 1</item>
+        <item>Item 02 - List 1</item>
+        <item>Item 03 - List 1</item>
+        <item>Item 04 - List 1</item>
+        <item>Item 05 - List 1</item>
+        <item>Item 06 - List 1</item>
+        <item>Item 07 - List 1</item>
+        <item>Item 08 - List 1</item>
+        <item>Item 09 - List 1</item>
+        <item>Item 10 - List 1</item>
+    </string-array>
+
+    <string-array name="list_2_items">
+        <item>Item 01 - List 2</item>
+        <item>Item 02 - List 2</item>
+        <item>Item 03 - List 2</item>
+        <item>Item 04 - List 2</item>
+        <item>Item 05 - List 2</item>
+        <item>Item 06 - List 2</item>
+        <item>Item 07 - List 2</item>
+        <item>Item 08 - List 2</item>
+        <item>Item 09 - List 2</item>
+        <item>Item 10 - List 2</item>
+    </string-array>
+
+    <string-array name="list_3_items">
+        <item>Item 01 - List 3</item>
+        <item>Item 02 - List 3</item>
+        <item>Item 03 - List 3</item>
+        <item>Item 04 - List 3</item>
+        <item>Item 05 - List 3</item>
+        <item>Item 06 - List 3</item>
+        <item>Item 07 - List 3</item>
+        <item>Item 08 - List 3</item>
+        <item>Item 09 - List 3</item>
+        <item>Item 10 - List 3</item>
+    </string-array>
+
+    <string-array name="list_4_items">
+        <item>Item 01 - List 4</item>
+        <item>Item 02 - List 4</item>
+        <item>Item 03 - List 4</item>
+        <item>Item 04 - List 4</item>
+        <item>Item 05 - List 4</item>
+        <item>Item 06 - List 4</item>
+        <item>Item 07 - List 4</item>
+        <item>Item 08 - List 4</item>
+        <item>Item 09 - List 4</item>
+        <item>Item 10 - List 4</item>
+    </string-array>
+    
+    
+</resources>

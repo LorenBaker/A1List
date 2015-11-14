@@ -1,0 +1,154 @@
+Parse.Cloud.define("initializeNewUser", function (request, response) {
+
+    console.log('Start initializeNewUser');
+    var user = request.user;
+    console.log('Found new user: ' + user.get("name"));
+    var ACL = new Parse.ACL(user);
+    var unsavedItemObjects = [];
+
+    var attributes = new Parse.Object("ListAttributes");
+    attributes.set('author', user);
+    attributes.set('attributeName', 'Genoa');
+    attributes.set('attributeNameLowercase', 'genoa');
+    attributes.set("isChecked", false);
+    attributes.set("isDefault", true);
+    attributes.set("startColor", -11761266);
+    attributes.set("endColor", -15576746);
+    attributes.set("textColor", -1);
+    attributes.set("textSize", 15);
+    attributes.set("isBold", true);
+    attributes.set("horizontalPaddingInDp", 5);
+    attributes.set("verticalPaddingInDp", 10);
+    attributes.set("isTransparent", false);
+    attributes.set("localUuid", '');
+    attributes.setACL(ACL);
+    unsavedItemObjects[0] = attributes;
+
+    var attributes = new Parse.Object("ListAttributes");
+    attributes.set('author', user);
+    attributes.set('attributeName', 'Opal');
+    attributes.set('attributeNameLowercase', 'opal');
+    attributes.set("isChecked", false);
+    attributes.set("isDefault", false);
+    attributes.set("startColor", -3416876);
+    attributes.set("endColor", -7231843);
+    attributes.set("textColor", -16777216);
+    attributes.set("textSize", 17);
+    attributes.set("isBold", false);
+    attributes.set("horizontalPaddingInDp", 10);
+    attributes.set("verticalPaddingInDp", 15);
+    attributes.set("isTransparent", false);
+    attributes.set("localUuid", '');
+    attributes.setACL(ACL);
+    unsavedItemObjects[1] = attributes;
+
+    var attributes = new Parse.Object("ListAttributes");
+    attributes.set('author', user);
+    attributes.set('attributeName', 'Shades of Blue');
+    attributes.set('attributeNameLowercase', 'shades of blue');
+    attributes.set("isChecked", false);
+    attributes.set("isDefault", false);
+    attributes.set("startColor", -5777934);
+    attributes.set("endColor", -10841921);
+    attributes.set("textColor", -16777216);
+    attributes.set("textSize", 17);
+    attributes.set("isBold", false);
+    attributes.set("horizontalPaddingInDp", 10);
+    attributes.set("verticalPaddingInDp", 15);
+    attributes.set("isTransparent", false);
+    attributes.set("localUuid", '');
+    attributes.setACL(ACL);
+    unsavedItemObjects[2] = attributes;
+
+    var attributes = new Parse.Object("ListAttributes");
+    attributes.set('author', user);
+    attributes.set('attributeName', 'Off White');
+    attributes.set('attributeNameLowercase', 'off white');
+    attributes.set("isChecked", false);
+    attributes.set("isDefault", false);
+    attributes.set("startColor", -1);
+    attributes.set("endColor", -2436147);
+    attributes.set("textColor", -16777216);
+    attributes.set("textSize", 17);
+    attributes.set("isBold", false);
+    attributes.set("horizontalPaddingInDp", 10);
+    attributes.set("verticalPaddingInDp", 1);
+    attributes.set("isTransparent", true);
+    attributes.set("localUuid", '');
+    attributes.setACL(ACL);
+    unsavedItemObjects[3] = attributes;
+
+
+    //var attributes = new Parse.Object("ListAttributes");
+    //attributes.set('author', user);
+    //attributes.set('attributeName', 'Genoa');
+    //attributes.set('attributeNameLowercase', 'genoa');
+    //attributes.set("isChecked", false);
+    //attributes.set("isDefault", false);
+    //attributes.set("startColor", );
+    //attributes.set("endColor", );
+    //attributes.set("textColor", -16777216);
+    //attributes.set("textSize", 17);
+    //attributes.set("isBold", false);
+    //attributes.set("horizontalPaddingInDp", 10);
+    //attributes.set("verticalPaddingInDp", 15);
+    //attributes.set("isTransparent", false);
+    //attributes.set("localUuid", '');
+    //attributes.setACL(ACL);
+    //unsavedItemObjects[4] = attributes;
+    //
+    //var attributes = new Parse.Object("ListAttributes");
+    //attributes.set('author', user);
+    //attributes.set('attributeName', 'Genoa');
+    //attributes.set('attributeNameLowercase', 'genoa');
+    //attributes.set("isChecked", false);
+    //attributes.set("isDefault", false);
+    //attributes.set("startColor", );
+    //attributes.set("endColor", );
+    //attributes.set("textColor", -16777216);
+    //attributes.set("textSize", 17);
+    //attributes.set("isBold", false);
+    //attributes.set("horizontalPaddingInDp", 10);
+    //attributes.set("verticalPaddingInDp", 15);
+    //attributes.set("isTransparent", false);
+    //attributes.set("localUuid", '');
+    //attributes.setACL(ACL);
+    //unsavedItemObjects[5] = attributes;
+
+
+    console.log('Ready to save ' + unsavedItemObjects.length + ' Attributes for user: ' + user.get("name"));
+
+    Parse.Object.saveAll(unsavedItemObjects, {
+        success: function (list) {
+            // All the objects were saved.
+            console.log('Successfully initialized ' + list.length + ' Attributes for user: ' + user.get("name"));
+            response.success(list.length);
+        },
+        error: function (error) {
+            // An error occurred while saving one of the objects.
+            console.log('An error occurred while saving one of the Attribute objects. Error code: ' + error.code + ' ' + error.message);
+            response.error('An error occurred while saving one of the Attribute objects. Error code: ' + error.code + ' ' + error.message);
+        }
+    });
+
+
+});
+
+
+Parse.Cloud.beforeSave("ListAttributes", function (request, response) {
+    var attributeName = request.object.get('name');
+    console.log('beforeSave ListAttributes ' + attributeName);
+    response.success();
+});
+
+Parse.Cloud.beforeSave("ListTitles", function (request, response) {
+    var listName = request.object.get('name');
+    console.log('beforeSave ListTitle ' + listName);
+    response.success();
+});
+
+Parse.Cloud.beforeSave("ListItems", function (request, response) {
+    var itemName = request.object.get('name');
+    console.log('beforeSave ListItem ' + itemName);
+    response.success();
+});

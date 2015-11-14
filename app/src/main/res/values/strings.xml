@@ -1,0 +1,26 @@
+<resources>
+    <string name="app_name">A1List</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_test_data">TestData</string>
+    <string name="action_newList_title">New List</string>
+    <string name="action_editListTheme_title">List Theme</string>
+    <string name="action_deleteStrikeouts_title">Delete Strikeouts</string>
+    <string name="action_showLists_title">Show All Lists</string>
+
+    <string name="notification_downloading_title">A1List</string>
+    <string name="notification_downloading_text">Downloading data from the cloud.</string>
+    <string name="notification_download_ticker">A1List Ticker</string>
+    <string name="action_refresh_title">Refresh</string>
+    <string name="action_listSorting_title">List Sorting</string>
+    <string name="title_activity_list_theme">ListThemeActivity</string>
+
+    <string name="btnTextSize_text">"Text Size: %1.0f"</string>
+    <string name="btnTextStyle_text_bold">Text Bold</string>
+    <string name="btnTextStyle_text_normal">Text Normal</string>
+    <string name="btnHorizontalMargin_text">"Horizontal Margin: %1d"</string>
+    <string name="btnVerticalMargin_text">"Vertical Margin: %1d"</string>
+</resources>
