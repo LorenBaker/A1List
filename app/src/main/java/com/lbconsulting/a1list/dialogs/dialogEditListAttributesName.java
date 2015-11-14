@@ -81,11 +81,16 @@ public class dialogEditListAttributesName extends DialogFragment {
                     @Override
                     public void onClick(final View v) {
                         String attributesProposedName = txtListAttributesName.getText().toString().trim();
-                        if (isValidAttributesName(attributesProposedName)) {
+                        if (ListAttributes.isValidAttributesName(attributesProposedName, mAttributes)) {
                             EventBus.getDefault().post(new MyEvents.setAttributesName(attributesProposedName));
                             dismiss();
                         } else {
-                            txtListAttributesName.setText(mAttributes.getName());
+//                            txtListAttributesName.setText(mAttributes.getName());
+                            dismiss();
+                            String title = "Invalid Theme Name";
+                            String msg = "Theme name \"" + attributesProposedName
+                                    + "\" already exists!\n\nPlease enter a unique theme name.";
+                            EventBus.getDefault().post(new MyEvents.showOkDialog(title, msg));
                         }
                     }
                 });
@@ -102,34 +107,6 @@ public class dialogEditListAttributesName extends DialogFragment {
 
             }
         });
-    }
-
-    private boolean isValidAttributesName(String attributesProposedName) {
-
-        boolean isValidName = false;
-        String title = "Invalid Theme Name";
-
-        if (attributesProposedName.isEmpty()) {
-            String msg = "Theme name cannot be empty!";
-            EventBus.getDefault().post(new MyEvents.showOkDialog(title, msg));
-
-        } else {
-            String existingAttributesID = ListAttributes.getExistingAttributesID(attributesProposedName);
-            if (existingAttributesID != null) {
-                // Found uuid for the proposed attributes name ...
-                // check if the uuid is the same a the provided mAttributes' uuid
-                if (existingAttributesID.equals(mAttributes.getLocalUuid())) {
-                    isValidName = true;
-                } else {
-                    String msg = "Theme name already exists!";
-                    EventBus.getDefault().post(new MyEvents.showOkDialog(title, msg));
-                }
-            } else {
-                isValidName = true;
-            }
-        }
-
-        return isValidName;
     }
 
 

@@ -178,6 +178,7 @@ public class ListThemeActivity extends AppCompatActivity implements View.OnClick
         upDateUI();
     }
 
+    //region OnEvent
     public void onEvent(MyEvents.setAttributesName event) {
         mTempAttributes.setName(event.getName());
         btnAttributesName.setText("Theme Name: " + event.getName());
@@ -200,6 +201,9 @@ public class ListThemeActivity extends AppCompatActivity implements View.OnClick
         mSampleArrayAdapter.setAttributes(mTempAttributes);
         upDateUI();
     }
+
+
+    //endregion
 
     private void upDateUI() {
         // set the background drawable
@@ -352,34 +356,38 @@ public class ListThemeActivity extends AppCompatActivity implements View.OnClick
 
             case R.id.btnNewAttributes:
 //                Toast.makeText(this, "btnNewAttributes clicked", Toast.LENGTH_SHORT).show();
-                createNewAttributes();
-                finish();
+                if (createNewAttributes()) {
+                    finish();
+                }
                 break;
 
             case R.id.btnSaveAttributes:
                 saveAttributes();
                 finish();
                 break;
-
         }
     }
 
-    private void createNewAttributes() {
-        String existingAttributesID = ListAttributes.getExistingAttributesID(mTempAttributes.getName());
-        if (existingAttributesID != null) {
-            String title = "Unable To Create New Theme";
-            String msg = "Theme name \"" + mTempAttributes.getName() + "\" exists. Please rename the Theme.";
-            EventBus.getDefault().post(new MyEvents.showOkDialog(title, msg));
-        } else {
+    private boolean createNewAttributes() {
+        boolean attributesCreated = false;
+
+        if (ListAttributes.isValidAttributesName(mTempAttributes.getName(), mTempAttributes)) {
             // We have a unique name ... so save the new attributes
             mTempAttributes.setAttributesDirty(true);
             mListTitle.setAttributes(mTempAttributes);
+            attributesCreated = true;
+        } else {
+            String title = "Unable To Create New Theme";
+            String msg = "Theme name \"" + mTempAttributes.getName() + "\" exists. Please rename the Theme.";
+            EventBus.getDefault().post(new MyEvents.showOkDialog(title, msg));
         }
+        return attributesCreated;
     }
 
     private void saveAttributes() {
         mOriginalAttributes = ListAttributes.copyListAttributes(mTempAttributes, mOriginalAttributes);
         mOriginalAttributes.setAttributesDirty(true);
+        mTempAttributes.setAttributesDirty(false);
         mTempAttributes.unpinInBackground();
     }
 }

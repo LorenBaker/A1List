@@ -3,6 +3,7 @@ package com.lbconsulting.a1list.database;
 import android.graphics.drawable.GradientDrawable;
 
 import com.lbconsulting.a1list.classes.CommonMethods;
+import com.lbconsulting.a1list.classes.MyEvents;
 import com.lbconsulting.a1list.classes.MyLog;
 import com.lbconsulting.a1list.classes.MySettings;
 import com.parse.ParseClassName;
@@ -15,6 +16,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+
+import de.greenrobot.event.EventBus;
 
 /**
  * Parse object for an A1List Attributes.
@@ -320,7 +323,35 @@ public class ListAttributes extends ParseObject {
         }
     }
 
-    public static String getExistingAttributesID(String proposedAttributesName) {
+    public static boolean isValidAttributesName(String attributesProposedName, ListAttributes sourceAttributes) {
+
+        boolean isValidName = false;
+        String title = "Invalid Theme Name";
+
+        if (attributesProposedName.isEmpty()) {
+            String msg = "Theme name cannot be empty!";
+            EventBus.getDefault().post(new MyEvents.showOkDialog(title, msg));
+
+        } else {
+            String existingAttributesID = getExistingAttributesID(attributesProposedName);
+            if (existingAttributesID != null) {
+                // Found uuid for the proposed attributes name ...
+                // check if the uuid is the same a the provided mAttributes' uuid
+                if (existingAttributesID.equals(sourceAttributes.getLocalUuid())) {
+                    isValidName = true;
+                } else {
+                    String msg = "Theme name already exists!";
+                    EventBus.getDefault().post(new MyEvents.showOkDialog(title, msg));
+                }
+            } else {
+                isValidName = true;
+            }
+        }
+
+        return isValidName;
+    }
+
+    private static String getExistingAttributesID(String proposedAttributesName) {
         // The ListItem exist if its lowercase name is in the datastore, AND
         // it is not marked for deletion
 
@@ -346,30 +377,50 @@ public class ListAttributes extends ParseObject {
         return existingAttributesID;
     }
 
-    public static  ListAttributes copyListAttributes(ListAttributes sourceAttributes, ListAttributes targetAttributes) {
+//    public static  ListAttributes copyListAttributes(ListAttributes sourceAttributes, ListAttributes targetAttributes) {
+//
+//        targetAttributes.setAuthor(ParseUser.getCurrentUser());
+//        targetAttributes.setEndColor(sourceAttributes.getEndColor());
+//        targetAttributes.setHorizontalPaddingDp(sourceAttributes.getHorizontalPaddingDp());
+//        targetAttributes.setAttributesDirty(sourceAttributes.isAttributesDirty());
+//        targetAttributes.setBold(sourceAttributes.isBold());
+//        targetAttributes.setChecked(sourceAttributes.isChecked());
+//        targetAttributes.setDefaultAttributes(sourceAttributes.isDefaultAttributes());
+//        targetAttributes.setMarkedForDeletion(sourceAttributes.isMarkedForDeletion());
+//        targetAttributes.setBackgroundTransparent(sourceAttributes.isBackgroundTransparent());
+//        targetAttributes.setName(sourceAttributes.getName());
+//        targetAttributes.setStartColor(sourceAttributes.getStartColor());
+//        targetAttributes.setTextColor(sourceAttributes.getTextColor());
+//        targetAttributes.setTextSize(sourceAttributes.getTextSize());
+//        targetAttributes.setVerticalPaddingDp(sourceAttributes.getVerticalPaddingDp());
+//
+//        return targetAttributes;
+//    }
 
+    public static  ListAttributes cloneListAttributes(LocalListAttributes sourceAttributes) {
+        ListAttributes targetAttributes = new ListAttributes();
+        targetAttributes.setLocalUuid();
         targetAttributes.setAuthor(ParseUser.getCurrentUser());
+        targetAttributes = copyListAttributes(sourceAttributes, targetAttributes);
+        return targetAttributes;
+    }
+
+    public static ListAttributes copyListAttributes(LocalListAttributes sourceAttributes, ListAttributes targetAttributes){
+        ;
         targetAttributes.setEndColor(sourceAttributes.getEndColor());
-        targetAttributes.setHorizontalPaddingDp(sourceAttributes.getHorizontalPaddingDp());
+        targetAttributes.setHorizontalPaddingDp(sourceAttributes.getHorizontalPaddingInDp());
         targetAttributes.setAttributesDirty(sourceAttributes.isAttributesDirty());
         targetAttributes.setBold(sourceAttributes.isBold());
         targetAttributes.setChecked(sourceAttributes.isChecked());
         targetAttributes.setDefaultAttributes(sourceAttributes.isDefaultAttributes());
         targetAttributes.setMarkedForDeletion(sourceAttributes.isMarkedForDeletion());
-        targetAttributes.setBackgroundTransparent(sourceAttributes.isBackgroundTransparent());
+        targetAttributes.setBackgroundTransparent(sourceAttributes.isTransparent());
         targetAttributes.setName(sourceAttributes.getName());
         targetAttributes.setStartColor(sourceAttributes.getStartColor());
         targetAttributes.setTextColor(sourceAttributes.getTextColor());
         targetAttributes.setTextSize(sourceAttributes.getTextSize());
-        targetAttributes.setVerticalPaddingDp(sourceAttributes.getVerticalPaddingDp());
+        targetAttributes.setVerticalPaddingDp(sourceAttributes.getVerticalPaddingInDp());
 
-        return targetAttributes;
-    }
-
-    public static  ListAttributes cloneListAttributes(ListAttributes sourceAttributes) {
-        ListAttributes targetAttributes = new ListAttributes();
-        targetAttributes.setLocalUuid();
-        targetAttributes = copyListAttributes(sourceAttributes, targetAttributes);
         return targetAttributes;
     }
 
