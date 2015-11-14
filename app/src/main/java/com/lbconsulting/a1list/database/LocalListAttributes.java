@@ -2,29 +2,14 @@ package com.lbconsulting.a1list.database;
 
 import android.graphics.drawable.GradientDrawable;
 
-import com.lbconsulting.a1list.classes.CommonMethods;
-import com.lbconsulting.a1list.classes.MyEvents;
-import com.lbconsulting.a1list.classes.MyLog;
-import com.lbconsulting.a1list.classes.MySettings;
 import com.parse.ParseClassName;
-import com.parse.ParseException;
-import com.parse.ParseObject;
-import com.parse.ParseQuery;
-import com.parse.ParseUser;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-
-import de.greenrobot.event.EventBus;
 
 /**
  * A class to hold local A1List Attributes.
  */
 
 @ParseClassName("ListAttributes")
-public class LocalListAttributes  {
+public class LocalListAttributes {
 
     private boolean isAttributesDirty;
     private boolean isBold;
@@ -76,6 +61,10 @@ public class LocalListAttributes  {
 
     public void setIsBold(boolean isBold) {
         this.isBold = isBold;
+    }
+
+    public void toggleTextStyle() {
+        setIsBold(!isBold());
     }
 
     public boolean isChecked() {
@@ -154,4 +143,11 @@ public class LocalListAttributes  {
     public void setVerticalPaddingInDp(int verticalPaddingInDp) {
         this.verticalPaddingInDp = verticalPaddingInDp;
     }
+
+    public GradientDrawable getBackgroundDrawable() {
+        int colors[] = {getStartColor(), getEndColor()};
+        return new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, colors);
+    }
+
+
 }

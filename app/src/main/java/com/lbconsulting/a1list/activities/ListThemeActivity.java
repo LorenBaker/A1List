@@ -1,6 +1,10 @@
 package com.lbconsulting.a1list.activities;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.FragmentManager;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.pm.ActivityInfo;
 import android.content.res.Resources;
 import android.os.Bundle;
@@ -19,7 +23,6 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
-import android.widget.Toast;
 
 import com.lbconsulting.a1list.R;
 import com.lbconsulting.a1list.adapters.ListItemsSampleArrayAdapter;
@@ -28,9 +31,13 @@ import com.lbconsulting.a1list.classes.MyLog;
 import com.lbconsulting.a1list.classes.MySettings;
 import com.lbconsulting.a1list.database.ListAttributes;
 import com.lbconsulting.a1list.database.ListTitle;
+import com.lbconsulting.a1list.database.LocalListAttributes;
 import com.lbconsulting.a1list.dialogs.dialogColorPicker;
 import com.lbconsulting.a1list.dialogs.dialogEditListAttributesName;
+import com.lbconsulting.a1list.dialogs.dialogNumberPicker;
 import com.nhaarman.listviewanimations.itemmanipulation.DynamicListView;
+import com.parse.ParseException;
+import com.parse.ParseUser;
 
 import java.util.ArrayList;
 
@@ -39,8 +46,12 @@ import de.greenrobot.event.EventBus;
 public class ListThemeActivity extends AppCompatActivity implements View.OnClickListener {
     private ActionBar mActionBar;
     private ListTitle mListTitle;
-    private ListAttributes mTempAttributes;
     private ListAttributes mOriginalAttributes;
+    private static LocalListAttributes mLocalAttributes;
+
+    public static LocalListAttributes getLocalAttributes() {
+        return mLocalAttributes;
+    }
 
     private LinearLayout llListTheme;
     private LinearLayout llContentListTheme;
@@ -106,8 +117,7 @@ public class ListThemeActivity extends AppCompatActivity implements View.OnClick
             }
             mOriginalAttributes = mListTitle.getAttributes();
             if (mOriginalAttributes != null) {
-                mTempAttributes = ListAttributes.cloneListAttributes(mOriginalAttributes);
-                mTempAttributes.pinInBackground();
+                mLocalAttributes = ListAttributes.createLocalListAttributes(mOriginalAttributes);
             } else {
                 String msg = "List \"" + mListTitle.getName() + "\" does not contain attributes!";
                 EventBus.getDefault().post(new MyEvents.showOkDialog(title, msg));
@@ -147,6 +157,9 @@ public class ListThemeActivity extends AppCompatActivity implements View.OnClick
             if (v instanceof Button) {
                 Button b = (Button) v;
                 b.setOnClickListener(this);
+            } else if (v instanceof RadioGroup) {
+                rbAlphabetical.setOnClickListener(this);
+                rbManual.setOnClickListener(this);
             }
         }
 
@@ -171,7 +184,7 @@ public class ListThemeActivity extends AppCompatActivity implements View.OnClick
         }
 
         mSampleArrayAdapter = new ListItemsSampleArrayAdapter(this, lvSampleItems,
-                mListTitle.getAttributes(), mListTitle.getName());
+                mLocalAttributes, mListTitle.getName());
         lvSampleItems.setAdapter(mSampleArrayAdapter);
         mSampleArrayAdapter.setData(sampleList);
 
@@ -180,35 +193,80 @@ public class ListThemeActivity extends AppCompatActivity implements View.OnClick
 
     //region OnEvent
     public void onEvent(MyEvents.setAttributesName event) {
-        mTempAttributes.setName(event.getName());
+        mLocalAttributes.setName(event.getName());
         btnAttributesName.setText("Theme Name: " + event.getName());
     }
 
     public void onEvent(MyEvents.setAttributesStartColor event) {
-        mTempAttributes.setStartColor(event.getColor());
-        mSampleArrayAdapter.setAttributes(mTempAttributes);
+        mLocalAttributes.setStartColor(event.getColor());
+        mSampleArrayAdapter.setAttributes(mLocalAttributes);
         upDateUI();
     }
 
     public void onEvent(MyEvents.setAttributesEndColor event) {
-        mTempAttributes.setEndColor(event.getColor());
-        mSampleArrayAdapter.setAttributes(mTempAttributes);
+        mLocalAttributes.setEndColor(event.getColor());
+        mSampleArrayAdapter.setAttributes(mLocalAttributes);
         upDateUI();
     }
 
     public void onEvent(MyEvents.setAttributesTextColor event) {
-        mTempAttributes.setTextColor(event.getColor());
-        mSampleArrayAdapter.setAttributes(mTempAttributes);
+        mLocalAttributes.setTextColor(event.getColor());
+        mSampleArrayAdapter.setAttributes(mLocalAttributes);
         upDateUI();
     }
 
+    public void onEvent(MyEvents.setAttributesTextSize event) {
+        mLocalAttributes.setTextSize(event.getTextSize());
+        mSampleArrayAdapter.setAttributes(mLocalAttributes);
+        upDateUI();
+    }
+
+    public void onEvent(MyEvents.setAttributesHorizontalPadding event) {
+        mLocalAttributes.setHorizontalPaddingInDp(event.getHorizontalPadding());
+        mSampleArrayAdapter.setAttributes(mLocalAttributes);
+        upDateUI();
+    }
+
+    public void onEvent(MyEvents.setAttributesVerticalPadding event) {
+        mLocalAttributes.setVerticalPaddingInDp(event.getVerticalPadding());
+        mSampleArrayAdapter.setAttributes(mLocalAttributes);
+        upDateUI();
+    }
 
     //endregion
+
+    public static void showOkDialog(Context context, String title, String message) {
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
+        // set dialog title and message
+        alertDialogBuilder
+                .setTitle(title)
+                .setMessage(message)
+                .setCancelable(false)
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                });
+
+        // create alert dialog
+        final AlertDialog alertDialog = alertDialogBuilder.create();
+        alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialog) {
+                Button btnOK = alertDialog.getButton(Dialog.BUTTON_POSITIVE);
+                btnOK.setTextSize(18);
+            }
+        });
+
+        // show it
+        alertDialog.show();
+    }
+
 
     private void upDateUI() {
         // set the background drawable
         Resources res = getResources();
-        llListTheme.setBackground(mTempAttributes.getBackgroundDrawable());
+        llListTheme.setBackground(mLocalAttributes.getBackgroundDrawable());
 
         // set views' text color
         for (int i = 0; i < llContentListTheme.getChildCount(); i++) {
@@ -216,10 +274,10 @@ public class ListThemeActivity extends AppCompatActivity implements View.OnClick
             // Note: Switches and CheckBoxes are "Buttons"
             if (v instanceof Button) {
                 Button b = (Button) v;
-                b.setTextColor(mTempAttributes.getTextColor());
+                b.setTextColor(mLocalAttributes.getTextColor());
             } else if (v instanceof RadioGroup) {
-                rbAlphabetical.setTextColor(mTempAttributes.getTextColor());
-                rbManual.setTextColor(mTempAttributes.getTextColor());
+                rbAlphabetical.setTextColor(mLocalAttributes.getTextColor());
+                rbManual.setTextColor(mLocalAttributes.getTextColor());
             }
         }
 
@@ -227,14 +285,14 @@ public class ListThemeActivity extends AppCompatActivity implements View.OnClick
             View v = llCancelNewSave.getChildAt(i);
             if (v instanceof Button) {
                 Button b = (Button) v;
-                b.setTextColor(mTempAttributes.getTextColor());
+                b.setTextColor(mLocalAttributes.getTextColor());
             }
         }
 
         // show the attributes values in their respective Buttons
 
-        btnAttributesName.setText("Theme Name: " + mTempAttributes.getName());
-        ckIsDefaultAttributes.setChecked(mTempAttributes.isDefaultAttributes());
+        btnAttributesName.setText("Theme Name: " + mLocalAttributes.getName());
+        ckIsDefaultAttributes.setChecked(mLocalAttributes.isDefaultAttributes());
 
         if (mListTitle.sortListItemsAlphabetically()) {
             rbAlphabetical.setChecked(true);
@@ -242,24 +300,26 @@ public class ListThemeActivity extends AppCompatActivity implements View.OnClick
             rbManual.setChecked(true);
         }
 
-        btnStartColor.setBackgroundColor(mTempAttributes.getStartColor());
-        btnEndColor.setBackgroundColor(mTempAttributes.getEndColor());
+        btnStartColor.setBackgroundColor(mLocalAttributes.getStartColor());
+        btnEndColor.setBackgroundColor(mLocalAttributes.getEndColor());
 
-        btnTextSize.setText(res.getString(R.string.btnTextSize_text, mTempAttributes.getTextSize()));
-        if (mTempAttributes.isBold()) {
+        btnTextSize.setText(res.getString(R.string.btnTextSize_text, mLocalAttributes.getTextSize()));
+        if (mLocalAttributes.isBold()) {
             btnTextStyle.setText(R.string.btnTextStyle_text_bold);
         } else {
             btnTextStyle.setText(R.string.btnTextStyle_text_normal);
         }
 
-        ckItemBackgroundTransparent.setChecked(mTempAttributes.isBackgroundTransparent());
+        ckItemBackgroundTransparent.setChecked(mLocalAttributes.isTransparent());
 
-        btnHorizontalMargin.setText(res.getString(R.string.btnHorizontalMargin_text, mTempAttributes.getHorizontalPaddingDp()));
-        btnVerticalMargin.setText(res.getString(R.string.btnVerticalMargin_text, mTempAttributes.getVerticalPaddingDp()));
+        btnHorizontalMargin.setText(res.getString(R.string.btnHorizontalMargin_text,
+                mLocalAttributes.getHorizontalPaddingInDp()));
+        btnVerticalMargin.setText(res.getString(R.string.btnVerticalMargin_text,
+                mLocalAttributes.getVerticalPaddingInDp()));
 
 
         // set list views' background drawables
-        lvSampleItems.setBackground(mTempAttributes.getBackgroundDrawable());
+        lvSampleItems.setBackground(mLocalAttributes.getBackgroundDrawable());
         mSampleArrayAdapter.notifyDataSetChanged();
         lvAttributes.setBackgroundColor(ContextCompat.getColor(this, R.color.whiteSmoke));
     }
@@ -310,47 +370,69 @@ public class ListThemeActivity extends AppCompatActivity implements View.OnClick
 
             case R.id.btnAttributesName:
                 dialogEditListAttributesName editListAttributesNameDialog
-                        = dialogEditListAttributesName.newInstance(mTempAttributes.getLocalUuid());
+                        = dialogEditListAttributesName.newInstance();
                 editListAttributesNameDialog.show(fm, "dialogEditListAttributesName");
+                break;
+
+            case R.id.ckIsDefaultAttributes:
+                mLocalAttributes.setIsDefaultAttributes(ckIsDefaultAttributes.isChecked());
+                break;
+
+            case R.id.rbAlphabetical:
+            case R.id.rbManual:
+                mListTitle.setSortListItemsAlphabetically(rbAlphabetical.isChecked());
                 break;
 
             case R.id.btnStartColor:
                 colorPickerDialog = dialogColorPicker.newInstance(MySettings.START_COLOR_PICKER,
-                        mTempAttributes.getStartColor());
+                        mLocalAttributes.getStartColor());
                 colorPickerDialog.show(fm, "dialogStartColorPicker");
                 break;
 
             case R.id.btnEndColor:
                 colorPickerDialog = dialogColorPicker.newInstance(MySettings.END_COLOR_PICKER,
-                        mTempAttributes.getEndColor());
+                        mLocalAttributes.getEndColor());
                 colorPickerDialog.show(fm, "dialogEndColorPicker");
                 break;
 
             case R.id.btnTextSize:
-                Toast.makeText(this, "btnTextSize clicked", Toast.LENGTH_SHORT).show();
+                dialogNumberPicker numberPickerDialog = dialogNumberPicker.newInstance(MySettings.TEXT_SIZE_PICKER,
+                        Math.round(mLocalAttributes.getTextSize()));
+                numberPickerDialog.show(fm, "dialogNumberPicker");
                 break;
 
             case R.id.btnTextColor:
                 colorPickerDialog = dialogColorPicker.newInstance(MySettings.TEXT_COLOR_PICKER,
-                        mTempAttributes.getTextColor());
+                        mLocalAttributes.getTextColor());
                 colorPickerDialog.show(fm, "dialogTextColorPicker");
                 break;
 
             case R.id.btnTextStyle:
-                Toast.makeText(this, "btnTextStyle clicked", Toast.LENGTH_SHORT).show();
+                mLocalAttributes.toggleTextStyle();
+                mSampleArrayAdapter.setAttributes(mLocalAttributes);
+                upDateUI();
+                break;
+
+            case R.id.ckItemBackgroundTransparent:
+                mLocalAttributes.setIsTransparent(ckItemBackgroundTransparent.isChecked());
+                mSampleArrayAdapter.setAttributes(mLocalAttributes);
+                upDateUI();
                 break;
 
             case R.id.btnHorizontalMargin:
-                Toast.makeText(this, "btnHorizontalMargin clicked", Toast.LENGTH_SHORT).show();
+                numberPickerDialog = dialogNumberPicker.newInstance(MySettings.HORIZONTAL_PADDING_PICKER,
+                        mLocalAttributes.getHorizontalPaddingInDp());
+                numberPickerDialog.show(fm, "dialogNumberPicker");
                 break;
 
             case R.id.btnVerticalMargin:
-                Toast.makeText(this, "btnVerticalMargin clicked", Toast.LENGTH_SHORT).show();
+                numberPickerDialog = dialogNumberPicker.newInstance(MySettings.VERTICAL_PADDING_PICKER,
+                        mLocalAttributes.getVerticalPaddingInDp());
+                numberPickerDialog.show(fm, "dialogNumberPicker");
                 break;
 
             case R.id.btnCancel:
 //                Toast.makeText(this, "btnCancel clicked", Toast.LENGTH_SHORT).show();
-                mTempAttributes.unpinInBackground();
                 finish();
                 break;
 
@@ -371,23 +453,30 @@ public class ListThemeActivity extends AppCompatActivity implements View.OnClick
     private boolean createNewAttributes() {
         boolean attributesCreated = false;
 
-        if (ListAttributes.isValidAttributesName(mTempAttributes.getName(), mTempAttributes)) {
+        if (ListAttributes.isValidAttributesName(mLocalAttributes.getName())) {
             // We have a unique name ... so save the new attributes
-            mTempAttributes.setAttributesDirty(true);
-            mListTitle.setAttributes(mTempAttributes);
-            attributesCreated = true;
+            try {
+                ListAttributes newAttributes = new ListAttributes();
+                newAttributes.setLocalUuid();
+                newAttributes.setAuthor(ParseUser.getCurrentUser());
+                newAttributes = ListAttributes.copyLocalListAttributes(mLocalAttributes, newAttributes);
+                mListTitle.setAttributes(newAttributes);
+                newAttributes.pin();
+                attributesCreated = true;
+            } catch (ParseException e) {
+                MyLog.e("ListThemeActivity", "createNewAttributes: ParseException: " + e.getMessage());
+            }
         } else {
-            String title = "Unable To Create New Theme";
-            String msg = "Theme name \"" + mTempAttributes.getName() + "\" exists. Please rename the Theme.";
-            EventBus.getDefault().post(new MyEvents.showOkDialog(title, msg));
+            String title = "Failed to Create New Theme";
+            String msg = "Theme \"" + mLocalAttributes.getName() + "\" already exists.\n\nPlease enter a unique theme name.";
+            showOkDialog(this, title, msg);
         }
         return attributesCreated;
     }
 
     private void saveAttributes() {
-        mOriginalAttributes = ListAttributes.copyListAttributes(mTempAttributes, mOriginalAttributes);
+        mOriginalAttributes = ListAttributes.copyLocalListAttributes(mLocalAttributes, mOriginalAttributes);
         mOriginalAttributes.setAttributesDirty(true);
-        mTempAttributes.setAttributesDirty(false);
-        mTempAttributes.unpinInBackground();
+
     }
 }

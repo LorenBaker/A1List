@@ -2,6 +2,7 @@ package com.lbconsulting.a1list.adapters;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.support.v4.content.ContextCompat;
 import android.util.TypedValue;
@@ -13,8 +14,10 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.lbconsulting.a1list.R;
+import com.lbconsulting.a1list.classes.CommonMethods;
 import com.lbconsulting.a1list.classes.MyLog;
 import com.lbconsulting.a1list.database.ListAttributes;
+import com.lbconsulting.a1list.database.LocalListAttributes;
 
 import java.util.List;
 
@@ -26,10 +29,10 @@ public class ListItemsSampleArrayAdapter extends ArrayAdapter<String> {
     private final Context mContext;
     private final ListView mListView;
     private final String mListName;
-    private ListAttributes mAttributes;
+    private LocalListAttributes mAttributes;
 //    private ListTitle mListTitle;
 
-    public ListItemsSampleArrayAdapter(Context context, ListView listView, ListAttributes attributes, String listName) {
+    public ListItemsSampleArrayAdapter(Context context, ListView listView, LocalListAttributes attributes, String listName) {
         super(context, 0);
         this.mContext = context;
         this.mListView = listView;
@@ -50,74 +53,52 @@ public class ListItemsSampleArrayAdapter extends ArrayAdapter<String> {
         }
     }
 
-    public void setAttributes(ListAttributes attributes) {
+    public void setAttributes(LocalListAttributes attributes) {
         mAttributes = attributes;
     }
 
-//    @Override
-//    public long getItemId(int position) {
-//        // TODO: Add item ids to data tables
-//        ListItem listItem = getItem(position);
-//        return listItem.getItemID();
-//    }
 
-//    @Override
-//    public boolean hasStableIds() {
-//        return true;
-//    }
-
-//    @Override
-//    public int getPosition(ListItem soughtItem) {
-//        return getItemPosition(soughtItem.getItemUuid());
-//    }
-
-//    private int getItemPosition(String soughtItemUuid) {
-//        int position;
-//        boolean found = false;
-//
-//        ListItem item;
-//        for (position = 0; position < getCount(); position++) {
-//            item = getItem(position);
-//            if (item.getItemUuid().equals(soughtItemUuid)) {
-//                found = true;
-//                break;
-//            }
-//        }
-//
-//        if (!found) {
-//            position = 0;
-//        }
-//        return position;
-//    }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
+        ListItemViewHolder holder;
+
         // Get the data item for this position
         String item = getItem(position);
-
-        convertView = LayoutInflater.from(getContext()).inflate(R.layout.row_list_item_name, parent, false);
-        TextView tvListItemName = (TextView) convertView.findViewById(R.id.tvListItemName);
+        if (convertView == null) {
+            convertView = LayoutInflater.from(getContext()).inflate(R.layout.row_list_item_name, parent, false);
+            holder = new ListItemViewHolder(convertView);
+            convertView.setTag(holder);
+        } else {
+            holder = (ListItemViewHolder) convertView.getTag();
+        }
 
         if (mAttributes != null) {
-            tvListItemName.setTextSize(TypedValue.COMPLEX_UNIT_SP, mAttributes.getTextSize());
-            tvListItemName.setTextColor(mAttributes.getTextColor());
+            holder.tvListItemName.setTextSize(TypedValue.COMPLEX_UNIT_SP, mAttributes.getTextSize());
+            holder.tvListItemName.setTextColor(mAttributes.getTextColor());
 
-            int horizontalPadding = mAttributes.getHorizontalPaddingPx();
-            int verticalPadding = mAttributes.getVerticalPaddingPx();
-            tvListItemName.setPadding(horizontalPadding, verticalPadding,
+            int horizontalPadding = CommonMethods.convertDpToPixel(mAttributes.getHorizontalPaddingInDp());
+            int verticalPadding = CommonMethods.convertDpToPixel(mAttributes.getVerticalPaddingInDp());
+            holder.tvListItemName.setPadding(horizontalPadding, verticalPadding,
                     horizontalPadding, verticalPadding);
 
-            if (mAttributes.isBackgroundTransparent()) {
-                tvListItemName.setBackgroundColor(Color.TRANSPARENT);
+            if (mAttributes.isTransparent()) {
+                holder.tvListItemName.setBackgroundColor(Color.TRANSPARENT);
                 mListView.setDivider(null);
                 mListView.setDividerHeight(0);
             } else {
-                tvListItemName.setBackground(mAttributes.getBackgroundDrawable());
+                holder.tvListItemName.setBackground(mAttributes.getBackgroundDrawable());
                 mListView.setDivider(new ColorDrawable(ContextCompat.getColor(mContext, R.color.greyLight3_50Transparent)));
                 mListView.setDividerHeight(1);
             }
+
+            if (mAttributes.isBold()) {
+                holder.tvListItemName.setTypeface(null, Typeface.BOLD);
+            }else{
+                holder.tvListItemName.setTypeface(null, Typeface.NORMAL);
+            }
         }
-        tvListItemName.setText(item);
+        holder.tvListItemName.setText(item);
 
         // Return the completed view to render on screen
         return convertView;
@@ -129,5 +110,12 @@ public class ListItemsSampleArrayAdapter extends ArrayAdapter<String> {
         MyLog.i("ListItemsSampleArrayAdapter", "notifyDataSetChanged for List: " + mListName);
     }
 
+    private class ListItemViewHolder {
+        public final TextView tvListItemName;
+
+        public ListItemViewHolder(View base) {
+            tvListItemName = (TextView) base.findViewById(R.id.tvListItemName);
+        }
+    }
 }
 

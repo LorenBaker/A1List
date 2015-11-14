@@ -12,9 +12,11 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.lbconsulting.a1list.R;
+import com.lbconsulting.a1list.activities.ListThemeActivity;
 import com.lbconsulting.a1list.classes.MyEvents;
 import com.lbconsulting.a1list.classes.MyLog;
 import com.lbconsulting.a1list.database.ListAttributes;
+import com.lbconsulting.a1list.database.LocalListAttributes;
 
 import de.greenrobot.event.EventBus;
 
@@ -23,10 +25,10 @@ import de.greenrobot.event.EventBus;
  */
 public class dialogEditListAttributesName extends DialogFragment {
 
-    private static final String ARG_LIST_ATTRIBUTES_UUID = "argListAttributesID";
+//    private static final String ARG_LIST_ATTRIBUTES_UUID = "argListAttributesID";
 
     private EditText txtListAttributesName;
-    private ListAttributes mAttributes;
+    private LocalListAttributes mAttributes;
     //    private String mName;
     private AlertDialog mEditListAttributesNameDialog;
 
@@ -36,32 +38,19 @@ public class dialogEditListAttributesName extends DialogFragment {
     }
 
 
-    public static dialogEditListAttributesName newInstance(String attributesUuid) {
+    public static dialogEditListAttributesName newInstance() {
         MyLog.i("dialogEditListAttributesName", "newInstance");
-        dialogEditListAttributesName fragment = new dialogEditListAttributesName();
-        Bundle args = new Bundle();
-        args.putString(ARG_LIST_ATTRIBUTES_UUID, attributesUuid);
-        fragment.setArguments(args);
-        return fragment;
+        return new dialogEditListAttributesName();
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         MyLog.i("dialogEditListAttributesName", "onCreate");
-        Bundle args = getArguments();
-        if (args.containsKey(ARG_LIST_ATTRIBUTES_UUID)) {
-            String attributesUuid = args.getString(ARG_LIST_ATTRIBUTES_UUID);
-            mAttributes = ListAttributes.getAttributes(attributesUuid, true);
-            if (mAttributes == null) {
-                String okDialogTitle = "Error Getting Attributes";
-                String msg = "Attributes is null!";
-                EventBus.getDefault().post(new MyEvents.showOkDialog(okDialogTitle, msg));
-                MyLog.e("dialogEditListAttributesName", "onCreate: " + msg);
-            }
-        } else {
+        mAttributes = ListThemeActivity.getLocalAttributes();
+        if (mAttributes == null) {
             String okDialogTitle = "Error Getting Attributes";
-            String msg = "Fragment arguments do not contain " + ARG_LIST_ATTRIBUTES_UUID + "!";
+            String msg = "Attributes is null!";
             EventBus.getDefault().post(new MyEvents.showOkDialog(okDialogTitle, msg));
             MyLog.e("dialogEditListAttributesName", "onCreate: " + msg);
         }
@@ -81,16 +70,15 @@ public class dialogEditListAttributesName extends DialogFragment {
                     @Override
                     public void onClick(final View v) {
                         String attributesProposedName = txtListAttributesName.getText().toString().trim();
-                        if (ListAttributes.isValidAttributesName(attributesProposedName, mAttributes)) {
+                        if (ListAttributes.isValidAttributesName(attributesProposedName)) {
                             EventBus.getDefault().post(new MyEvents.setAttributesName(attributesProposedName));
                             dismiss();
                         } else {
-//                            txtListAttributesName.setText(mAttributes.getName());
-                            dismiss();
+                            txtListAttributesName.setText(mAttributes.getName());
                             String title = "Invalid Theme Name";
-                            String msg = "Theme name \"" + attributesProposedName
-                                    + "\" already exists!\n\nPlease enter a unique theme name.";
-                            EventBus.getDefault().post(new MyEvents.showOkDialog(title, msg));
+                            String msg = "Theme \"" + attributesProposedName
+                                    + "\" already exists.\n\nPlease enter a unique theme name.";
+                            ListThemeActivity.showOkDialog(getActivity(),title,msg);
                         }
                     }
                 });

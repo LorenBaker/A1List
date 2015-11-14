@@ -22,6 +22,10 @@ public class MySettings {
     public static final int START_COLOR_PICKER = 2;
     public static final int TEXT_COLOR_PICKER = 3;
 
+    public static final int TEXT_SIZE_PICKER = 10;
+    public static final int HORIZONTAL_PADDING_PICKER = 20;
+    public static final int VERTICAL_PADDING_PICKER = 30;
+
     public static final String ARG_LIST_TITLE_ID = "listTitleID";
 
     public static final String SETTING_ACTIVE_LIST_TITLE_UUID = "activeListTitleUuid";

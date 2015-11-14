@@ -122,6 +122,36 @@ public class MyEvents {
             return mColor;
         }
     }
+
+    public static class setAttributesTextSize {
+        private int mSelectedTextSize;
+        public setAttributesTextSize(int selectedTextSize) {
+         mSelectedTextSize =selectedTextSize;
+        }
+        public float getTextSize(){
+            return (float) mSelectedTextSize;
+        }
+    }
+
+    public static class setAttributesHorizontalPadding {
+        private int mHorizontalPadding;
+        public setAttributesHorizontalPadding(int selectedHorizontalPadding) {
+            mHorizontalPadding =selectedHorizontalPadding;
+        }
+        public int getHorizontalPadding(){
+            return mHorizontalPadding;
+        }
+    }
+
+    public static class setAttributesVerticalPadding {
+        private int mVerticalPadding;
+        public setAttributesVerticalPadding(int selectedVerticalPadding) {
+            mVerticalPadding =selectedVerticalPadding;
+        }
+        public int getVerticalPadding(){
+            return mVerticalPadding;
+        }
+    }
 }
 
 

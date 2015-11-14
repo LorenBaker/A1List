@@ -323,27 +323,40 @@ public class ListAttributes extends ParseObject {
         }
     }
 
-    public static boolean isValidAttributesName(String attributesProposedName, ListAttributes sourceAttributes) {
+//    public static boolean isValidAttributesName(String attributesProposedName, ListAttributes sourceAttributes) {
+//
+//        boolean isValidName = false;
+//        String title = "Invalid Theme Name";
+//
+//        if (attributesProposedName.isEmpty()) {
+//            String msg = "Theme name cannot be empty!";
+//            EventBus.getDefault().post(new MyEvents.showOkDialog(title, msg));
+//
+//        } else {
+//            String existingAttributesID = getExistingAttributesID(attributesProposedName);
+//            if (existingAttributesID != null) {
+//                // Found uuid for the proposed attributes name ...
+//                // check if the uuid is the same a the provided mAttributes' uuid
+//                if (existingAttributesID.equals(sourceAttributes.getLocalUuid())) {
+//                    isValidName = true;
+//                } else {
+//                    String msg = "Theme name already exists!";
+//                    EventBus.getDefault().post(new MyEvents.showOkDialog(title, msg));
+//                }
+//            } else {
+//                isValidName = true;
+//            }
+//        }
+//
+//        return isValidName;
+//    }
+
+    public static boolean isValidAttributesName(String attributesProposedName) {
 
         boolean isValidName = false;
-        String title = "Invalid Theme Name";
-
-        if (attributesProposedName.isEmpty()) {
-            String msg = "Theme name cannot be empty!";
-            EventBus.getDefault().post(new MyEvents.showOkDialog(title, msg));
-
-        } else {
+        if (!attributesProposedName.isEmpty()) {
             String existingAttributesID = getExistingAttributesID(attributesProposedName);
-            if (existingAttributesID != null) {
-                // Found uuid for the proposed attributes name ...
-                // check if the uuid is the same a the provided mAttributes' uuid
-                if (existingAttributesID.equals(sourceAttributes.getLocalUuid())) {
-                    isValidName = true;
-                } else {
-                    String msg = "Theme name already exists!";
-                    EventBus.getDefault().post(new MyEvents.showOkDialog(title, msg));
-                }
-            } else {
+            if (existingAttributesID == null) {
                 isValidName = true;
             }
         }
@@ -377,7 +390,7 @@ public class ListAttributes extends ParseObject {
         return existingAttributesID;
     }
 
-//    public static  ListAttributes copyListAttributes(ListAttributes sourceAttributes, ListAttributes targetAttributes) {
+//    public static  ListAttributes copyLocalListAttributes(ListAttributes sourceAttributes, ListAttributes targetAttributes) {
 //
 //        targetAttributes.setAuthor(ParseUser.getCurrentUser());
 //        targetAttributes.setEndColor(sourceAttributes.getEndColor());
@@ -397,16 +410,28 @@ public class ListAttributes extends ParseObject {
 //        return targetAttributes;
 //    }
 
-    public static  ListAttributes cloneListAttributes(LocalListAttributes sourceAttributes) {
-        ListAttributes targetAttributes = new ListAttributes();
-        targetAttributes.setLocalUuid();
-        targetAttributes.setAuthor(ParseUser.getCurrentUser());
-        targetAttributes = copyListAttributes(sourceAttributes, targetAttributes);
+    public static LocalListAttributes createLocalListAttributes(ListAttributes sourceAttributes) {
+        LocalListAttributes targetAttributes = new LocalListAttributes();
+
+        targetAttributes.setEndColor(sourceAttributes.getEndColor());
+        targetAttributes.setHorizontalPaddingInDp(sourceAttributes.getHorizontalPaddingDp());
+        targetAttributes.setIsAttributesDirty(sourceAttributes.isAttributesDirty());
+        targetAttributes.setIsBold(sourceAttributes.isBold());
+        targetAttributes.setIsChecked(sourceAttributes.isChecked());
+        targetAttributes.setIsDefaultAttributes(sourceAttributes.isDefaultAttributes());
+        targetAttributes.setIsMarkedForDeletion(sourceAttributes.isMarkedForDeletion());
+        targetAttributes.setIsTransparent(sourceAttributes.isBackgroundTransparent());
+        targetAttributes.setName(sourceAttributes.getName());
+        targetAttributes.setStartColor(sourceAttributes.getStartColor());
+        targetAttributes.setTextColor(sourceAttributes.getTextColor());
+        targetAttributes.setTextSize(sourceAttributes.getTextSize());
+        targetAttributes.setVerticalPaddingInDp(sourceAttributes.getVerticalPaddingDp());
+
         return targetAttributes;
     }
 
-    public static ListAttributes copyListAttributes(LocalListAttributes sourceAttributes, ListAttributes targetAttributes){
-        ;
+    public static ListAttributes copyLocalListAttributes(LocalListAttributes sourceAttributes, ListAttributes targetAttributes) {
+
         targetAttributes.setEndColor(sourceAttributes.getEndColor());
         targetAttributes.setHorizontalPaddingDp(sourceAttributes.getHorizontalPaddingInDp());
         targetAttributes.setAttributesDirty(sourceAttributes.isAttributesDirty());
