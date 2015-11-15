@@ -15,8 +15,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
@@ -30,6 +28,7 @@ import com.lbconsulting.a1list.classes.MyEvents;
 import com.lbconsulting.a1list.classes.MyLog;
 import com.lbconsulting.a1list.classes.MySettings;
 import com.lbconsulting.a1list.database.ListAttributes;
+import com.lbconsulting.a1list.database.ListItem;
 import com.lbconsulting.a1list.database.ListTitle;
 import com.lbconsulting.a1list.database.LocalListAttributes;
 import com.lbconsulting.a1list.dialogs.dialogColorPicker;
@@ -95,10 +94,10 @@ public class ListThemeActivity extends AppCompatActivity implements View.OnClick
         EventBus.getDefault().register(this);
 
         // TODO: Figure out why app status bar background is white without this code ... change min api back to 16
-        Window window = getWindow();
-        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-        window.setStatusBarColor(ContextCompat.getColor(this, R.color.colorPrimaryDark));
+//        Window window = getWindow();
+//        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+//        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+//        window.setStatusBarColor(ContextCompat.getColor(this, R.color.colorPrimaryDark));
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -456,12 +455,20 @@ public class ListThemeActivity extends AppCompatActivity implements View.OnClick
         if (ListAttributes.isValidAttributesName(mLocalAttributes.getName())) {
             // We have a unique name ... so save the new attributes
             try {
+                if (ckIsDefaultAttributes.isChecked()) {
+                    // These "new" attributes are now the default attributes ... so
+                    // make sure that no other attributes are set as default.
+                    ListAttributes.clearAllDefaultAttributes();
+                }
+
                 ListAttributes newAttributes = new ListAttributes();
                 newAttributes.setLocalUuid();
                 newAttributes.setAuthor(ParseUser.getCurrentUser());
                 newAttributes = ListAttributes.copyLocalListAttributes(mLocalAttributes, newAttributes);
-                mListTitle.setAttributes(newAttributes);
                 newAttributes.pin();
+                mListTitle.setAttributes(newAttributes);
+                ListItem.setNewAttributes(mListTitle, newAttributes);
+
                 attributesCreated = true;
             } catch (ParseException e) {
                 MyLog.e("ListThemeActivity", "createNewAttributes: ParseException: " + e.getMessage());
@@ -475,6 +482,12 @@ public class ListThemeActivity extends AppCompatActivity implements View.OnClick
     }
 
     private void saveAttributes() {
+        if (ckIsDefaultAttributes.isChecked()) {
+            // These "existing" attributes are now the default attributes ... so
+            // make sure that no other attributes are set as default.
+            ListAttributes.clearAllDefaultAttributes();
+        }
+
         mOriginalAttributes = ListAttributes.copyLocalListAttributes(mLocalAttributes, mOriginalAttributes);
         mOriginalAttributes.setAttributesDirty(true);
 

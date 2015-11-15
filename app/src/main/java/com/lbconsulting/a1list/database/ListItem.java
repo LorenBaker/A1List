@@ -96,6 +96,12 @@ public class ListItem extends ParseObject {
         setListItemDirty(true);
     }
 
+    public static void setNewAttributes(ListTitle listTitle, ListAttributes newAttributes) {
+        List<ListItem> allItems = getAllListItems(listTitle);
+        for (ListItem item : allItems) {
+            item.setAttributes(newAttributes);
+        }
+    }
     public boolean isStruckOut() {
         return getBoolean(IS_STRUCK_OUT);
     }
@@ -311,6 +317,7 @@ public class ListItem extends ParseObject {
 
         return result;
     }
+
 
 
 }

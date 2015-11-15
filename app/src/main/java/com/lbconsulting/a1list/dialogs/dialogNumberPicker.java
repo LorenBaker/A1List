@@ -147,8 +147,8 @@ public class dialogNumberPicker extends DialogFragment {
         }
 
         mNumberPicker.setMinValue(minNumberPickerValue);
-        mNumberPicker.setMinValue(maxNumberPickerValue);
-//        mNumberPicker.setValue(mStartingNumberPickerValue);
+        mNumberPicker.setMaxValue(maxNumberPickerValue);
+        mNumberPicker.setValue(mStartingNumberPickerValue);
 
 
         // build the dialog

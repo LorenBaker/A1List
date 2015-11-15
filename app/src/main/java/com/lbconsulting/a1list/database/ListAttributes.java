@@ -89,7 +89,6 @@ public class ListAttributes extends ParseObject {
         return getString(NAME_LOWERCASE);
     }
 
-    //
 
     public boolean isDefaultAttributes() {
         return getBoolean(IS_DEFAULT_ATTRIBUTES);
@@ -98,6 +97,22 @@ public class ListAttributes extends ParseObject {
     public void setDefaultAttributes(boolean isDefaultAttributes) {
         put(IS_DEFAULT_ATTRIBUTES, isDefaultAttributes);
         setAttributesDirty(true);
+    }
+
+    public static void clearAllDefaultAttributes() {
+        List<ListAttributes> allDefaultAttributes = new ArrayList<>();
+        try {
+            ParseQuery<ListAttributes> query = getQuery();
+            query.whereEqualTo(IS_MARKED_FOR_DELETION, false);
+            query.whereEqualTo(IS_DEFAULT_ATTRIBUTES, true);
+            query.fromLocalDatastore();
+            allDefaultAttributes = query.find();
+        } catch (ParseException e) {
+            MyLog.e("ListAttributes", "getAllListAttributes: ParseException: " + e.getMessage());
+        }
+        for (ListAttributes attributes : allDefaultAttributes) {
+            attributes.setDefaultAttributes(false);
+        }
     }
 
     public boolean isChecked() {
@@ -448,5 +463,6 @@ public class ListAttributes extends ParseObject {
 
         return targetAttributes;
     }
+
 
 }

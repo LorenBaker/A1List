@@ -13,6 +13,7 @@
     <item
         android:id="@+id/action_newList"
         android:orderInCategory="100"
+        android:icon="@android:drawable/ic_menu_add"
         android:title="@string/action_newList_title"
         app:showAsAction="never" />
 
