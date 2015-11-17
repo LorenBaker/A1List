@@ -5,6 +5,9 @@ import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.design.widget.TextInputLayout;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
@@ -25,11 +28,9 @@ import de.greenrobot.event.EventBus;
  */
 public class dialogEditListAttributesName extends DialogFragment {
 
-//    private static final String ARG_LIST_ATTRIBUTES_UUID = "argListAttributesID";
-
     private EditText txtListAttributesName;
+    private TextInputLayout txtListAttributesName_input_layout;
     private LocalListAttributes mAttributes;
-    //    private String mName;
     private AlertDialog mEditListAttributesNameDialog;
 
 
@@ -70,15 +71,19 @@ public class dialogEditListAttributesName extends DialogFragment {
                     @Override
                     public void onClick(final View v) {
                         String attributesProposedName = txtListAttributesName.getText().toString().trim();
-                        if (ListAttributes.isValidAttributesName(attributesProposedName)) {
+
+                        if (attributesProposedName.isEmpty()) {
+                            String errorMsg = "The Theme's name cannot be empty.\nPlease enter a unique Theme name.";
+                            txtListAttributesName_input_layout.setError(errorMsg);
+
+                        } else if (!ListAttributes.isValidAttributesName(attributesProposedName)) {
+                            txtListAttributesName.setText(mAttributes.getName());
+                            String errorMsg = "Theme \"" + attributesProposedName
+                                    + "\" already exists.\nPlease enter a unique theme name.";
+                            txtListAttributesName_input_layout.setError(errorMsg);
+                        } else {
                             EventBus.getDefault().post(new MyEvents.setAttributesName(attributesProposedName));
                             dismiss();
-                        } else {
-                            txtListAttributesName.setText(mAttributes.getName());
-                            String title = "Invalid Theme Name";
-                            String msg = "Theme \"" + attributesProposedName
-                                    + "\" already exists.\n\nPlease enter a unique theme name.";
-                            ListThemeActivity.showOkDialog(getActivity(),title,msg);
                         }
                     }
                 });
@@ -108,8 +113,25 @@ public class dialogEditListAttributesName extends DialogFragment {
 
         // find the dialog's views
         txtListAttributesName = (EditText) view.findViewById(R.id.txtName);
-        txtListAttributesName.setHint("Theme Name");
         txtListAttributesName.setText(mAttributes.getName());
+        txtListAttributesName_input_layout = (TextInputLayout) view.findViewById(R.id.txtName_input_layout);
+        txtListAttributesName_input_layout.setHint("Theme Name");
+        txtListAttributesName.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                txtListAttributesName_input_layout.setError(null);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
 
         // build the dialog
         mEditListAttributesNameDialog = new AlertDialog.Builder(getActivity())

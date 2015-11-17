@@ -5,6 +5,9 @@ import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.design.widget.TextInputLayout;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
@@ -27,7 +30,9 @@ import de.greenrobot.event.EventBus;
  */
 public class dialogNewListTitle extends DialogFragment {
 
-    private EditText txtListName;
+    private EditText txtListTitleName;
+    private TextInputLayout txtListTitleName_input_layout;
+
     private AlertDialog mNewListTitleDialog;
 
     public dialogNewListTitle() {
@@ -59,9 +64,10 @@ public class dialogNewListTitle extends DialogFragment {
                 positiveButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(final View v) {
-                        addNewList(txtListName.getText().toString().trim());
-                        EventBus.getDefault().post(new MyEvents.startA1List(false));
-                        dismiss();
+                        if (addNewList(txtListTitleName.getText().toString().trim())) {
+                            EventBus.getDefault().post(new MyEvents.startA1List(false));
+                            dismiss();
+                        }
                     }
                 });
 
@@ -82,28 +88,32 @@ public class dialogNewListTitle extends DialogFragment {
                 neutralButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(final View v) {
-                        addNewList(txtListName.getText().toString().trim());
-                        txtListName.setText("");
+                        if(addNewList(txtListTitleName.getText().toString().trim())) {
+                            txtListTitleName.setText("");
+                        }
                     }
                 });
             }
         });
     }
 
-    private void addNewList(String newListName) {
-        String title = "List Name Not Valid";
+    private boolean addNewList(String newListName) {
+        boolean result = false;
         if (newListName.isEmpty()) {
-            String msg = "The list's name cannot be empty!\n\nPlease try again.";
-            EventBus.getDefault().post(new MyEvents.showOkDialog(title, msg));
+            String errorMsg = "The List's name cannot be empty.\nPlease enter a unique List name.";
+            txtListTitleName_input_layout.setError(errorMsg);
 
         } else if (ListTitle.listExists(newListName)) {
-            String msg = "List \"" + newListName + "\" already exists.\nPlease try again.";
-            EventBus.getDefault().post(new MyEvents.showOkDialog(title, msg));
+            String errorMsg = "List \"" + newListName
+                    + "\" already exists.\nPlease enter a unique List name.";
+            txtListTitleName_input_layout.setError(errorMsg);
 
         } else {
             // ok to create list
             createNewList(newListName);
+            result = true;
         }
+        return result;
     }
 
     private void createNewList(String newListName) {
@@ -128,21 +138,6 @@ public class dialogNewListTitle extends DialogFragment {
         }
     }
 
-//    private long getNextListTitleSortKey() {
-//        long sortKey = 0;
-//        List<ListTitle> listTitles = ListTitle.getAllListTitles(false);
-//        if (listTitles.size() > 0) {
-//            sortKey = listTitles.get(listTitles.size() - 1).getListTitleManualSortKey();
-//            for (ListTitle listTitle : listTitles) {
-//                if (listTitle.getListTitleManualSortKey() > sortKey) {
-//                    sortKey = listTitle.getListTitleManualSortKey();
-//                }
-//            }
-//        }
-//        sortKey++;
-//        return sortKey;
-//    }
-
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -153,8 +148,25 @@ public class dialogNewListTitle extends DialogFragment {
         View view = inflater.inflate(R.layout.dialog_single_edit_text, null, false);
 
         // find the dialog's views
-        txtListName = (EditText) view.findViewById(R.id.txtName);
-        txtListName.setHint("List Name");
+        txtListTitleName = (EditText) view.findViewById(R.id.txtName);
+        txtListTitleName_input_layout = (TextInputLayout) view.findViewById(R.id.txtName_input_layout);
+        txtListTitleName_input_layout.setHint("List Name");
+        txtListTitleName.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                txtListTitleName_input_layout.setError(null);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
 
         // build the dialog
         mNewListTitleDialog = new AlertDialog.Builder(getActivity())

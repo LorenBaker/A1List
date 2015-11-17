@@ -5,6 +5,9 @@ import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.design.widget.TextInputLayout;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
@@ -29,6 +32,7 @@ public class dialogNewListItem extends DialogFragment {
     private static final String ARG_LIST_UUID = "argListUuid";
 
     private EditText txtItemName;
+    private TextInputLayout txtName_input_layout;
 
     private ListTitle mListTitle;
     private AlertDialog mNewListItemDialog;
@@ -43,8 +47,6 @@ public class dialogNewListItem extends DialogFragment {
         dialogNewListItem fragment = new dialogNewListItem();
         Bundle args = new Bundle();
         args.putString(ARG_LIST_UUID, listUuid);
-//        args.putString(ARG_ITEM_UUID, itemUuid);
-//        args.putString(ARG_DIALOG_TITLE, dialogTitle);
         fragment.setArguments(args);
         return fragment;
     }
@@ -79,9 +81,10 @@ public class dialogNewListItem extends DialogFragment {
                 saveButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(final View v) {
-                        addNewItem(txtItemName.getText().toString().trim());
-                        EventBus.getDefault().post(new MyEvents.updateListUI());
-                        dismiss();
+                        if(addNewItem(txtItemName.getText().toString().trim())) {
+                            EventBus.getDefault().post(new MyEvents.updateListUI());
+                            dismiss();
+                        }
                     }
                 });
 
@@ -101,28 +104,33 @@ public class dialogNewListItem extends DialogFragment {
                 addNewButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(final View v) {
-                        addNewItem(txtItemName.getText().toString().trim());
-                        txtItemName.setText("");
+                       if( addNewItem(txtItemName.getText().toString().trim())) {
+                           txtItemName.setText("");
+                       }
                     }
                 });
             }
         });
     }
 
-    private void addNewItem(String newItemName) {
-        String title = "Item Name Not Valid";
+    private boolean addNewItem(String newItemName) {
+        boolean result = false;
         if (newItemName.isEmpty()) {
-            String msg = "The item's name cannot be empty!\n\nPlease try again.";
-            EventBus.getDefault().post(new MyEvents.showOkDialog(title, msg));
+            String errorMsg = "The Item's name cannot be empty.\nPlease enter a unique Item name.";
+            txtName_input_layout.setError(errorMsg);
 
         } else if (ListItem.itemExists(newItemName)) {
-            String msg = "Item \"" + newItemName + " already exists.\nPlease try again.";
-            EventBus.getDefault().post(new MyEvents.showOkDialog(title, msg));
+
+            String errorMsg = "Item \"" + newItemName
+                    + "\" already exists.\nPlease enter a unique Item name.";
+            txtName_input_layout.setError(errorMsg);
 
         } else {
             // ok to create item
             createNewItem(newItemName);
+            result=true;
         }
+        return result;
     }
 
     private void createNewItem(String newItemName) {
@@ -145,19 +153,6 @@ public class dialogNewListItem extends DialogFragment {
         }
     }
 
-//    private long getNextListItemSortKey(ListTitle listTitle) {
-//        long sortKey = 0;
-//        List<ListItem> listItems = ListItem.getAllListItems(listTitle);
-//
-//        for (ListItem listItem : listItems) {
-//            if (listItem.getListItemManualSortKey() > sortKey) {
-//                sortKey = listItem.getListItemManualSortKey();
-//            }
-//        }
-//
-//        sortKey++;
-//        return sortKey;
-//    }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -169,7 +164,24 @@ public class dialogNewListItem extends DialogFragment {
 
         // find the dialog's views
         txtItemName = (EditText) view.findViewById(R.id.txtName);
-        txtItemName.setHint("Item Name");
+        txtName_input_layout = (TextInputLayout) view.findViewById(R.id.txtName_input_layout);
+        txtName_input_layout.setHint("Item Name");
+        txtItemName.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                txtName_input_layout.setError(null);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
 
         // build the dialog
         mNewListItemDialog = new AlertDialog.Builder(getActivity())
