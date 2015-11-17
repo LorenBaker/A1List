@@ -40,19 +40,13 @@ public class App extends Application {
         //user's data is only accessible by the user unless explicit permission is given
         ParseACL defaultACL = new ParseACL();
         ParseACL.setDefaultACL(defaultACL, true);
-
-        MySettings.setContext(mContext);
         MyLog.i("App", "onCreate: Parse initialized");
 
+        MySettings.setContext(mContext);
     }
 
     public static Context getContext(){
         return mContext;
     }
 
-    @Override
-    public void onTerminate() {
-        MyLog.i("A1ListApplication", "onTerminate");
-        super.onTerminate();
-    }
 }

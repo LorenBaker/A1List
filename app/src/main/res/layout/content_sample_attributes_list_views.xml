@@ -13,11 +13,4 @@
         android:layout_height="wrap_content"
         android:layout_weight="1" />
 
-    <com.nhaarman.listviewanimations.itemmanipulation.DynamicListView
-        android:id="@+id/lvAttributes"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1" />
-
-
 </LinearLayout>

@@ -95,6 +95,15 @@ public class DownloadDataAsyncTask extends AsyncTask<Void, Void, Void> {
         }
         id++;
         MySettings.setNextListTitleID(id);
+
+        id=0;
+        for (ListAttributes item : mAttributes) {
+            if (item.getAttributesID() > id) {
+                id = item.getAttributesID();
+            }
+        }
+        id++;
+        MySettings.setNextListAttributesID(id);
     }
 
     private void unpinOldData() {

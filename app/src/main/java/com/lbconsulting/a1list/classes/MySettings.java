@@ -33,6 +33,7 @@ public class MySettings {
     public static final String SETTING_IS_USER_INITIALIZED = "isUserInitialized";
     public static final String SETTING_IS_USER_EMAIL_VERIFIED = "isEmailVerified";
     public static final String SETTING_DEFAULT_ATTRIBUTES_ID = "defaultAttributesID";
+    public static final String SETTING_NEXT_LIST_ATTRIBUTES_ID = "nextListAttributesID";
     public static final String SETTING_NEXT_LIST_ITEM_ID = "nextListItemID";
     public static final String SETTING_NEXT_LIST_TITLE_ID = "nextListTitleID";
 
@@ -131,7 +132,20 @@ public class MySettings {
 
     //endregion
 
-    //region ListTitle and ListItem IDs
+    //region ListAttributes, ListTitle and ListItem IDs
+
+    public static long getNextListAttributesID() {
+        long nextListAttributesID = mPreferences.getLong(SETTING_NEXT_LIST_ATTRIBUTES_ID, 0);
+        setNextListAttributesID(nextListAttributesID + 1);
+        return nextListAttributesID;
+    }
+
+    public static void setNextListAttributesID(long nextListAttributesID) {
+        SharedPreferences.Editor editor = mPreferences.edit();
+        editor.putLong(SETTING_NEXT_LIST_ATTRIBUTES_ID, nextListAttributesID);
+        editor.apply();
+    }
+
     public static long getNextListItemID() {
         long nextListItemID = mPreferences.getLong(SETTING_NEXT_LIST_ITEM_ID, 0);
         setNextListItemID(nextListItemID + 1);
@@ -155,5 +169,7 @@ public class MySettings {
         editor.putLong(SETTING_NEXT_LIST_TITLE_ID, nextListTitleID);
         editor.apply();
     }
+
     //endregion
+
 }

@@ -122,7 +122,7 @@ public class fragListItems extends Fragment implements View.OnClickListener {
         lvListItems.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                TextView tv = (TextView) view.findViewById(R.id.tvListItemName);
+                TextView tv = (TextView) view.findViewById(R.id.tvItemName);
                 mListItemsArrayAdapter.toggleStrikeout(position, tv);
             }
         });

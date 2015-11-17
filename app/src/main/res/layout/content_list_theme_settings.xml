@@ -100,7 +100,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="start|center_vertical"
-            android:text="Horizontal Margin:" />
+            android:text="Horizontal Padding:" />
 
         <Button
             android:id="@+id/btnVerticalMargin"
@@ -108,7 +108,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="start|center_vertical"
-            android:text="Vertical Margin:" />
+            android:text="Vertical Padding:" />
 
     </LinearLayout>
 

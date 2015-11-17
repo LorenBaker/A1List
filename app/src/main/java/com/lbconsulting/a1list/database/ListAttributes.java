@@ -42,6 +42,7 @@ public class ListAttributes extends ParseObject {
     public static final String TEXT_COLOR = "textColor"; // int
     public static final String TEXT_SIZE = "textSize"; //float
     public static final String VERTICAL_PADDING_DP = "verticalPaddingInDp"; //float dp. Need to convert to float px
+    public static final String LIST_ATTRIBUTES_ID = "listAttributesID";
 
 
     public ListAttributes() {
@@ -65,6 +66,17 @@ public class ListAttributes extends ParseObject {
         }
         return uuidString;
     }
+
+    public long getAttributesID() {
+        return getLong(LIST_ATTRIBUTES_ID);
+    }
+
+    public void setAttributesID() {
+        long attributesID = MySettings.getNextListAttributesID();
+        put(LIST_ATTRIBUTES_ID, attributesID);
+        setAttributesDirty(true);
+    }
+
 
     public ParseUser getAuthor() {
         return getParseUser(AUTHOR);
@@ -245,7 +257,8 @@ public class ListAttributes extends ParseObject {
         return getName();
     }
 
-    public static ListAttributes getAttributes(String attributeID, boolean isUuid) {
+    public static ListAttributes getAttributes(String attributeID) {
+        boolean isUuid = attributeID.contains("-");
         ListAttributes attributes = null;
         try {
             ParseQuery<ListAttributes> query = getQuery();

@@ -125,31 +125,49 @@ public class MyEvents {
 
     public static class setAttributesTextSize {
         private int mSelectedTextSize;
+
         public setAttributesTextSize(int selectedTextSize) {
-         mSelectedTextSize =selectedTextSize;
+            mSelectedTextSize = selectedTextSize;
         }
-        public float getTextSize(){
+
+        public float getTextSize() {
             return (float) mSelectedTextSize;
         }
     }
 
     public static class setAttributesHorizontalPadding {
         private int mHorizontalPadding;
+
         public setAttributesHorizontalPadding(int selectedHorizontalPadding) {
-            mHorizontalPadding =selectedHorizontalPadding;
+            mHorizontalPadding = selectedHorizontalPadding;
         }
-        public int getHorizontalPadding(){
+
+        public int getHorizontalPadding() {
             return mHorizontalPadding;
         }
     }
 
     public static class setAttributesVerticalPadding {
         private int mVerticalPadding;
+
         public setAttributesVerticalPadding(int selectedVerticalPadding) {
-            mVerticalPadding =selectedVerticalPadding;
+            mVerticalPadding = selectedVerticalPadding;
         }
-        public int getVerticalPadding(){
+
+        public int getVerticalPadding() {
             return mVerticalPadding;
+        }
+    }
+
+    public static class replaceAttributes {
+        private String mAttributeUuid;
+
+        public replaceAttributes(String attributeUuid) {
+            mAttributeUuid = attributeUuid;
+        }
+
+        public String getAttributeUuid() {
+            return mAttributeUuid;
         }
     }
 }

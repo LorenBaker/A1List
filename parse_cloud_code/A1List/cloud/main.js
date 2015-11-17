@@ -7,9 +7,10 @@ Parse.Cloud.define("initializeNewUser", function (request, response) {
 
     var attributes = new Parse.Object("ListAttributes");
     attributes.set('author', user);
+    attributes.set('listAttributesID', 1);
     attributes.set('name', 'Genoa');
     attributes.set('nameLowercase', 'genoa');
-    attributes.set("isDefaultAttributes", true);
+    attributes.set("isDefaultAttributes", false);
     attributes.set("isChecked", false);
     attributes.set("startColor", -11761266);
     attributes.set("endColor", -15576746);
@@ -27,6 +28,7 @@ Parse.Cloud.define("initializeNewUser", function (request, response) {
 
     var attributes = new Parse.Object("ListAttributes");
     attributes.set('author', user);
+    attributes.set('listAttributesID', 2);
     attributes.set('name', 'Opal');
     attributes.set('nameLowercase', 'opal');
     attributes.set("isDefaultAttributes", false);
@@ -47,6 +49,7 @@ Parse.Cloud.define("initializeNewUser", function (request, response) {
 
     var attributes = new Parse.Object("ListAttributes");
     attributes.set('author', user);
+    attributes.set('listAttributesID', 3);
     attributes.set('name', 'Shades of Blue');
     attributes.set('nameLowercase', 'shades of blue');
     attributes.set("isDefaultAttributes", false);
@@ -67,6 +70,7 @@ Parse.Cloud.define("initializeNewUser", function (request, response) {
 
     var attributes = new Parse.Object("ListAttributes");
     attributes.set('author', user);
+    attributes.set('listAttributesID', 4);
     attributes.set('name', 'Off White');
     attributes.set('nameLowercase', 'off white');
     attributes.set("isDefaultAttributes", false);
@@ -87,7 +91,8 @@ Parse.Cloud.define("initializeNewUser", function (request, response) {
 
 
     //var attributes = new Parse.Object("ListAttributes");
-    //attributes.set('author', user);
+    //attributes.set('author', user);\
+    //    attributes.set('listAttributesID', 5);
     //attributes.set('name', 'Genoa');
     //attributes.set('nameLowercase', 'genoa');
     //attributes.set("isDefaultAttributes", false);
@@ -108,6 +113,7 @@ Parse.Cloud.define("initializeNewUser", function (request, response) {
     //
     //var attributes = new Parse.Object("ListAttributes");
     //attributes.set('author', user);
+    //    attributes.set('listAttributesID', 6);
     //attributes.set('name', 'Genoa');
     //attributes.set('nameLowercase', 'genoa');
     //attributes.set("isDefaultAttributes", false);

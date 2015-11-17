@@ -18,14 +18,15 @@ import com.lbconsulting.a1list.classes.MySettings;
 import de.greenrobot.event.EventBus;
 
 /**
- * A dialog where the user edits the ListAttributes' name
+ * A dialog where the user edits the ListAttributes' text size, horizontal and vertical padding
  */
 public class dialogNumberPicker extends DialogFragment {
 
     private static final String ARG_NUMBER_PICKER_ID = "argNumberPickerID";
     private static final String ARG_STARTING_VALUE = "argStartingValue";
 
-    private NumberPicker mNumberPicker;
+    private NumberPicker npTens;
+    private NumberPicker npOnes;
 
     private AlertDialog mDialog;
     private int mNumberPickerId;
@@ -117,39 +118,45 @@ public class dialogNumberPicker extends DialogFragment {
         View view = inflater.inflate(R.layout.dialog_number_picker, null, false);
 
         // find the dialog's views
-        mNumberPicker = (NumberPicker) view.findViewById(R.id.npNumberPicker);
-        mNumberPicker.setWrapSelectorWheel(true);
-        mNumberPicker.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
+        npTens = (NumberPicker) view.findViewById(R.id.npTens);
+        npOnes = (NumberPicker) view.findViewById(R.id.npOnes);
+        npTens.setWrapSelectorWheel(true);
+        npOnes.setWrapSelectorWheel(true);
+
+        npTens.setMinValue(0);
+        npTens.setMaxValue(9);
+        npOnes.setMinValue(0);
+        npOnes.setMaxValue(9);
+
+        npTens.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
             @Override
             public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
-                mSelectedValue = newVal;
+                mSelectedValue = newVal * 10 + npOnes.getValue();
+            }
+        });
+        npOnes.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
+            @Override
+            public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+                mSelectedValue = npTens.getValue() * 10 + newVal;
             }
         });
 
+        setPickerValues(mStartingNumberPickerValue);
+
         String title = "";
-        int minNumberPickerValue = 1;
-        int maxNumberPickerValue = 10;
         switch (mNumberPickerId) {
             case MySettings.TEXT_SIZE_PICKER:
                 title = "Select Text Size";
-                maxNumberPickerValue = 25;
                 break;
 
             case MySettings.HORIZONTAL_PADDING_PICKER:
                 title = "Select Horizontal Padding";
-                maxNumberPickerValue = 25;
                 break;
 
             case MySettings.VERTICAL_PADDING_PICKER:
                 title = "Select Vertical Padding";
-                maxNumberPickerValue = 25;
                 break;
         }
-
-        mNumberPicker.setMinValue(minNumberPickerValue);
-        mNumberPicker.setMaxValue(maxNumberPickerValue);
-        mNumberPicker.setValue(mStartingNumberPickerValue);
-
 
         // build the dialog
         mDialog = new AlertDialog.Builder(getActivity())
@@ -160,6 +167,16 @@ public class dialogNumberPicker extends DialogFragment {
                 .create();
 
         return mDialog;
+    }
+
+    private void setPickerValues(int value) {
+
+        int tens  = value / 10;
+        int ones = value % 10;
+
+        npTens.setValue(tens);
+        npOnes.setValue(ones);
+
     }
 
 }

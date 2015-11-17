@@ -16,7 +16,6 @@ import android.widget.TextView;
 import com.lbconsulting.a1list.R;
 import com.lbconsulting.a1list.classes.CommonMethods;
 import com.lbconsulting.a1list.classes.MyLog;
-import com.lbconsulting.a1list.database.ListAttributes;
 import com.lbconsulting.a1list.database.LocalListAttributes;
 
 import java.util.List;
@@ -66,7 +65,7 @@ public class ListItemsSampleArrayAdapter extends ArrayAdapter<String> {
         // Get the data item for this position
         String item = getItem(position);
         if (convertView == null) {
-            convertView = LayoutInflater.from(getContext()).inflate(R.layout.row_list_item_name, parent, false);
+            convertView = LayoutInflater.from(getContext()).inflate(R.layout.row_item_name, parent, false);
             holder = new ListItemViewHolder(convertView);
             convertView.setTag(holder);
         } else {
@@ -114,7 +113,7 @@ public class ListItemsSampleArrayAdapter extends ArrayAdapter<String> {
         public final TextView tvListItemName;
 
         public ListItemViewHolder(View base) {
-            tvListItemName = (TextView) base.findViewById(R.id.tvListItemName);
+            tvListItemName = (TextView) base.findViewById(R.id.tvItemName);
         }
     }
 }

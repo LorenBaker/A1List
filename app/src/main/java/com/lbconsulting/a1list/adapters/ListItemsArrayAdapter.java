@@ -102,7 +102,7 @@ public class ListItemsArrayAdapter extends ArrayAdapter<ListItem> implements Swa
 
         // Check if an existing view is being reused, otherwise inflate the view
         if (convertView == null) {
-            convertView = LayoutInflater.from(getContext()).inflate(R.layout.row_list_item_name, parent, false);
+            convertView = LayoutInflater.from(getContext()).inflate(R.layout.row_item_name, parent, false);
             holder = new ListItemViewHolder(convertView);
 
             mAttributes = item.getAttributes();
@@ -230,7 +230,7 @@ public class ListItemsArrayAdapter extends ArrayAdapter<ListItem> implements Swa
         public final TextView tvListItemName;
 
         public ListItemViewHolder(View base) {
-            tvListItemName = (TextView) base.findViewById(R.id.tvListItemName);
+            tvListItemName = (TextView) base.findViewById(R.id.tvItemName);
         }
     }
 }
