@@ -220,6 +220,23 @@ public class ListItem extends ParseObject {
         return listItems;
     }
 
+
+    public static List<ListItem> getAllListItems(ListAttributes listAttributes) {
+        List<ListItem> listItems = new ArrayList<>();
+        if (listAttributes != null) {
+            try {
+                ParseQuery<ListItem> query = getQuery();
+                query.whereEqualTo(ATTRIBUTES, listAttributes);
+                query.whereEqualTo(IS_MARKED_FOR_DELETION, false);
+                query.fromLocalDatastore();
+                listItems = query.find();
+            } catch (ParseException e) {
+                MyLog.e("ListItem", "getAllListItems: ParseException" + e.getMessage());
+            }
+        }
+        return listItems;
+    }
+
     public static List<ListItem> getStrikeoutItems(ListTitle listTitle) {
         List<ListItem> listItems = new ArrayList<>();
         if (listTitle != null) {
@@ -317,7 +334,6 @@ public class ListItem extends ParseObject {
 
         return result;
     }
-
 
 
 }

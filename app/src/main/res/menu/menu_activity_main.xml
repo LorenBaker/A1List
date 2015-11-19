@@ -30,9 +30,15 @@
         app:showAsAction="never" />
 
     <item
-        android:id="@+id/action_showLists"
+        android:id="@+id/action_manageLists"
         android:orderInCategory="120"
-        android:title="@string/action_showLists_title"
+        android:title="@string/action_manageLists_title"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_manageThemes"
+        android:orderInCategory="120"
+        android:title="@string/action_manageThemes_title"
         app:showAsAction="never" />
 
     <item
@@ -48,8 +54,8 @@
         android:title="@string/action_settings"
         app:showAsAction="never" />
 
-    <item android:id="@+id/action_test_data"
-        android:orderInCategory="1000"
-        android:title="Test Data"
-        app:showAsAction="never" />
+    <!--<item android:id="@+id/action_test_data"-->
+        <!--android:orderInCategory="1000"-->
+        <!--android:title="Test Data"-->
+        <!--app:showAsAction="never" />-->
 </menu>

@@ -90,7 +90,6 @@ public class MainActivity extends AppCompatActivity
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
 
-
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -177,7 +176,7 @@ public class MainActivity extends AppCompatActivity
         startA1List(false);
     }
 
-    public void onEvent(MyEvents.startA1List event){
+    public void onEvent(MyEvents.startA1List event) {
         startA1List(event.getRefreshDataFromTheCloud());
     }
     //endregion
@@ -193,26 +192,12 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-        MyLog.i("MainActivity", "onStart");
-    }
-
-    @Override
-    protected void onRestart() {
-        super.onRestart();
-        MyLog.i("MainActivity", "onRestart");
-    }
-
-    @Override
     protected void onResume() {
         // A1List sync strategy:
         //  onResume() data is download from Parse and then the UI is updated
         //  onPause() any dirty data is uploaded to Parse
-        //  The client always wins ... data in the cloud is overwritten by the client's data
+        //  Conflicts: the client always wins ... data in the cloud is overwritten by the client's data
         super.onResume();
-
-
 
         if (MySettings.isUserEmailVerified()) {
             MyLog.i("MainActivity", "onResume: User email verified -- startA1List.");
@@ -224,11 +209,10 @@ public class MainActivity extends AppCompatActivity
             startA1List(true);
 
         } else if (MySettings.isUserInitialized()) {
-
             if (ParseUser.getCurrentUser().isNew()) {
                 MyLog.i("MainActivity", "onResume: User initialized and is a new user -- startA1List.");
                 startA1List(true);
-            } else{
+            } else {
                 checkInitializationDate();
             }
 
@@ -236,7 +220,7 @@ public class MainActivity extends AppCompatActivity
             MyLog.i("MainActivity", "onResume: New User -- initializeNewUser");
             initializeNewUser();
 
-        }else if(ParseUser.getCurrentUser().isAuthenticated()){
+        } else if (ParseUser.getCurrentUser().isAuthenticated()) {
             MySettings.setIsUserInitialized(true);
             checkInitializationDate();
 
@@ -282,11 +266,6 @@ public class MainActivity extends AppCompatActivity
         if (refreshDataFromTheCloud) {
             downloadDataFromParse();
         }
-
-        // Note: setupNavigationMenu() retrieves mListTitles
-//        if (mListTitles != null && mListTitles.size() == 0) {
-//            showCreateNewListDialog();
-//        }
     }
 
 
@@ -295,13 +274,6 @@ public class MainActivity extends AppCompatActivity
             new DownloadDataAsyncTask(this).execute();
         }
     }
-//
-//    private void showCreateNewListDialog() {
-//        String title = "Create A New List";
-//        String newListTitle = getResources().getString(R.string.action_newList_title);
-//        String msg = "Please select \"" + newListTitle + "\" from the upper right dropdown menu.";
-//        showOkDialog(this, title, msg);
-//    }
 
     private void requestEmailBeVerified() {
         String title = "Please Confirm Email Address";
@@ -383,7 +355,6 @@ public class MainActivity extends AppCompatActivity
                                         ParseObject.pinAllInBackground(attributesList);
                                         MyLog.i("MainActivity", "retrieveAttributes: Pinned" + attributesList.size() + "attributes.");
                                         long endTime = System.currentTimeMillis();
-//                                        MySettings.setAppInitializationDate(endTime);
                                         long duration = endTime - startTime;
                                         ParseUser user = ParseUser.getCurrentUser();
                                         String successMsg = user.getUsername() + " successfully initialized.\n\n"
@@ -444,7 +415,7 @@ public class MainActivity extends AppCompatActivity
         // A1List sync strategy:
         //  onResume() data is download from Parse and then the UI is updated
         //  onPause() any dirty data is uploaded to Parse
-        //  The client always wins ... data in the cloud is overwritten by the client's data
+        //  Conflicts: the client always wins ... data in the cloud is overwritten by the client's data
         super.onPause();
         MyLog.i("MainActivity", "onPause");
         uploadDirtyObjects();
@@ -457,17 +428,10 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
-        MyLog.i("MainActivity", "onStop");
-    }
-
-    @Override
     protected void onDestroy() {
         super.onDestroy();
         MyLog.i("MainActivity", "onDestroy");
         EventBus.getDefault().unregister(this);
-
     }
 
     @Override
@@ -497,8 +461,6 @@ public class MainActivity extends AppCompatActivity
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-
         if (id == R.id.action_deleteStrikeouts) {
             deleteStrikeoutItems();
             return true;
@@ -509,20 +471,30 @@ public class MainActivity extends AppCompatActivity
 
         } else if (id == R.id.action_listSorting) {
             showListSortingDialog();
-//            Toast.makeText(this, "action_listSorting selected.", Toast.LENGTH_SHORT).show();
             return true;
 
         } else if (id == R.id.action_editListTheme) {
             Intent intent = new Intent(this, ListThemeActivity.class);
             Bundle bundle = new Bundle();
-            bundle.putString(MySettings.ARG_LIST_TITLE_ID, mActiveListTitle.getLocalUuid()); //Your id
-            intent.putExtras(bundle); //Put your id to your next Intent
+            bundle.putString(MySettings.ARG_LIST_TITLE_ID, mActiveListTitle.getLocalUuid());
+            intent.putExtras(bundle);
             startActivity(intent);
-//            Toast.makeText(this, "action_editListTheme selected.", Toast.LENGTH_SHORT).show();
             return true;
 
-        } else if (id == R.id.action_showLists) {
-            Toast.makeText(this, "action_showLists selected.", Toast.LENGTH_SHORT).show();
+        } else if (id == R.id.action_manageLists) {
+            Intent intent = new Intent(this, ManageListsAndThemesActivity.class);
+            Bundle bundle = new Bundle();
+            bundle.putInt(ManageListsAndThemesActivity.ARG_DATA_TYPE, ManageListsAndThemesActivity.MANAGE_LISTS);
+            intent.putExtras(bundle);
+            startActivity(intent);
+            return true;
+
+        } else if (id == R.id.action_manageThemes) {
+            Intent intent = new Intent(this, ManageListsAndThemesActivity.class);
+            Bundle bundle = new Bundle();
+            bundle.putInt(ManageListsAndThemesActivity.ARG_DATA_TYPE, ManageListsAndThemesActivity.MANAGE_THEMES);
+            intent.putExtras(bundle);
+            startActivity(intent);
             return true;
 
         } else if (id == R.id.action_refresh) {
@@ -535,12 +507,17 @@ public class MainActivity extends AppCompatActivity
             return true;
 
             // TODO: Remove action_test_data menu item
-        } else if (id == R.id.action_test_data) {
-            Toast.makeText(this, "action_test_data selected.", Toast.LENGTH_SHORT).show();
-//            Intent testDataIntent = new Intent(this, TestDataActivity.class);
-//            this.startActivity(testDataIntent);
-//            return true;
         }
+//        else if (id == R.id.action_test_data) {
+//
+//            Intent intent = new Intent(this, ListThemeActivity.class);
+//            Bundle bundle = new Bundle();
+//            bundle.putString(MySettings.ARG_LIST_TITLE_ID, mActiveListTitle.getLocalUuid());
+//            intent.putExtras(bundle);
+//            startActivity(intent);
+//
+//            return true;
+//        }
 
         return super.onOptionsItemSelected(item);
     }
@@ -575,7 +552,6 @@ public class MainActivity extends AppCompatActivity
             dialog.show(fm, "dialogNewListItem");
         }
     }
-
 
     private void setupNavigationMenu() {
 

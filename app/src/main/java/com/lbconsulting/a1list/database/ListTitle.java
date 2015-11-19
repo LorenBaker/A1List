@@ -196,6 +196,21 @@ public class ListTitle extends ParseObject {
         return allListTitles;
     }
 
+
+    public static List<ListTitle> getAllListTitles(ListAttributes listAttributes) {
+        List<ListTitle> allListTitles = new ArrayList<>();
+        try {
+            ParseQuery<ListTitle> query = getQuery();
+            query.whereEqualTo(ATTRIBUTES,listAttributes);
+            query.whereEqualTo(IS_MARKED_FOR_DELETION, false);
+            query.fromLocalDatastore();
+            allListTitles = query.find();
+        } catch (ParseException e) {
+            MyLog.e("ListTitle", "getAllListTitles: ParseException: " + e.getMessage());
+        }
+        return allListTitles;
+    }
+
     public static List<ListTitle> getAllDirtyListTitles() {
         List<ListTitle> allDirtyListTitles = new ArrayList<>();
         try {

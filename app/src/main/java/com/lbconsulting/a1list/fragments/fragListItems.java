@@ -70,13 +70,21 @@ public class fragListItems extends Fragment implements View.OnClickListener {
                 MyLog.i("fragListItems", "onCreate: " + mListTitleName);
             } else {
                 MyLog.e("fragListItems", "onCreate: ListTitle is Null! uuid = " + listTitleUuid);
+                List<ListTitle> allListTitles = ListTitle.getAllListTitles(true);
+                if(allListTitles.size()>0){
+                    mListTitle = allListTitles.get(0);
+                }else{
+                    MyLog.e("fragListItems", "onCreate: ListTitle is null!");
+                }
             }
         } else {
 
             MyLog.e("fragListItems", "onCreate: No ListTitle found!");
         }
 
-        MainActivity.setActiveListTitle(mListTitle);
+        if(mListTitle!=null) {
+            MainActivity.setActiveListTitle(mListTitle);
+        }
 
 //        setHasOptionsMenu(true);
     }

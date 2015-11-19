@@ -22,7 +22,6 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
 import com.lbconsulting.a1list.R;
-import com.lbconsulting.a1list.adapters.ListAttributesArrayAdapter;
 import com.lbconsulting.a1list.adapters.ListItemsSampleArrayAdapter;
 import com.lbconsulting.a1list.classes.MyEvents;
 import com.lbconsulting.a1list.classes.MyLog;
@@ -35,7 +34,6 @@ import com.lbconsulting.a1list.dialogs.dialogColorPicker;
 import com.lbconsulting.a1list.dialogs.dialogEditListAttributesName;
 import com.lbconsulting.a1list.dialogs.dialogNumberPicker;
 import com.lbconsulting.a1list.dialogs.dialogSelectTheme;
-import com.nhaarman.listviewanimations.itemmanipulation.DynamicListView;
 import com.parse.ParseException;
 import com.parse.ParseUser;
 
@@ -44,7 +42,6 @@ import java.util.ArrayList;
 import de.greenrobot.event.EventBus;
 
 public class ListThemeActivity extends AppCompatActivity implements View.OnClickListener {
-    private ActionBar mActionBar;
     private ListTitle mListTitle;
     private ListAttributes mOriginalAttributes;
     private static LocalListAttributes mLocalAttributes;
@@ -64,21 +61,13 @@ public class ListThemeActivity extends AppCompatActivity implements View.OnClick
     private Button btnStartColor;
     private Button btnEndColor;
     private Button btnTextSize;
-    private Button btnTextColor;
     private Button btnTextStyle;
     private CheckBox ckItemBackgroundTransparent;
     private Button btnHorizontalMargin;
     private Button btnVerticalMargin;
-    private Button btnCancel;
-    private Button btnNewAttributes;
-    private Button btnSaveAttributes;
-
 
     private ListView lvSampleItems;
     private ListItemsSampleArrayAdapter mSampleArrayAdapter;
-    private DynamicListView lvAttributes;
-    private ListAttributesArrayAdapter mAttributesArrayAdapter;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,18 +81,11 @@ public class ListThemeActivity extends AppCompatActivity implements View.OnClick
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         }
         setContentView(R.layout.activity_list_theme);
-
         EventBus.getDefault().register(this);
-
-        // TODO: Figure out why app status bar background is white without this code ... change min api back to 16
-//        Window window = getWindow();
-//        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-//        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-//        window.setStatusBarColor(ContextCompat.getColor(this, R.color.colorPrimaryDark));
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        mActionBar = getSupportActionBar();
+        ActionBar mActionBar = getSupportActionBar();
         if (mActionBar != null) {
             mActionBar.setDisplayHomeAsUpEnabled(true);
         }
@@ -140,17 +122,12 @@ public class ListThemeActivity extends AppCompatActivity implements View.OnClick
         btnStartColor = (Button) findViewById(R.id.btnStartColor);
         btnEndColor = (Button) findViewById(R.id.btnEndColor);
         btnTextSize = (Button) findViewById(R.id.btnTextSize);
-        btnTextColor = (Button) findViewById(R.id.btnTextColor);
         btnTextStyle = (Button) findViewById(R.id.btnTextStyle);
         ckItemBackgroundTransparent = (CheckBox) findViewById(R.id.ckItemBackgroundTransparent);
         btnHorizontalMargin = (Button) findViewById(R.id.btnHorizontalMargin);
         btnVerticalMargin = (Button) findViewById(R.id.btnVerticalMargin);
-        btnCancel = (Button) findViewById(R.id.btnCancel);
-        btnNewAttributes = (Button) findViewById(R.id.btnNewAttributes);
-        btnSaveAttributes = (Button) findViewById(R.id.btnSaveAttributes);
 
         lvSampleItems = (ListView) findViewById(R.id.lvSampleItems);
-        lvAttributes = (DynamicListView) findViewById(R.id.lvAttributes);
 
         // set button OnClickListeners
         for (int i = 0; i < llContentListTheme.getChildCount(); i++) {
@@ -195,7 +172,7 @@ public class ListThemeActivity extends AppCompatActivity implements View.OnClick
     //region OnEvent
     public void onEvent(MyEvents.setAttributesName event) {
         mLocalAttributes.setName(event.getName());
-        btnAttributesName.setText("Theme Name: " + event.getName());
+        btnAttributesName.setText(String.format(getString(R.string.btnAttributesName_text), event.getName()));
     }
 
     public void onEvent(MyEvents.setAttributesStartColor event) {
@@ -245,7 +222,7 @@ public class ListThemeActivity extends AppCompatActivity implements View.OnClick
 
     //endregion
 
-    public static void showOkDialog(Context context, String title, String message) {
+    private static void showOkDialog(Context context, String title, String message) {
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
         // set dialog title and message
         alertDialogBuilder
@@ -301,7 +278,8 @@ public class ListThemeActivity extends AppCompatActivity implements View.OnClick
 
         // show the attributes values in their respective Buttons
 
-        btnAttributesName.setText("Theme Name: " + mLocalAttributes.getName());
+        btnAttributesName.setText(String.format(getString(R.string.btnAttributesName_text),
+                mLocalAttributes.getName()));
         ckIsDefaultAttributes.setChecked(mLocalAttributes.isDefaultAttributes());
 
         if (mListTitle.sortListItemsAlphabetically()) {
@@ -333,10 +311,6 @@ public class ListThemeActivity extends AppCompatActivity implements View.OnClick
         mSampleArrayAdapter.notifyDataSetChanged();
     }
 
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-    }
 
     @Override
     protected void onResume() {
@@ -455,14 +429,12 @@ public class ListThemeActivity extends AppCompatActivity implements View.OnClick
                 break;
 
             case R.id.btnCancel:
-//                Toast.makeText(this, "btnCancel clicked", Toast.LENGTH_SHORT).show();
                 mListTitle.setAttributes(mOriginalAttributes);
                 ListItem.setNewAttributes(mListTitle, mOriginalAttributes);
                 finish();
                 break;
 
             case R.id.btnNewAttributes:
-//                Toast.makeText(this, "btnNewAttributes clicked", Toast.LENGTH_SHORT).show();
                 if (createNewAttributes()) {
                     finish();
                 }
@@ -521,3 +493,4 @@ public class ListThemeActivity extends AppCompatActivity implements View.OnClick
 
     }
 }
+

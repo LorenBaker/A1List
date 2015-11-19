@@ -14,6 +14,10 @@ public class MyEvents {
         }
     }
 
+    public static class updateListTitleUI {
+        public updateListTitleUI() {
+        }
+    }
 
     public static class startA1List {
         private boolean mRefreshDataFromTheCloud;

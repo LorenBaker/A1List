@@ -74,7 +74,16 @@
 
         <activity
             android:name=".activities.ListThemeActivity"
-            android:label="@string/title_activity_list_theme"
+            android:label="@string/title_activity_test2"
+            android:parentActivityName=".activities.MainActivity"
+            android:theme="@style/AppTheme.NoActionBar" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.lbconsulting.a1list.activities.MainActivity" />
+        </activity>
+        <activity
+            android:name=".activities.ManageListsAndThemesActivity"
+            android:label="@string/title_activity_manage_lists_and_themes"
             android:parentActivityName=".activities.MainActivity"
             android:theme="@style/AppTheme.NoActionBar" >
             <meta-data

@@ -57,7 +57,7 @@ public class MySettings {
 
     //region SETTING_ALPHABETICALLY_SORT_NAVIGATION_MENU
     public static boolean isAlphabeticallySortNavigationMenu() {
-        return mPreferences.getBoolean(SETTING_ALPHABETICALLY_SORT_NAVIGATION_MENU, true);
+        return mPreferences.getBoolean(SETTING_ALPHABETICALLY_SORT_NAVIGATION_MENU, false);
     }
 
     public static void setAlphabeticallySortNavigationMenu(boolean isAlphabetical) {
