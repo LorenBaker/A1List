@@ -36,6 +36,8 @@ public class MySettings {
     public static final String SETTING_NEXT_LIST_ATTRIBUTES_ID = "nextListAttributesID";
     public static final String SETTING_NEXT_LIST_ITEM_ID = "nextListItemID";
     public static final String SETTING_NEXT_LIST_TITLE_ID = "nextListTitleID";
+    public static final String SETTING_CREATE_A_LIST_DIALOG_SHOWN = "pleaseCreateAListDialogShown";
+    public static final String SETTING_REFRESH_DATA_FROM_THE_CLOUD = "refreshDataFromTheCloud";
 
 
     public static void setContext(Context context) {
@@ -91,6 +93,32 @@ public class MySettings {
     }
     //endregion
 
+    //region SETTING_CREATE_A_LIST_DIALOG_SHOWN
+
+    public static boolean getCreateAListDialogShown() {
+        return mPreferences.getBoolean(SETTING_CREATE_A_LIST_DIALOG_SHOWN, false);
+    }
+
+    public static void setCreateAListDialogShown(boolean createAListDialogShown) {
+        SharedPreferences.Editor editor = mPreferences.edit();
+        editor.putBoolean(SETTING_CREATE_A_LIST_DIALOG_SHOWN, createAListDialogShown);
+        editor.apply();
+    }
+    //endregion
+
+    //region SETTING_REFRESH_DATA_FROM_THE_CLOUD
+
+    public static boolean getRefreshDataFromTheCloud() {
+        return mPreferences.getBoolean(SETTING_REFRESH_DATA_FROM_THE_CLOUD, true);
+    }
+
+    public static void setRefreshDataFromTheCloud(boolean refreshDataFromTheCloud) {
+        SharedPreferences.Editor editor = mPreferences.edit();
+        editor.putBoolean(SETTING_REFRESH_DATA_FROM_THE_CLOUD, refreshDataFromTheCloud);
+        editor.apply();
+    }
+    //endregion
+
     //region SETTING_IS_USER_INITIALIZED
     public static boolean isUserInitialized() {
         return mPreferences.getBoolean(SETTING_IS_USER_INITIALIZED, false);
@@ -114,7 +142,6 @@ public class MySettings {
         editor.apply();
     }
     //endregion
-
 
     //region SETTING_DEFAULT_ATTRIBUTES_ID
     public static int getDefaultAttributesID() {

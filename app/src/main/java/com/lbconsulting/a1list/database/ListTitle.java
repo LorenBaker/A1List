@@ -67,9 +67,9 @@ public class ListTitle extends ParseObject {
         return getString(NAME);
     }
 
-    public void setName(String tableName) {
-        put(NAME, tableName);
-        put(NAME_LOWERCASE, tableName.toLowerCase());
+    public void setName(String listName) {
+        put(NAME, listName);
+        put(NAME_LOWERCASE, listName.toLowerCase());
         setListTitleDirty(true);
     }
 
@@ -159,7 +159,8 @@ public class ListTitle extends ParseObject {
         return getName();
     }
 
-    public static ListTitle getListTitle(String listTitleID, boolean isUuid) {
+    public static ListTitle getListTitle(String listTitleID) {
+        boolean isUuid = listTitleID.contains("-");
         ListTitle listTitle = null;
         try {
             ParseQuery<ListTitle> query = getQuery();
@@ -201,7 +202,7 @@ public class ListTitle extends ParseObject {
         List<ListTitle> allListTitles = new ArrayList<>();
         try {
             ParseQuery<ListTitle> query = getQuery();
-            query.whereEqualTo(ATTRIBUTES,listAttributes);
+            query.whereEqualTo(ATTRIBUTES, listAttributes);
             query.whereEqualTo(IS_MARKED_FOR_DELETION, false);
             query.fromLocalDatastore();
             allListTitles = query.find();
@@ -284,4 +285,24 @@ public class ListTitle extends ParseObject {
         return result;
     }
 
+    public static boolean getIsSameObject(ListTitle listTitle, String proposedListName) {
+        boolean result = false;
+        try {
+            ParseQuery<ListTitle> query = getQuery();
+            query.whereEqualTo(NAME_LOWERCASE, proposedListName.trim().toLowerCase());
+            query.whereEqualTo(IS_MARKED_FOR_DELETION, false);
+            query.fromLocalDatastore();
+            ListTitle existingListTitle = query.getFirst();
+            if (existingListTitle.getLocalUuid().equals(listTitle.getLocalUuid())) {
+                result = true;
+            }
+
+        } catch (ParseException e) {
+            if (e.getCode() != 101) {  // 101 = ObjectNotFound
+                MyLog.e("ListTitle", "listExists: ParseException: " + e.getMessage());
+            }
+        }
+
+        return result;
+    }
 }

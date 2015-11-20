@@ -4,9 +4,9 @@
     tools:context=".ManageListsAndThemesActivity">
 
     <item
-        android:id="@+id/action_settings"
-        android:orderInCategory="200"
-        android:title="@string/action_settings"
+        android:id="@+id/action_listTitleSorting"
+        android:orderInCategory="105"
+        android:title="@string/action_listTitleSorting_title"
         app:showAsAction="never" />
 
 </menu>

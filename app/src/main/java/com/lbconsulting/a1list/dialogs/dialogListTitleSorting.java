@@ -8,68 +8,44 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.RadioButton;
 
 import com.lbconsulting.a1list.R;
 import com.lbconsulting.a1list.classes.MyEvents;
 import com.lbconsulting.a1list.classes.MyLog;
-import com.lbconsulting.a1list.database.ListAttributes;
-import com.lbconsulting.a1list.database.ListItem;
-import com.lbconsulting.a1list.database.ListTitle;
-import com.parse.ParseException;
-import com.parse.ParseUser;
+import com.lbconsulting.a1list.classes.MySettings;
 
 import de.greenrobot.event.EventBus;
 
 /**
  * A dialog where the user creates a new ListItem
  */
-public class dialogListItemSorting extends DialogFragment {
-
-    private static final String ARG_LIST_UUID = "argListUuid";
+public class dialogListTitleSorting extends DialogFragment {
 
     private RadioButton rbAlphabetical;
-    private RadioButton rbManual;
-
-    private ListTitle mListTitle;
     private AlertDialog mListItemSortingDialog;
 
-    public dialogListItemSorting() {
+    public dialogListTitleSorting() {
         // Empty constructor required for DialogFragment
     }
 
 
-    public static dialogListItemSorting newInstance(String listUuid) {
-        MyLog.i("dialogListItemSorting", "newInstance");
-        dialogListItemSorting fragment = new dialogListItemSorting();
-        Bundle args = new Bundle();
-        args.putString(ARG_LIST_UUID, listUuid);
-        fragment.setArguments(args);
-        return fragment;
+    public static dialogListTitleSorting newInstance() {
+        MyLog.i("dialogListTitleSorting", "newInstance");
+        return new dialogListTitleSorting();
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        MyLog.i("dialogListItemSorting", "onCreate");
-        Bundle args = getArguments();
-        if (args.containsKey(ARG_LIST_UUID)) {
-            String listUuid = args.getString((ARG_LIST_UUID));
-            mListTitle = ListTitle.getListTitle(listUuid);
-            if (mListTitle == null) {
-                String okDialogTitle = "List Item Sorting Error";
-                String msg = "ListTitle with uuid = \"" + listUuid + "\" does not exist!";
-                EventBus.getDefault().post(new MyEvents.showOkDialog(okDialogTitle, msg));
-                MyLog.e("dialogListItemSorting", "onCreate: " + msg);
-            }
-        }
+        MyLog.i("dialogListTitleSorting", "onCreate");
+
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        MyLog.i("dialogListItemSorting", "onActivityCreated");
+        MyLog.i("dialogListTitleSorting", "onActivityCreated");
 
         mListItemSortingDialog.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
@@ -79,13 +55,12 @@ public class dialogListItemSorting extends DialogFragment {
                 okButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(final View v) {
-                        if(rbAlphabetical.isChecked()){
-                            mListTitle.setSortListItemsAlphabetically(true);
-                        }else{
-                            mListTitle.setSortListItemsAlphabetically(false);
+                        if (rbAlphabetical.isChecked()) {
+                            MySettings.setAlphabeticallySortNavigationMenu(true);
+                        } else {
+                            MySettings.setAlphabeticallySortNavigationMenu(false);
                         }
-                        mListTitle.setListTitleDirty(true);
-                        EventBus.getDefault().post(new MyEvents.startA1List(false));
+                        EventBus.getDefault().post(new MyEvents.updateListTitleUI());
                         dismiss();
                     }
                 });
@@ -105,7 +80,7 @@ public class dialogListItemSorting extends DialogFragment {
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        MyLog.i("dialogListItemSorting", "onCreateDialog");
+        MyLog.i("dialogListTitleSorting", "onCreateDialog");
 
         // inflate the xml layout
         LayoutInflater inflater = getActivity().getLayoutInflater();
@@ -113,17 +88,17 @@ public class dialogListItemSorting extends DialogFragment {
 
         // find the dialog's views
         rbAlphabetical = (RadioButton) view.findViewById(R.id.rbAlphabetical);
-        rbManual = (RadioButton) view.findViewById(R.id.rbManual);
+        RadioButton rbManual = (RadioButton) view.findViewById(R.id.rbManual);
 
-        if(mListTitle.sortListItemsAlphabetically()){
+        if (MySettings.isAlphabeticallySortNavigationMenu()) {
             rbAlphabetical.setChecked(true);
-        }else{
+        } else {
             rbManual.setChecked(true);
         }
 
         // build the dialog
         mListItemSortingDialog = new AlertDialog.Builder(getActivity())
-                .setTitle("\"" + mListTitle.getName() + "\" Item Sorting")
+                .setTitle("List Title Sorting")
                 .setView(view)
                 .setPositiveButton("OK", null)
                 .setNegativeButton("Cancel", null)

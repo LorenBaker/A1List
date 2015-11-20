@@ -26,19 +26,15 @@ import de.greenrobot.event.EventBus;
 /**
  * A fragment that shows master list of grocery items
  */
-public class fragListItems extends Fragment implements View.OnClickListener {
+public class fragListItems extends Fragment {
     private static final int LIST_ITEMS_QUERY_LIMIT = 500;
     private static final String ARG_LIST_TITLE_UUID = "argListTitleUuid";
 
-    //    private ListView lvListItems;
     private com.nhaarman.listviewanimations.itemmanipulation.DynamicListView lvListItems;
     private ListTitle mListTitle;
     private String mListTitleName = "Unknown";
 
     private ListItemsArrayAdapter mListItemsArrayAdapter;
-//    private ParseQueryAdapter<ListItem> mListItemsAdapter;
-//    private ParseQueryAdapter.QueryFactory<ListItem> mQueryFactory;
-
 
     public static fragListItems newInstance(String listTitleID) {
         MyLog.i("fragListItems", "newInstance: ListTitleID = " + listTitleID);
@@ -62,18 +58,18 @@ public class fragListItems extends Fragment implements View.OnClickListener {
         Bundle args = getArguments();
         if (args.containsKey(ARG_LIST_TITLE_UUID)) {
             String listTitleUuid = args.getString(ARG_LIST_TITLE_UUID);
-            if (listTitleUuid != MySettings.NOT_AVAILABLE) {
-                mListTitle = ListTitle.getListTitle(listTitleUuid, true);
+            if (listTitleUuid != null && !listTitleUuid.equals(MySettings.NOT_AVAILABLE)) {
+                mListTitle = ListTitle.getListTitle(listTitleUuid);
             }
             if (mListTitle != null) {
                 mListTitleName = mListTitle.getName();
                 MyLog.i("fragListItems", "onCreate: " + mListTitleName);
             } else {
                 MyLog.e("fragListItems", "onCreate: ListTitle is Null! uuid = " + listTitleUuid);
-                List<ListTitle> allListTitles = ListTitle.getAllListTitles(true);
-                if(allListTitles.size()>0){
+                List<ListTitle> allListTitles = ListTitle.getAllListTitles(MySettings.isAlphabeticallySortNavigationMenu());
+                if (allListTitles.size() > 0) {
                     mListTitle = allListTitles.get(0);
-                }else{
+                } else {
                     MyLog.e("fragListItems", "onCreate: ListTitle is null!");
                 }
             }
@@ -82,11 +78,9 @@ public class fragListItems extends Fragment implements View.OnClickListener {
             MyLog.e("fragListItems", "onCreate: No ListTitle found!");
         }
 
-        if(mListTitle!=null) {
+        if (mListTitle != null) {
             MainActivity.setActiveListTitle(mListTitle);
         }
-
-//        setHasOptionsMenu(true);
     }
 
     @Override
@@ -96,7 +90,6 @@ public class fragListItems extends Fragment implements View.OnClickListener {
         View rootView = inflater.inflate(R.layout.frag_list_items, container, false);
 
         lvListItems = (com.nhaarman.listviewanimations.itemmanipulation.DynamicListView) rootView.findViewById(R.id.lvListItems);
-//        lvListItems.setItemsCanFocus(true);
 
         // Set up the ListView adapter
         mListItemsArrayAdapter = new ListItemsArrayAdapter(getActivity(), lvListItems, mListTitle);
@@ -115,17 +108,34 @@ public class fragListItems extends Fragment implements View.OnClickListener {
                 }
         );
 
-        lvListItems.enableDragAndDrop();
-        lvListItems.setOnItemLongClickListener(
-                new AdapterView.OnItemLongClickListener() {
-                    @Override
-                    public boolean onItemLongClick(final AdapterView<?> parent, final View view,
-                                                   final int position, final long id) {
-                        lvListItems.startDragging(position);
-                        return true;
+        if (!mListTitle.sortListItemsAlphabetically()) {
+            lvListItems.enableDragAndDrop();
+            lvListItems.setOnItemLongClickListener(
+                    new AdapterView.OnItemLongClickListener() {
+                        @Override
+                        public boolean onItemLongClick(final AdapterView<?> parent, final View view,
+                                                       final int position, final long id) {
+                            lvListItems.startDragging(position);
+                            return true;
+                        }
                     }
-                }
-        );
+            );
+        } else {
+            lvListItems.disableDragAndDrop();
+            lvListItems.setOnItemLongClickListener(null);
+        }
+
+//        lvListItems.enableDragAndDrop();
+//        lvListItems.setOnItemLongClickListener(
+//                new AdapterView.OnItemLongClickListener() {
+//                    @Override
+//                    public boolean onItemLongClick(final AdapterView<?> parent, final View view,
+//                                                   final int position, final long id) {
+//                        lvListItems.startDragging(position);
+//                        return true;
+//                    }
+//                }
+//        );
 
         lvListItems.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -138,53 +148,18 @@ public class fragListItems extends Fragment implements View.OnClickListener {
         return rootView;
     }
 
-//    private void setupListViewAdapter() {
-//        mListItemsArrayAdapter = new ListItemsArrayAdapter(getActivity(), lvListItems,mListTitleName);
-////        mListItemsAdapter.setObjectsPerPage(LIST_ITEMS_QUERY_LIMIT);
-//        lvListItems.setAdapter(mListItemsArrayAdapter);
-//
-//        mListItemsAdapter.addOnQueryLoadListener(new ParseQueryAdapter.OnQueryLoadListener<ListItem>() {
-//            public void onLoading() {
-//                // Trigger "loading" UI progress bar
-//            }
-//
-//            @Override
-//            public void onLoaded(List<ListItem> list, Exception e) {
-//                // Execute any post-loading logic, hide "loading" progress bar
-//                MyLog.i("fragListItems", "onLoaded: " +mListTitleName + ". Loaded " + list.size() + " Items.");
-////                if (mMoveToItemID != null && !mMoveToItemID.isEmpty()) {
-////                    int position = 0;
-////                    ClipData.Item item;
-////                    for (int i = 0; i < mListItemsAdapter.getListItemsCount(); i++) {
-////                        item = mListItemsAdapter.getItem(i);
-////                        if (item.getItemID().equals(mMoveToItemID)) {
-////                            position = i;
-////                            break;
-////                        }
-////                    }
-////
-////                    lvListItems.setSelection(position);
-////                }
-//            }
-//        });
-//    }
-
-
     public void onEvent(MyEvents.updateListUI event) {
         updateListUI();
     }
 
-//    public void onEvent(MyEvents.updateListUI event) {
-//        updateListUI();
-//    }
-
     private void updateListUI() {
+
+
         List<ListItem> listItems = ListItem.getAllListItems(mListTitle);
         MyLog.i("fragListItems", "updateListUI List " + mListTitleName + " with " + listItems.size() + " items.");
         mListItemsArrayAdapter.setData(listItems);
         mListItemsArrayAdapter.notifyDataSetChanged();
     }
-
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -257,90 +232,4 @@ public class fragListItems extends Fragment implements View.OnClickListener {
         MyLog.i("fragListItems", "onDetach: " + mListTitleName);
     }
 
-
-    //region Options Menu
-/*    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.frag_master_list, menu);
-        MyLog.i("fragListItems", "onCreateOptionsMenu: frag_master_list");
-
-    }
-
-    @Override
-    public void onPrepareOptionsMenu(Menu menu) {
-        super.onPrepareOptionsMenu(menu);
-        MyLog.i("fragListItems", "onPrepareOptionsMenu: frag_master_list");
-        MenuItem showFavorites = menu.findItem(R.id.action_show_favorites);
-        MenuItem showAllItems = menu.findItem(R.id.action_show_all_items);
-        if (MySettings.showFavorites()) {
-            showFavorites.setVisible(false);
-            showAllItems.setVisible(true);
-        } else {
-            showFavorites.setVisible(true);
-            showAllItems.setVisible(false);
-        }
-    }
-
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        // Shown in all fragment views.
-        if (id == R.id.action_show_favorites) {
-            MySettings.setShowFavorites(true);
-            updateListUI(null);
-            getActivity().invalidateOptionsMenu();
-            return true;
-
-        } else if (id == R.id.action_show_all_items) {
-            MySettings.setShowFavorites(false);
-            updateListUI(null);
-            getActivity().invalidateOptionsMenu();
-            return true;
-
-        } else if (id == R.id.action_select_all_items) {
-            Item.selectAllItems(getActivity());
-            updateListUI(null);
-            return true;
-
-        } else if (id == R.id.action_select_all_favorites) {
-            Item.selectAllFavorites(getActivity());
-            updateListUI(null);
-            return true;
-
-        } else if (id == R.id.action_deselect_all_items) {
-            Item.deselectAllItems(getActivity());
-            updateListUI(null);
-            return true;
-
-        } else if (id == R.id.action_show_master_list_sort_dialog) {
-            showMasterListSortDialog();
-            return true;
-
-        } else
-            // Not implemented here
-            return false;
-    }
-
-
-    private void showMasterListSortDialog() {
-        FragmentManager fm = getFragmentManager();
-        dialogMasterListSorting dialog = dialogMasterListSorting.newInstance();
-        dialog.show(fm, "dialogMasterListSorting");
-    }*/
-    //endregion
-
-
-    @Override
-    public void onClick(View v) {
-//        switch (v.getId()) {
-//
-//            case R.id.btnClearEditText:
-//                txtItemName.setText("");
-//                break;
-//        }
-    }
 }

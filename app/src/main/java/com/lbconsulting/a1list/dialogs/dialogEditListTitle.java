@@ -17,39 +17,33 @@ import android.widget.EditText;
 import com.lbconsulting.a1list.R;
 import com.lbconsulting.a1list.classes.MyEvents;
 import com.lbconsulting.a1list.classes.MyLog;
-import com.lbconsulting.a1list.classes.MySettings;
-import com.lbconsulting.a1list.database.ListAttributes;
 import com.lbconsulting.a1list.database.ListTitle;
-import com.parse.ParseException;
-import com.parse.ParseUser;
 
 import de.greenrobot.event.EventBus;
 
 /**
  * A dialog where the user creates a new ListTitle
  */
-public class dialogNewListTitle extends DialogFragment {
+public class dialogEditListTitle extends DialogFragment {
 
-    public static final int SOURCE_FROM_MAIN_ACTIVITY = 1;
-    public static final int SOURCE_FROM_MANAGE_LISTS_ACTIVITY = 2;
-    private static final String ARG_SOURCE = "argSource";
+    private static final String ARG_LIST_TITLE_ID = "argListTitleID";
 
     private EditText txtListTitleName;
     private TextInputLayout txtListTitleName_input_layout;
 
     private AlertDialog mNewListTitleDialog;
-    private int mSource;
+    private ListTitle mListTitle;
 
-    public dialogNewListTitle() {
+    public dialogEditListTitle() {
         // Empty constructor required for DialogFragment
     }
 
 
-    public static dialogNewListTitle newInstance(int source) {
-        MyLog.i("dialogNewListTitle", "newInstance");
-        dialogNewListTitle frag = new dialogNewListTitle();
+    public static dialogEditListTitle newInstance(String listTitleID) {
+        MyLog.i("dialogEditListTitle", "newInstance");
+        dialogEditListTitle frag = new dialogEditListTitle();
         Bundle args = new Bundle();
-        args.putInt(ARG_SOURCE, source);
+        args.putString(ARG_LIST_TITLE_ID, listTitleID);
         frag.setArguments(args);
         return frag;
     }
@@ -57,18 +51,19 @@ public class dialogNewListTitle extends DialogFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        MyLog.i("dialogNewListTitle", "onCreate");
+        MyLog.i("dialogEditListTitle", "onCreate");
 
         Bundle args = getArguments();
-        if (args.containsKey(ARG_SOURCE)) {
-            mSource = args.getInt(ARG_SOURCE);
+        if (args.containsKey(ARG_LIST_TITLE_ID)) {
+            String listTitleID = args.getString(ARG_LIST_TITLE_ID);
+            mListTitle = ListTitle.getListTitle(listTitleID);
         }
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        MyLog.i("dialogNewListTitle", "onActivityCreated");
+        MyLog.i("dialogEditListTitle", "onActivityCreated");
         getDialog().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
         mNewListTitleDialog.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
@@ -78,17 +73,8 @@ public class dialogNewListTitle extends DialogFragment {
                 positiveButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(final View v) {
-                        if (addNewList(txtListTitleName.getText().toString().trim())) {
-                            switch (mSource){
-                                case SOURCE_FROM_MAIN_ACTIVITY:
-                                    EventBus.getDefault().post(new MyEvents.startA1List(false));
-                                    break;
-
-                                case SOURCE_FROM_MANAGE_LISTS_ACTIVITY:
-                                    EventBus.getDefault().post(new MyEvents.updateListTitleUI());
-                                    break;
-                            }
-
+                        if (reviseListName(txtListTitleName.getText().toString().trim())) {
+                            EventBus.getDefault().post(new MyEvents.updateListTitleUI());
                             dismiss();
                         }
                     }
@@ -101,70 +87,43 @@ public class dialogNewListTitle extends DialogFragment {
                     @Override
                     public void onClick(View v) {
                         // Cancel
-                        EventBus.getDefault().post(new MyEvents.startA1List(false));
                         dismiss();
                     }
                 });
 
-                Button neutralButton = mNewListTitleDialog.getButton(Dialog.BUTTON_NEUTRAL);
-                neutralButton.setTextSize(17);
-                neutralButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(final View v) {
-                        if (addNewList(txtListTitleName.getText().toString().trim())) {
-                            txtListTitleName.setText("");
-                        }
-                    }
-                });
             }
         });
     }
 
-    private boolean addNewList(String newListName) {
+    private boolean reviseListName(String newListName) {
         boolean result = false;
         if (newListName.isEmpty()) {
             String errorMsg = "The List's name cannot be empty.\nPlease enter a unique List name.";
             txtListTitleName_input_layout.setError(errorMsg);
 
         } else if (ListTitle.listExists(newListName)) {
-            String errorMsg = "List \"" + newListName
-                    + "\" already exists.\nPlease enter a unique List name.";
-            txtListTitleName_input_layout.setError(errorMsg);
+            boolean isSameObject = ListTitle.getIsSameObject(mListTitle, newListName);
+            if(isSameObject){
+                mListTitle.setName(newListName);
+                result = true;
+            }else {
+                String errorMsg = "List \"" + newListName
+                        + "\" already exists.\nPlease enter a unique List name.";
+                txtListTitleName_input_layout.setError(errorMsg);
+            }
 
         } else {
             // ok to create list
-            createNewList(newListName);
+            mListTitle.setName(newListName);
             result = true;
         }
         return result;
     }
 
-    private void createNewList(String newListName) {
-        ListTitle newListTitle = new ListTitle();
-        try {
-            newListTitle.setName(newListName);
-            ListAttributes defaultAttributes = ListAttributes.getDefaultAttributes();
-            newListTitle.setAttributes(defaultAttributes);
-            newListTitle.setLocalUuid();
-            newListTitle.setListID();
-            newListTitle.setAuthor(ParseUser.getCurrentUser());
-            newListTitle.setChecked(false);
-            newListTitle.setListTitleDirty(true);
-            newListTitle.setMarkedForDeletion(false);
-            newListTitle.setSortListItemsAlphabetically(true);
-            MySettings.setActiveListTitleUuid(newListTitle.getLocalUuid());
-            newListTitle.setListTitleManualSortKey(newListTitle.getListID());
-            newListTitle.pin();
-
-        } catch (ParseException e) {
-            MyLog.e("MainActivity", "createNewList; newListTitle.pin(): ParseException: " + e.getMessage());
-        }
-    }
-
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        MyLog.i("dialogNewListTitle", "onCreateDialog");
+        MyLog.i("dialogEditListTitle", "onCreateDialog");
 
         // inflate the xml layout
         LayoutInflater inflater = getActivity().getLayoutInflater();
@@ -172,6 +131,7 @@ public class dialogNewListTitle extends DialogFragment {
 
         // find the dialog's views
         txtListTitleName = (EditText) view.findViewById(R.id.txtName);
+        txtListTitleName.setText(mListTitle.getName());
         txtListTitleName_input_layout = (TextInputLayout) view.findViewById(R.id.txtName_input_layout);
         txtListTitleName_input_layout.setHint("List Name");
         txtListTitleName.addTextChangedListener(new TextWatcher() {
@@ -193,11 +153,10 @@ public class dialogNewListTitle extends DialogFragment {
 
         // build the dialog
         mNewListTitleDialog = new AlertDialog.Builder(getActivity())
-                .setTitle("Create New List")
+                .setTitle("Edit List Name")
                 .setView(view)
                 .setPositiveButton("Save", null)
                 .setNegativeButton("Cancel", null)
-                .setNeutralButton("Save/New", null)
                 .create();
 
         return mNewListTitleDialog;

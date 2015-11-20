@@ -178,7 +178,8 @@ public class ListItem extends ParseObject {
         return getName();
     }
 
-    public static ListItem getListItem(String listItemID, boolean isUuid) {
+    public static ListItem getListItem(String listItemID) {
+        boolean isUuid = listItemID.contains("-");
         ListItem listItem = null;
         try {
             ParseQuery<ListItem> query = getQuery();

@@ -92,7 +92,7 @@ public class ListThemeActivity extends AppCompatActivity implements View.OnClick
 
         Bundle args = getIntent().getExtras();
         String listTitleID = args.getString(MySettings.ARG_LIST_TITLE_ID);
-        mListTitle = ListTitle.getListTitle(listTitleID, true);
+        mListTitle = ListTitle.getListTitle(listTitleID);
         String title = "Error creating ListThemeActivity";
         if (mListTitle != null) {
             if (mActionBar != null) {

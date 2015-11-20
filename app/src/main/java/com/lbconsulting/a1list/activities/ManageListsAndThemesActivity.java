@@ -2,6 +2,7 @@ package com.lbconsulting.a1list.activities;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.FragmentManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.ActivityInfo;
@@ -29,6 +30,9 @@ import com.lbconsulting.a1list.classes.MySettings;
 import com.lbconsulting.a1list.database.ListAttributes;
 import com.lbconsulting.a1list.database.ListItem;
 import com.lbconsulting.a1list.database.ListTitle;
+import com.lbconsulting.a1list.dialogs.dialogEditListTitle;
+import com.lbconsulting.a1list.dialogs.dialogListTitleSorting;
+import com.lbconsulting.a1list.dialogs.dialogNewListTitle;
 import com.nhaarman.listviewanimations.itemmanipulation.DynamicListView;
 import com.nhaarman.listviewanimations.itemmanipulation.swipedismiss.OnDismissCallback;
 
@@ -40,7 +44,6 @@ public class ManageListsAndThemesActivity extends AppCompatActivity {
 
     public static final int MANAGE_LISTS = 100;
     public static final int MANAGE_THEMES = 200;
-
     public static final String ARG_DATA_TYPE = "argDataType";
 
     private int mDataType;
@@ -61,12 +64,12 @@ public class ManageListsAndThemesActivity extends AppCompatActivity {
         }
 
         setContentView(R.layout.activity_manage_lists_and_themes);
-
         EventBus.getDefault().register(this);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        MySettings.setRefreshDataFromTheCloud(false);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -76,11 +79,11 @@ public class ManageListsAndThemesActivity extends AppCompatActivity {
                 switch (mDataType) {
 
                     case MANAGE_LISTS:
-
+                        showNewListDialog();
                         break;
 
                     case MANAGE_THEMES:
-
+                        // do nothing ... should never reach here!
                         break;
 
                 }
@@ -88,10 +91,6 @@ public class ManageListsAndThemesActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
-
-        if (mDataType == MANAGE_THEMES) {
-            fab.setVisibility(View.GONE);
-        }
 
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -102,6 +101,11 @@ public class ManageListsAndThemesActivity extends AppCompatActivity {
             mDataType = args.getInt(ARG_DATA_TYPE);
         } else {
             mDataType = savedInstanceState.getInt(ARG_DATA_TYPE);
+        }
+
+
+        if (mDataType == MANAGE_THEMES) {
+            fab.setVisibility(View.GONE);
         }
 
         lvItems = (DynamicListView) findViewById(R.id.lvItems);
@@ -119,32 +123,21 @@ public class ManageListsAndThemesActivity extends AppCompatActivity {
                                 int position = reverseSortedPositions[0];
                                 ListTitle item = mListTitleArrayAdapter.getItem(position);
                                 deleteListTitle(item);
-                                updateListTitleUI();
+                                updateUI();
                             }
                         }
                 );
 
-                if (!MySettings.isAlphabeticallySortNavigationMenu()) {
-                    lvItems.enableDragAndDrop();
-                    lvItems.setOnItemLongClickListener(
-                            new AdapterView.OnItemLongClickListener() {
-                                @Override
-                                public boolean onItemLongClick(final AdapterView<?> parent, final View view,
-                                                               final int position, final long id) {
-
-                                    lvItems.startDragging(position);
-                                    return true;
-                                }
-                            }
-                    );
-                }
+                lvItems.enableDragAndDrop();
 
                 lvItems.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                         TextView tv = (TextView) view.findViewById(R.id.tvItemName);
-                        Toast.makeText(ManageListsAndThemesActivity.this, "Selected List: "
-                                + tv.getText().toString(), Toast.LENGTH_SHORT).show();
+                        ListTitle listTitle = (ListTitle)tv.getTag();
+                        FragmentManager fm = getFragmentManager();
+                        dialogEditListTitle dialog = dialogEditListTitle.newInstance(listTitle.getLocalUuid());
+                        dialog.show(fm, "dialogEditListTitle");
                     }
                 });
 
@@ -162,7 +155,7 @@ public class ManageListsAndThemesActivity extends AppCompatActivity {
                                 int position = reverseSortedPositions[0];
                                 ListAttributes item = mListAttributesArrayAdapter.getItem(position);
                                 deleteListAttributes(item);
-                                updateListTitleUI();
+                                updateUI();
                             }
                         }
                 );
@@ -178,7 +171,13 @@ public class ManageListsAndThemesActivity extends AppCompatActivity {
 
         }
 
-        updateListTitleUI();
+        updateUI();
+    }
+
+    private void showNewListDialog() {
+        FragmentManager fm = getFragmentManager();
+        dialogNewListTitle dialog = dialogNewListTitle.newInstance(dialogNewListTitle.SOURCE_FROM_MANAGE_LISTS_ACTIVITY);
+        dialog.show(fm, "dialogNewListTitle");
     }
 
     private static void showOkDialog(Context context, String title, String message) {
@@ -244,27 +243,48 @@ public class ManageListsAndThemesActivity extends AppCompatActivity {
         }
         // mark the ListTitle for deletion
         listTitle.setMarkedForDeletion(true);
+
+        if (MySettings.getActiveListTitleUuid().equals(listTitle.getLocalUuid())) {
+            // The active ListTitle is being deleted ... so reset the active ListTitle ID
+            MySettings.setActiveListTitleUuid(MySettings.NOT_AVAILABLE);
+        }
     }
 
     public void onEvent(MyEvents.updateListTitleUI event) {
-        updateListTitleUI();
+        updateUI();
     }
 
-    private void updateListTitleUI() {
+    private void updateUI() {
         switch (mDataType) {
 
             case MANAGE_LISTS:
+                if (!MySettings.isAlphabeticallySortNavigationMenu()) {
+                    lvItems.setOnItemLongClickListener(
+                            new AdapterView.OnItemLongClickListener() {
+                                @Override
+                                public boolean onItemLongClick(final AdapterView<?> parent, final View view,
+                                                               final int position, final long id) {
+
+                                    lvItems.startDragging(position);
+                                    return true;
+                                }
+                            }
+                    );
+                } else {
+                    lvItems.setOnItemLongClickListener(null);
+                }
+
                 List<ListTitle> allListTitles = ListTitle.getAllListTitles(MySettings.isAlphabeticallySortNavigationMenu());
                 mListTitleArrayAdapter.setData(allListTitles);
                 mListTitleArrayAdapter.notifyDataSetChanged();
-                MyLog.i("ManageListsAndThemesActivity", "updateListTitleUI with " + allListTitles.size() + " ListTitles.");
+                MyLog.i("ManageListsAndThemesActivity", "updateUI with " + allListTitles.size() + " ListTitles.");
                 break;
 
             case MANAGE_THEMES:
                 List<ListAttributes> allAttributes = ListAttributes.getAllListAttributes();
                 mListAttributesArrayAdapter.setData(allAttributes);
                 mListAttributesArrayAdapter.notifyDataSetChanged();
-                MyLog.i("ManageListsAndThemesActivity", "updateListTitleUI with " + allAttributes.size() + " ListAttributes.");
+                MyLog.i("ManageListsAndThemesActivity", "updateUI with " + allAttributes.size() + " ListAttributes.");
                 break;
         }
     }
@@ -303,18 +323,24 @@ public class ManageListsAndThemesActivity extends AppCompatActivity {
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        menu.findItem(R.id.action_settings).setVisible(mDataType == MANAGE_LISTS);
+        menu.findItem(R.id.action_listTitleSorting).setVisible(mDataType == MANAGE_LISTS);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            Toast.makeText(this, "action_settings selected.", Toast.LENGTH_SHORT).show();
+        if (id == R.id.action_listTitleSorting) {
+            showListTitleSortingDialog();
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void showListTitleSortingDialog() {
+        FragmentManager fm = getFragmentManager();
+        dialogListTitleSorting dialog = dialogListTitleSorting.newInstance();
+        dialog.show(fm, "dialogListTitleSorting");
     }
 
     @Override

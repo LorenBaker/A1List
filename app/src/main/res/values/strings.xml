@@ -3,7 +3,8 @@
 
     <string name="action_deleteStrikeouts_title">Delete Strikeouts</string>
     <string name="action_editListTheme_title">List Theme</string>
-    <string name="action_listSorting_title">List Sorting</string>
+    <string name="action_listSorting_title">List Item Sorting</string>
+    <string name="action_listTitleSorting_title">List Title Sorting</string>
     <string name="action_manageLists_title">Manage Lists</string>
     <string name="action_manageThemes_title">Manage Themes</string>
     <string name="action_newList_title">New List</string>

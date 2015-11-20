@@ -58,6 +58,8 @@ import de.greenrobot.event.EventBus;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+    private boolean mRefreshDataFromTheCloud;
+
     private RelativeLayout mFragmentContainer;
 
     private static ListTitle mActiveListTitle;
@@ -115,6 +117,7 @@ public class MainActivity extends AppCompatActivity
 
         mNavigationMenu = navigationView.getMenu();
 
+        mRefreshDataFromTheCloud = MySettings.getRefreshDataFromTheCloud();
 
     }
 
@@ -173,7 +176,7 @@ public class MainActivity extends AppCompatActivity
 
     private void updateUI() {
         MyLog.i("MainActivity", "updateUI");
-        startA1List(false);
+        startA1List(mRefreshDataFromTheCloud);
     }
 
     public void onEvent(MyEvents.startA1List event) {
@@ -201,17 +204,17 @@ public class MainActivity extends AppCompatActivity
 
         if (MySettings.isUserEmailVerified()) {
             MyLog.i("MainActivity", "onResume: User email verified -- startA1List.");
-            startA1List(true);
+            startA1List(mRefreshDataFromTheCloud);
 
         } else if (getIsUserEmailVerified()) {
             MyLog.i("MainActivity", "onResume: User email has become verified -- startA1List.");
             MySettings.setIsUserInitialized(true);
-            startA1List(true);
+            startA1List(mRefreshDataFromTheCloud);
 
         } else if (MySettings.isUserInitialized()) {
             if (ParseUser.getCurrentUser().isNew()) {
                 MyLog.i("MainActivity", "onResume: User initialized and is a new user -- startA1List.");
-                startA1List(true);
+                startA1List(mRefreshDataFromTheCloud);
             } else {
                 checkInitializationDate();
             }
@@ -237,7 +240,7 @@ public class MainActivity extends AppCompatActivity
         } else {
             MyLog.i("MainActivity", "onResume: User initialized but within 7 day grace period -- requestEmailBeVerified -- startA1List");
             requestEmailBeVerified();
-            startA1List(true);
+            startA1List(mRefreshDataFromTheCloud);
         }
     }
 
@@ -247,18 +250,35 @@ public class MainActivity extends AppCompatActivity
 
         String activeListTitleUuid = MySettings.getActiveListTitleUuid();
         if (activeListTitleUuid.equals(MySettings.NOT_AVAILABLE)) {
-            mActiveListTitle = null;
-            // show default gradient
+            // get all ListTitles
+            List<ListTitle> allLists = ListTitle.getAllListTitles(MySettings.isAlphabeticallySortNavigationMenu());
 
-            ListAttributes defaultAttributes = ListAttributes.getDefaultAttributes();
-            if (defaultAttributes != null) {
-                mFragmentContainer.setBackground(defaultAttributes.getBackgroundDrawable());
+            if (allLists.size() > 0) {
+                // Since there are ListTitles in the datastore ... select the first ListTitle
+                mActiveListTitle = allLists.get(0);
+                activeListTitleUuid = mActiveListTitle.getLocalUuid();
+                MySettings.setCreateAListDialogShown(true);
+
+            } else {
+                mActiveListTitle = null;
+                // show default gradient
+
+                ListAttributes defaultAttributes = ListAttributes.getDefaultAttributes();
+                if (defaultAttributes != null) {
+                    mFragmentContainer.setBackground(defaultAttributes.getBackgroundDrawable());
+                }
+
+                mToolbar.setTitle("Please Create A List");
+                if (!MySettings.getCreateAListDialogShown() && ParseUser.getCurrentUser().isNew()) {
+                    String title = "";
+                    String msg = "Please create a list by selecting \"New List\" from the dropdown menu.";
+                    MySettings.setCreateAListDialogShown(true);
+                    showOkDialog(this, title, msg);
+                }
+
             }
-
-            mToolbar.setTitle("No List Selected");
-
         } else {
-            mActiveListTitle = ListTitle.getListTitle(activeListTitleUuid, true);
+            mActiveListTitle = ListTitle.getListTitle(activeListTitleUuid);
         }
 
         showList(activeListTitleUuid);
@@ -266,6 +286,8 @@ public class MainActivity extends AppCompatActivity
         if (refreshDataFromTheCloud) {
             downloadDataFromParse();
         }
+
+        MySettings.setRefreshDataFromTheCloud(true);
     }
 
 
@@ -392,13 +414,16 @@ public class MainActivity extends AppCompatActivity
 
     private void showList(String listTitleID) {
         FragmentManager fm = getFragmentManager();
+
         if (listTitleID.equals(MySettings.NOT_AVAILABLE)) {
-            Fragment activeFragment = fm.findFragmentByTag(mActiveFragmentTag);
-            if (activeFragment != null) {
-                fm.beginTransaction()
-                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-                        .remove(activeFragment)
-                        .commit();
+            if (mActiveFragmentTag != null && !mActiveFragmentTag.isEmpty()) {
+                Fragment activeFragment = fm.findFragmentByTag(mActiveFragmentTag);
+                if (activeFragment != null) {
+                    fm.beginTransaction()
+                            .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                            .remove(activeFragment)
+                            .commit();
+                }
             }
         } else {
             mActiveFragmentTag = "frag_" + listTitleID;
@@ -470,7 +495,7 @@ public class MainActivity extends AppCompatActivity
             return true;
 
         } else if (id == R.id.action_listSorting) {
-            showListSortingDialog();
+            showListItemSortingDialog();
             return true;
 
         } else if (id == R.id.action_editListTheme) {
@@ -522,7 +547,7 @@ public class MainActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
-    private void showListSortingDialog() {
+    private void showListItemSortingDialog() {
         FragmentManager fm = getFragmentManager();
         dialogListItemSorting dialog = dialogListItemSorting.newInstance(mActiveListTitle.getLocalUuid());
         dialog.show(fm, "dialogListItemSorting");
@@ -540,7 +565,7 @@ public class MainActivity extends AppCompatActivity
 
     private void showNewListDialog() {
         FragmentManager fm = getFragmentManager();
-        dialogNewListTitle dialog = dialogNewListTitle.newInstance();
+        dialogNewListTitle dialog = dialogNewListTitle.newInstance(dialogNewListTitle.SOURCE_FROM_MAIN_ACTIVITY);
         dialog.show(fm, "dialogNewListTitle");
     }
 
@@ -556,6 +581,7 @@ public class MainActivity extends AppCompatActivity
     private void setupNavigationMenu() {
 
         mListTitles = ListTitle.getAllListTitles(MySettings.isAlphabeticallySortNavigationMenu());
+        MyLog.i("MainActivity", "setupNavigationMenu with " + mListTitles.size() + " ListTitles.");
         mNavigationMenu.clear();
         if (mListTitles != null) {
             int itemID = 0;

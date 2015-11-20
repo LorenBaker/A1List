@@ -58,7 +58,7 @@ public class dialogNewListItem extends DialogFragment {
         Bundle args = getArguments();
         if (args.containsKey(ARG_LIST_UUID)) {
             String listUuid = args.getString((ARG_LIST_UUID));
-            mListTitle = ListTitle.getListTitle(listUuid, true);
+            mListTitle = ListTitle.getListTitle(listUuid);
             if (mListTitle == null) {
                 String okDialogTitle = "Error Creating New Item";
                 String msg = "ListTitle with uuid = \"" + listUuid + "\" does not exist!";
