@@ -28,5 +28,6 @@
     <string name="title_activity_test_data">activity_test_data</string>
     <string name="title_activity_test2">activity_test2</string>
     <string name="title_activity_manage_lists_and_themes">ManageListsAndThemesActivity</string>
+    <string name="action_logoff_title">Logoff</string>
 
 </resources>

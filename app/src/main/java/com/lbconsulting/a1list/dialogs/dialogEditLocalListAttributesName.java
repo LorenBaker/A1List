@@ -15,60 +15,52 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.lbconsulting.a1list.R;
+import com.lbconsulting.a1list.activities.ListThemeActivity;
 import com.lbconsulting.a1list.classes.MyEvents;
 import com.lbconsulting.a1list.classes.MyLog;
 import com.lbconsulting.a1list.database.ListAttributes;
+import com.lbconsulting.a1list.database.LocalListAttributes;
 
 import de.greenrobot.event.EventBus;
 
 /**
  * A dialog where the user edits the ListAttributes' name
  */
-public class dialogEditListAttributesName extends DialogFragment {
-
-    public static final String ARG_ATTRIBUTES_ID = "argAttributesID";
+public class dialogEditLocalListAttributesName extends DialogFragment {
 
     private EditText txtListAttributesName;
     private TextInputLayout txtListAttributesName_input_layout;
-    private ListAttributes mAttributes;
+    private LocalListAttributes mAttributes;
     private AlertDialog mEditListAttributesNameDialog;
 
 
-    public dialogEditListAttributesName() {
+    public dialogEditLocalListAttributesName() {
         // Empty constructor required for DialogFragment
     }
 
 
-    public static dialogEditListAttributesName newInstance(String attributesID) {
-        MyLog.i("dialogEditListAttributesName", "newInstance");
-        dialogEditListAttributesName frag = new dialogEditListAttributesName();
-        Bundle args = new Bundle();
-        args.putString(ARG_ATTRIBUTES_ID, attributesID);
-        frag.setArguments(args);
-        return frag;
+    public static dialogEditLocalListAttributesName newInstance() {
+        MyLog.i("dialogEditLocalListAttributesName", "newInstance");
+        return new dialogEditLocalListAttributesName();
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        MyLog.i("dialogEditListAttributesName", "onCreate");
-        Bundle args = getArguments();
-        if (args.containsKey(ARG_ATTRIBUTES_ID)) {
-            String attributesID = args.getString(ARG_ATTRIBUTES_ID);
-            mAttributes = ListAttributes.getAttributes(attributesID);
-        }
+        MyLog.i("dialogEditLocalListAttributesName", "onCreate");
+        mAttributes = ListThemeActivity.getLocalAttributes();
         if (mAttributes == null) {
             String okDialogTitle = "Error Getting Attributes";
             String msg = "Attributes is null!";
             EventBus.getDefault().post(new MyEvents.showOkDialog(okDialogTitle, msg));
-            MyLog.e("dialogEditListAttributesName", "onCreate: " + msg);
+            MyLog.e("dialogEditLocalListAttributesName", "onCreate: " + msg);
         }
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        MyLog.i("dialogEditListAttributesName", "onActivityCreated");
+        MyLog.i("dialogEditLocalListAttributesName", "onActivityCreated");
         getDialog().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
         mEditListAttributesNameDialog.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
@@ -84,14 +76,13 @@ public class dialogEditListAttributesName extends DialogFragment {
                             String errorMsg = "The Theme's name cannot be empty.\nPlease enter a unique Theme name.";
                             txtListAttributesName_input_layout.setError(errorMsg);
 
-                        } else if (!ListAttributes.isValidAttributesName(mAttributes, attributesProposedName)) {
+                        } else if (!ListAttributes.isValidAttributesName(attributesProposedName)) {
                             txtListAttributesName.setText(mAttributes.getName());
                             String errorMsg = "Theme \"" + attributesProposedName
                                     + "\" already exists.\nPlease enter a unique theme name.";
                             txtListAttributesName_input_layout.setError(errorMsg);
                         } else {
-                            mAttributes.setName(attributesProposedName);
-                            EventBus.getDefault().post(new MyEvents.updateListTitleUI());
+                            EventBus.getDefault().post(new MyEvents.setAttributesName(attributesProposedName));
                             dismiss();
                         }
                     }
@@ -114,7 +105,7 @@ public class dialogEditListAttributesName extends DialogFragment {
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        MyLog.i("dialogEditListAttributesName", "onCreateDialog");
+        MyLog.i("dialogEditLocalListAttributesName", "onCreateDialog");
 
         // inflate the xml layout
         LayoutInflater inflater = getActivity().getLayoutInflater();

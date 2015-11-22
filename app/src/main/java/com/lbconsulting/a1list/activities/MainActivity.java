@@ -42,6 +42,7 @@ import com.lbconsulting.a1list.services.UploadDirtyObjectsService;
 import com.parse.DeleteCallback;
 import com.parse.FindCallback;
 import com.parse.FunctionCallback;
+import com.parse.LogOutCallback;
 import com.parse.ParseCloud;
 import com.parse.ParseException;
 import com.parse.ParseObject;
@@ -202,13 +203,16 @@ public class MainActivity extends AppCompatActivity
         //  Conflicts: the client always wins ... data in the cloud is overwritten by the client's data
         super.onResume();
 
-        if (MySettings.isUserEmailVerified()) {
+        if (MySettings.isUserEmailVerified() || !CommonMethods.isNetworkAvailable()) {
             MyLog.i("MainActivity", "onResume: User email verified -- startA1List.");
             startA1List(mRefreshDataFromTheCloud);
 
-        } else if (getIsUserEmailVerified()) {
+        } else if (getIsUserEmailVerified() ) {
             MyLog.i("MainActivity", "onResume: User email has become verified -- startA1List.");
-            MySettings.setIsUserInitialized(true);
+            if(CommonMethods.isNetworkAvailable()) {
+                MySettings.setIsUserEmailVerified(true);
+                MySettings.setIsUserInitialized(true);
+            }
             startA1List(mRefreshDataFromTheCloud);
 
         } else if (MySettings.isUserInitialized()) {
@@ -337,21 +341,25 @@ public class MainActivity extends AppCompatActivity
     }
 
     private boolean getIsUserEmailVerified() {
-        // TODO: figure out what to do if the network is not available 
         boolean isEmailVerified = false;
-        try {
-            ParseUser user = ParseUser.getCurrentUser().fetch();
-            isEmailVerified = user.getBoolean("emailVerified");
-        } catch (ParseException e) {
-            e.printStackTrace();
+        if (CommonMethods.isNetworkAvailable()) {
+            try {
+                ParseUser user = ParseUser.getCurrentUser().fetch();
+                isEmailVerified = user.getBoolean("emailVerified");
+            } catch (ParseException e) {
+                MyLog.e("MainActivity", "getIsUserEmailVerified: ParseException: " + e.getMessage());
+            }
+        } else {
+            // if the network is not available ... assume that the email has been verified.
+            isEmailVerified = true;
         }
+
         return isEmailVerified;
     }
 
     private void initializeNewUser() {
         // initializeNewUser on Parse
-        // TODO: show progress bar
-        final HashMap<String, Object> params = new HashMap<String, Object>();
+        final HashMap<String, Object> params = new HashMap<>();
         final long startTime = System.currentTimeMillis();
         final Context context = this;
         ParseCloud.callFunctionInBackground("initializeNewUser", params, new FunctionCallback<Integer>() {
@@ -523,22 +531,31 @@ public class MainActivity extends AppCompatActivity
             return true;
 
         } else if (id == R.id.action_refresh) {
-            MyLog.i("MainActivity", "onOptionsItemSelected: action_refresh");
             downloadDataFromParse();
             return true;
 
-        } else if (id == R.id.action_settings) {
-            Toast.makeText(this, "action_settings selected.", Toast.LENGTH_SHORT).show();
+        } else if (id == R.id.action_logoff) {
+            ParseUser.logOutInBackground(new LogOutCallback() {
+                @Override
+                public void done(ParseException e) {
+                    if(e==null){
+                        Intent intent = new Intent(MainActivity.this, DispatchActivity.class);
+                        startActivity(intent);
+                    }else{
+                        String title = "Failed of Log Out";
+                        String msg = e.getMessage();
+                        showOkDialog(MainActivity.this,title,msg);
+                        MyLog.e("MainActivity", "action_logoff: " + msg);
+                    }
+                }
+            });
             return true;
 
             // TODO: Remove action_test_data menu item
         }
 //        else if (id == R.id.action_test_data) {
 //
-//            Intent intent = new Intent(this, ListThemeActivity.class);
-//            Bundle bundle = new Bundle();
-//            bundle.putString(MySettings.ARG_LIST_TITLE_ID, mActiveListTitle.getLocalUuid());
-//            intent.putExtras(bundle);
+//            Intent intent = new Intent(this, TestDataActivity.class);
 //            startActivity(intent);
 //
 //            return true;

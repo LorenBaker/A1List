@@ -59,7 +59,6 @@ public class ListItemsArrayAdapter extends ArrayAdapter<ListItem> implements Swa
 
     @Override
     public long getItemId(int position) {
-        // TODO: Add item ids to data tables
         ListItem listItem = getItem(position);
         return  listItem.getItemID();
     }

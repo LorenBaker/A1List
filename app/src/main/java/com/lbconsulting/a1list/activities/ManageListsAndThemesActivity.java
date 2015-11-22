@@ -30,6 +30,7 @@ import com.lbconsulting.a1list.classes.MySettings;
 import com.lbconsulting.a1list.database.ListAttributes;
 import com.lbconsulting.a1list.database.ListItem;
 import com.lbconsulting.a1list.database.ListTitle;
+import com.lbconsulting.a1list.dialogs.dialogEditListAttributesName;
 import com.lbconsulting.a1list.dialogs.dialogEditListTitle;
 import com.lbconsulting.a1list.dialogs.dialogListTitleSorting;
 import com.lbconsulting.a1list.dialogs.dialogNewListTitle;
@@ -134,7 +135,7 @@ public class ManageListsAndThemesActivity extends AppCompatActivity {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                         TextView tv = (TextView) view.findViewById(R.id.tvItemName);
-                        ListTitle listTitle = (ListTitle)tv.getTag();
+                        ListTitle listTitle = (ListTitle) tv.getTag();
                         FragmentManager fm = getFragmentManager();
                         dialogEditListTitle dialog = dialogEditListTitle.newInstance(listTitle.getLocalUuid());
                         dialog.show(fm, "dialogEditListTitle");
@@ -164,7 +165,10 @@ public class ManageListsAndThemesActivity extends AppCompatActivity {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                         TextView tv = (TextView) view.findViewById(R.id.tvItemName);
-                        Toast.makeText(ManageListsAndThemesActivity.this, "Selected Theme: " + tv.getText().toString(), Toast.LENGTH_SHORT).show();
+                        ListAttributes attributes = (ListAttributes) tv.getTag();
+                        FragmentManager fm = getFragmentManager();
+                        dialogEditListAttributesName dialog = dialogEditListAttributesName.newInstance(attributes.getLocalUuid());
+                        dialog.show(fm, "dialogEditListAttributesName");
                     }
                 });
                 break;

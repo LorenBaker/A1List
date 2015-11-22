@@ -47,12 +47,18 @@
         android:title="@string/action_refresh_title"
         app:showAsAction="never" />
 
-
     <item
-        android:id="@+id/action_settings"
-        android:orderInCategory="200"
-        android:title="@string/action_settings"
+        android:id="@+id/action_logoff"
+        android:orderInCategory="140"
+        android:title="@string/action_logoff_title"
         app:showAsAction="never" />
+
+
+    <!--<item-->
+        <!--android:id="@+id/action_settings"-->
+        <!--android:orderInCategory="200"-->
+        <!--android:title="@string/action_settings"-->
+        <!--app:showAsAction="never" />-->
 
     <!--<item android:id="@+id/action_test_data"-->
         <!--android:orderInCategory="1000"-->

@@ -3,7 +3,6 @@ package com.lbconsulting.a1list.database;
 import android.graphics.drawable.GradientDrawable;
 
 import com.lbconsulting.a1list.classes.CommonMethods;
-import com.lbconsulting.a1list.classes.MyEvents;
 import com.lbconsulting.a1list.classes.MyLog;
 import com.lbconsulting.a1list.classes.MySettings;
 import com.parse.ParseClassName;
@@ -16,8 +15,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
-
-import de.greenrobot.event.EventBus;
 
 /**
  * Parse object for an A1List Attributes.
@@ -361,7 +358,7 @@ public class ListAttributes extends ParseObject {
 //            EventBus.getDefault().post(new MyEvents.showOkDialog(title, msg));
 //
 //        } else {
-//            String existingAttributesID = getExistingAttributesID(attributesProposedName);
+//            String existingAttributesID = getExistingAttributes(attributesProposedName);
 //            if (existingAttributesID != null) {
 //                // Found uuid for the proposed attributes name ...
 //                // check if the uuid is the same a the provided mAttributes' uuid
@@ -383,8 +380,8 @@ public class ListAttributes extends ParseObject {
 
         boolean isValidName = false;
         if (!attributesProposedName.isEmpty()) {
-            String existingAttributesID = getExistingAttributesID(attributesProposedName);
-            if (existingAttributesID == null) {
+            ListAttributes existingAttributes = getExistingAttributes(attributesProposedName);
+            if (existingAttributes == null) {
                 isValidName = true;
             }
         }
@@ -392,21 +389,37 @@ public class ListAttributes extends ParseObject {
         return isValidName;
     }
 
-    private static String getExistingAttributesID(String proposedAttributesName) {
+    public static boolean isValidAttributesName(ListAttributes originalAttributes, String attributesProposedName) {
+
+        boolean isValidName = false;
+        if (!attributesProposedName.isEmpty()) {
+            ListAttributes existingAttributes = getExistingAttributes(attributesProposedName);
+            if (existingAttributes == null) {
+                isValidName = true;
+            } else {
+                // found existing attributes ... now see if it is the same object
+                if (existingAttributes.getLocalUuid().equals(originalAttributes.getLocalUuid())) {
+                    // both the original and existing attributes are the same Parse Object
+                    isValidName=true;
+                }
+            }
+        }
+
+        return isValidName;
+    }
+
+    private static ListAttributes getExistingAttributes(String proposedAttributesName) {
         // The ListItem exist if its lowercase name is in the datastore, AND
         // it is not marked for deletion
 
-        String existingAttributesID = null;
+        ListAttributes attributes = null;
 
         try {
             ParseQuery<ListAttributes> query = getQuery();
             query.whereEqualTo(NAME_LOWERCASE, proposedAttributesName.trim().toLowerCase());
             query.whereEqualTo(IS_MARKED_FOR_DELETION, false);
             query.fromLocalDatastore();
-            ListAttributes attributes = query.getFirst();
-            if (attributes != null) {
-                existingAttributesID = attributes.getLocalUuid();
-            }
+            attributes = query.getFirst();
 
         } catch (ParseException e) {
 
@@ -415,7 +428,7 @@ public class ListAttributes extends ParseObject {
             }
         }
 
-        return existingAttributesID;
+        return attributes;
     }
 
 //    public static  ListAttributes copyLocalListAttributes(ListAttributes sourceAttributes, ListAttributes targetAttributes) {

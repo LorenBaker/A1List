@@ -31,7 +31,7 @@ import com.lbconsulting.a1list.database.ListItem;
 import com.lbconsulting.a1list.database.ListTitle;
 import com.lbconsulting.a1list.database.LocalListAttributes;
 import com.lbconsulting.a1list.dialogs.dialogColorPicker;
-import com.lbconsulting.a1list.dialogs.dialogEditListAttributesName;
+import com.lbconsulting.a1list.dialogs.dialogEditLocalListAttributesName;
 import com.lbconsulting.a1list.dialogs.dialogNumberPicker;
 import com.lbconsulting.a1list.dialogs.dialogSelectTheme;
 import com.parse.ParseException;
@@ -366,9 +366,9 @@ public class ListThemeActivity extends AppCompatActivity implements View.OnClick
         switch (v.getId()) {
 
             case R.id.btnAttributesName:
-                dialogEditListAttributesName editListAttributesNameDialog
-                        = dialogEditListAttributesName.newInstance();
-                editListAttributesNameDialog.show(fm, "dialogEditListAttributesName");
+                dialogEditLocalListAttributesName editListAttributesNameDialog
+                        = dialogEditLocalListAttributesName.newInstance();
+                editListAttributesNameDialog.show(fm, "dialogEditLocalListAttributesName");
                 break;
 
             case R.id.ckIsDefaultAttributes:
