@@ -11,8 +11,10 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -23,7 +25,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.RelativeLayout;
-import android.widget.Toast;
 
 import com.lbconsulting.a1list.R;
 import com.lbconsulting.a1list.classes.CommonMethods;
@@ -62,6 +63,7 @@ public class MainActivity extends AppCompatActivity
     private boolean mRefreshDataFromTheCloud;
 
     private RelativeLayout mFragmentContainer;
+    private static CoordinatorLayout mSnackBarView;
 
     private static ListTitle mActiveListTitle;
 
@@ -104,7 +106,7 @@ public class MainActivity extends AppCompatActivity
         });
 
         mFragmentContainer = (RelativeLayout) findViewById(R.id.rlActivityMain);
-
+        mSnackBarView = (CoordinatorLayout) findViewById(R.id.snackbarPosition);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -161,6 +163,12 @@ public class MainActivity extends AppCompatActivity
         alertDialog.show();
     }
 
+    private static void showSnackBar(String message) {
+        Snackbar
+                .make(mSnackBarView, message, Snackbar.LENGTH_LONG)
+                .show();
+    }
+
     public void onEvent(MyEvents.setFragmentContainerBackground event) {
         setFragmentContainerBackground(event.getStartColor(), event.getEndColor());
     }
@@ -207,9 +215,9 @@ public class MainActivity extends AppCompatActivity
             MyLog.i("MainActivity", "onResume: User email verified -- startA1List.");
             startA1List(mRefreshDataFromTheCloud);
 
-        } else if (getIsUserEmailVerified() ) {
+        } else if (getIsUserEmailVerified()) {
             MyLog.i("MainActivity", "onResume: User email has become verified -- startA1List.");
-            if(CommonMethods.isNetworkAvailable()) {
+            if (CommonMethods.isNetworkAvailable()) {
                 MySettings.setIsUserEmailVerified(true);
                 MySettings.setIsUserInitialized(true);
             }
@@ -273,12 +281,13 @@ public class MainActivity extends AppCompatActivity
                 }
 
                 mToolbar.setTitle("Please Create A List");
-                if (!MySettings.getCreateAListDialogShown() && ParseUser.getCurrentUser().isNew()) {
-                    String title = "";
-                    String msg = "Please create a list by selecting \"New List\" from the dropdown menu.";
-                    MySettings.setCreateAListDialogShown(true);
-                    showOkDialog(this, title, msg);
-                }
+                String msg = "Please create a list by selecting \"New List\" from the dropdown menu.";
+                showSnackBar(msg);
+//                if (!MySettings.getCreateAListDialogShown() && ParseUser.getCurrentUser().isNew()) {
+//                    String title = "";
+//                    MySettings.setCreateAListDialogShown(true);
+//                    showOkDialog(this, title, msg);
+//                }
 
             }
         } else {
@@ -302,9 +311,8 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void requestEmailBeVerified() {
+        String requestEmailBeVerificationMsg = getString(R.string.requestEmailBeVerifiedMessage);
         String title = "Please Confirm Email Address";
-        String requestEmailBeVerificationMsg = "Please see the email from no-reply@lbconsulting.a1list.com to confirm your email address. "
-                + "Please confirm it as soon as practical.\n\nIf your email address is not confirmed within seven days of A1List's installation A1List will stop working.";
         showOkDialog(this, title, requestEmailBeVerificationMsg);
     }
 
@@ -387,8 +395,8 @@ public class MainActivity extends AppCompatActivity
                                         long endTime = System.currentTimeMillis();
                                         long duration = endTime - startTime;
                                         ParseUser user = ParseUser.getCurrentUser();
-                                        String successMsg = user.getUsername() + " successfully initialized.\n\n"
-                                                + numberOfAttributes + " list color themes have been created in your cloud account.\n\n"
+                                        String successMsg = user.get("name")  + ", your A1List account was successfully initialized.\n\n"
+                                                + "Start by selecting \"New List\" from the dropdown menu.\n\n"
                                                 + "Shortly you'll receive an email from no-reply@lbconsulting.a1list.com asking you to confirm your email address. "
                                                 + "Please confirm it as soon as practical.";
 
@@ -396,7 +404,7 @@ public class MainActivity extends AppCompatActivity
                                                 + numberOfAttributes + " Attributes created in Parse cloud. Duration = "
                                                 + NumberFormat.getNumberInstance(Locale.US).format(duration) + " milliseconds.";
                                         MyLog.i("MainActivity", successLog);
-                                        String title = "Welcome to A1List";
+                                        String title = "Welcome " + user.get("name") + " to A1List";
                                         showOkDialog(context, title, successMsg);
                                     }
                                 });
@@ -538,13 +546,13 @@ public class MainActivity extends AppCompatActivity
             ParseUser.logOutInBackground(new LogOutCallback() {
                 @Override
                 public void done(ParseException e) {
-                    if(e==null){
+                    if (e == null) {
                         Intent intent = new Intent(MainActivity.this, DispatchActivity.class);
                         startActivity(intent);
-                    }else{
+                    } else {
                         String title = "Failed of Log Out";
                         String msg = e.getMessage();
-                        showOkDialog(MainActivity.this,title,msg);
+                        showOkDialog(MainActivity.this, title, msg);
                         MyLog.e("MainActivity", "action_logoff: " + msg);
                     }
                 }

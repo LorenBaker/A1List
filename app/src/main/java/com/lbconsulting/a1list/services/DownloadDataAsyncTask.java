@@ -38,6 +38,7 @@ public class DownloadDataAsyncTask extends AsyncTask<Void, Void, Void> {
     private List<ListItem> mListItems;
 
     private final Context mContext;
+    private boolean mRestartA1List;
 
     public DownloadDataAsyncTask(Context context) {
         this.mContext = context;
@@ -47,6 +48,7 @@ public class DownloadDataAsyncTask extends AsyncTask<Void, Void, Void> {
     protected void onPreExecute() {
         MyLog.i("DownloadDataAsyncTask", "onPreExecute");
         showDownLoadNotification();
+        mRestartA1List = true;
     }
 
     @Override
@@ -67,7 +69,9 @@ public class DownloadDataAsyncTask extends AsyncTask<Void, Void, Void> {
         MyLog.i("DownloadDataAsyncTask", "onPostExecute");
         cancelDownLoadNotification();
         EventBus.getDefault().post(new MyEvents.updateListUI());
-        EventBus.getDefault().post(new MyEvents.startA1List(false));
+        if(mRestartA1List) {
+            EventBus.getDefault().post(new MyEvents.startA1List(false));
+        }
         super.onPostExecute(aVoid);
     }
 
@@ -87,7 +91,7 @@ public class DownloadDataAsyncTask extends AsyncTask<Void, Void, Void> {
         id++;
         MySettings.setNextListItemID(id);
 
-        id=0;
+        id = 0;
         for (ListTitle item : mListTitles) {
             if (item.getListID() > id) {
                 id = item.getListID();
@@ -96,7 +100,7 @@ public class DownloadDataAsyncTask extends AsyncTask<Void, Void, Void> {
         id++;
         MySettings.setNextListTitleID(id);
 
-        id=0;
+        id = 0;
         for (ListAttributes item : mAttributes) {
             if (item.getAttributesID() > id) {
                 id = item.getAttributesID();
@@ -115,6 +119,7 @@ public class DownloadDataAsyncTask extends AsyncTask<Void, Void, Void> {
     private void pinNewData() {
         try {
             if (mAttributes != null && mAttributes.size() > 0) {
+
                 ParseObject.pinAll(mAttributes);
                 MyLog.i("DownloadDataAsyncTask", "pinNewData: " + mAttributes.size() + " Attributes.");
             }
@@ -122,6 +127,8 @@ public class DownloadDataAsyncTask extends AsyncTask<Void, Void, Void> {
             if (mListTitles != null && mListTitles.size() > 0) {
                 ParseObject.pinAll(mListTitles);
                 MyLog.i("DownloadDataAsyncTask", "pinNewData: " + mListTitles.size() + " ListTitles.");
+            } else {
+                mRestartA1List = false;
             }
 
             if (mListItems != null && mListItems.size() > 0) {

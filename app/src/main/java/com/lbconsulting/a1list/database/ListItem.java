@@ -102,6 +102,7 @@ public class ListItem extends ParseObject {
             item.setAttributes(newAttributes);
         }
     }
+
     public boolean isStruckOut() {
         return getBoolean(IS_STRUCK_OUT);
     }
@@ -312,14 +313,16 @@ public class ListItem extends ParseObject {
         }
     }
 
-    public static boolean itemExists(String proposedItemName) {
-        // The ListItem exist if its lowercase name is in the datastore, AND
-        // it is not marked for deletion
+    public static boolean itemExists(ListTitle listTitle, String proposedItemName) {
+        // The ListItem exist if
+        // its lowercase name is in the datastore of the provided list
+        // AND it is not marked for deletion
 
         boolean result = false;
         try {
             ParseQuery<ListItem> query = getQuery();
             query.whereEqualTo(NAME_LOWERCASE, proposedItemName.trim().toLowerCase());
+            query.whereEqualTo(LIST_TITLE, listTitle);
             query.whereEqualTo(IS_MARKED_FOR_DELETION, false);
             query.fromLocalDatastore();
             ListItem listItem = query.getFirst();

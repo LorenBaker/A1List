@@ -119,7 +119,7 @@ public class dialogNewListItem extends DialogFragment {
             String errorMsg = "The Item's name cannot be empty.\nPlease enter a unique Item name.";
             txtName_input_layout.setError(errorMsg);
 
-        } else if (ListItem.itemExists(newItemName)) {
+        } else if (ListItem.itemExists(mListTitle, newItemName)) {
 
             String errorMsg = "Item \"" + newItemName
                     + "\" already exists.\nPlease enter a unique Item name.";

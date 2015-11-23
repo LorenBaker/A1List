@@ -15,7 +15,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:text="Cancel"
+        android:text="\nCancel"
         android:textSize="17sp" />
 
     <Button
@@ -24,7 +24,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:text="New"
+        android:text="New Theme"
         android:textSize="17sp" />
 
     <Button
@@ -33,7 +33,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:text="Save"
+        android:text="Apply Changes"
         android:textSize="17sp" />
 
 </LinearLayout>

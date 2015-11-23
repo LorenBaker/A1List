@@ -2,11 +2,11 @@
     <string name="app_name">A1List</string>
 
     <string name="action_deleteStrikeouts_title">Delete Strikeouts</string>
-    <string name="action_editListTheme_title">List Theme</string>
+    <string name="action_editListTheme_title">Change List Theme</string>
     <string name="action_listSorting_title">List Item Sorting</string>
     <string name="action_listTitleSorting_title">List Title Sorting</string>
     <string name="action_manageLists_title">Manage Lists</string>
-    <string name="action_manageThemes_title">Manage Themes</string>
+    <string name="action_manageThemes_title">Delete Themes</string>
     <string name="action_newList_title">New List</string>
     <string name="action_refresh_title">Refresh</string>
     <string name="action_settings">Settings</string>
@@ -29,5 +29,6 @@
     <string name="title_activity_test2">activity_test2</string>
     <string name="title_activity_manage_lists_and_themes">ManageListsAndThemesActivity</string>
     <string name="action_logoff_title">Logoff</string>
+    <string name="requestEmailBeVerifiedMessage">Please see the email from no-reply@lbconsulting.a1list.com to confirm your email address. Please confirm it as soon as practical.\n\nIf your email address is not confirmed within seven days of A1List\'s installation A1List will stop working.</string>
 
 </resources>
