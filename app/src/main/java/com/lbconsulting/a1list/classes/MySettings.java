@@ -14,34 +14,29 @@ import java.util.Date;
  */
 public class MySettings {
 
-    private static Context mContext;
-    private static SharedPreferences mPreferences;
     public static final String NOT_AVAILABLE = "N/A";
-
     public static final int END_COLOR_PICKER = 1;
     public static final int START_COLOR_PICKER = 2;
     public static final int TEXT_COLOR_PICKER = 3;
-
     public static final int TEXT_SIZE_PICKER = 10;
     public static final int HORIZONTAL_PADDING_PICKER = 20;
     public static final int VERTICAL_PADDING_PICKER = 30;
 
     public static final String ARG_LIST_TITLE_ID = "listTitleID";
 
-    public static final String SETTING_ACTIVE_LIST_TITLE_UUID = "activeListTitleUuid";
-    public static final String SETTING_ALPHABETICALLY_SORT_NAVIGATION_MENU = "alphabeticallySortNavigationMenu";
-    public static final String SETTING_IS_USER_INITIALIZED = "isUserInitialized";
-    public static final String SETTING_IS_USER_EMAIL_VERIFIED = "isEmailVerified";
-    public static final String SETTING_DEFAULT_ATTRIBUTES_ID = "defaultAttributesID";
-    public static final String SETTING_NEXT_LIST_ATTRIBUTES_ID = "nextListAttributesID";
-    public static final String SETTING_NEXT_LIST_ITEM_ID = "nextListItemID";
-    public static final String SETTING_NEXT_LIST_TITLE_ID = "nextListTitleID";
-    public static final String SETTING_CREATE_A_LIST_DIALOG_SHOWN = "pleaseCreateAListDialogShown";
-    public static final String SETTING_REFRESH_DATA_FROM_THE_CLOUD = "refreshDataFromTheCloud";
+    private static final String SETTING_ACTIVE_LIST_TITLE_UUID = "activeListTitleUuid";
+    private static final String SETTING_ALPHABETICALLY_SORT_NAVIGATION_MENU = "alphabeticallySortNavigationMenu";
+    private static final String SETTING_DEFAULT_ATTRIBUTES_ID = "defaultAttributesID";
+    private static final String SETTING_IS_USER_EMAIL_VERIFIED = "isEmailVerified";
+    private static final String SETTING_IS_USER_INITIALIZED = "isUserInitialized";
+    private static final String SETTING_NEXT_LIST_ATTRIBUTES_ID = "nextListAttributesID";
+    private static final String SETTING_NEXT_LIST_ITEM_ID = "nextListItemID";
+    private static final String SETTING_NEXT_LIST_TITLE_ID = "nextListTitleID";
+    private static final String SETTING_REFRESH_DATA_FROM_THE_CLOUD = "refreshDataFromTheCloud";
 
+    private static SharedPreferences mPreferences;
 
     public static void setContext(Context context) {
-        mContext = context;
         mPreferences = PreferenceManager.getDefaultSharedPreferences(context);
     }
 
@@ -70,12 +65,11 @@ public class MySettings {
     //endregion
 
     //region SETTING_APP_INITIALIZATION_DATE
-    public static Calendar getAppInitializationDatePlus7Days() {
+    private static Calendar getAppInitializationDatePlus7Days() {
         Date createdAt = ParseUser.getCurrentUser().getCreatedAt();
         Calendar appInitializationDatePlus7Days = Calendar.getInstance();
         appInitializationDatePlus7Days.setTimeInMillis(createdAt.getTime());
         appInitializationDatePlus7Days.add(Calendar.DATE, 7);
-//        appInitializationDatePlus7Days.add(Calendar.MINUTE, 1);
         return appInitializationDatePlus7Days;
     }
 
@@ -90,19 +84,6 @@ public class MySettings {
             result = false;
         }
         return result;
-    }
-    //endregion
-
-    //region SETTING_CREATE_A_LIST_DIALOG_SHOWN
-
-    public static boolean getCreateAListDialogShown() {
-        return mPreferences.getBoolean(SETTING_CREATE_A_LIST_DIALOG_SHOWN, false);
-    }
-
-    public static void setCreateAListDialogShown(boolean createAListDialogShown) {
-        SharedPreferences.Editor editor = mPreferences.edit();
-        editor.putBoolean(SETTING_CREATE_A_LIST_DIALOG_SHOWN, createAListDialogShown);
-        editor.apply();
     }
     //endregion
 

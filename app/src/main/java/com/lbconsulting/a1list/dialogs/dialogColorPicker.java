@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -28,8 +29,6 @@ public class dialogColorPicker extends DialogFragment {
     private static final String ARG_COLOR_PICKER_ID = "argColorPickerID";
     private static final String ARG_STARTING_COLOR = "argStartingColor";
 
-    private GradientView mTop;
-    private GradientView mBottom;
     private TextView mTextView;
     private Drawable mIcon;
 
@@ -63,9 +62,7 @@ public class dialogColorPicker extends DialogFragment {
             mColorPickerId = args.getInt(ARG_COLOR_PICKER_ID);
             mStartingColor = args.getInt(ARG_STARTING_COLOR);
         } else {
-            String okDialogTitle = "Error Getting Color Picker";
             String msg = "Fragment arguments do not contain Color Picker ID = " + ARG_COLOR_PICKER_ID + "!";
-            EventBus.getDefault().post(new MyEvents.showOkDialog(okDialogTitle, msg));
             MyLog.e("dialogColorPicker", "onCreate: " + msg);
         }
     }
@@ -123,39 +120,39 @@ public class dialogColorPicker extends DialogFragment {
         View view = inflater.inflate(R.layout.dialog_color_picker, null, false);
 
         // find the dialog's views
-        mIcon = getResources().getDrawable(R.drawable.andy_the_robot, null);
+        mIcon = ContextCompat.getDrawable(getActivity(), R.drawable.andy_the_robot);
         mTextView = (TextView) view.findViewById(R.id.color);
         mTextView.setCompoundDrawablesWithIntrinsicBounds(mIcon, null, null, null);
-        mTop = (GradientView) view.findViewById(R.id.top);
-        mBottom = (GradientView) view.findViewById(R.id.bottom);
+        GradientView mTop = (GradientView) view.findViewById(R.id.top);
+        GradientView mBottom = (GradientView) view.findViewById(R.id.bottom);
         mTop.setBrightnessGradientView(mBottom);
         mBottom.setOnColorChangedListener(new GradientView.OnColorChangedListener() {
             @Override
             public void onColorChanged(GradientView view, int color) {
                 mSelectedColor = color;
                 mTextView.setTextColor(color);
-                mTextView.setText("#" + Integer.toHexString(color));
+                mTextView.setText(String.format(getActivity().getString(R.string.onColorChanged),
+                        Integer.toHexString(color)));
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     mIcon.setTint(color);
                 }
             }
         });
 
-//        int color = 0xFF394572;
         mTop.setColor(mStartingColor);
 
         String title = "";
         switch (mColorPickerId) {
             case MySettings.TEXT_COLOR_PICKER:
-                title = "Select Text Color";
+                title = getActivity().getString(R.string.colorPicker_textColor_title);
                 break;
 
             case MySettings.START_COLOR_PICKER:
-                title = "Select Gradient Start Color";
+                title = getActivity().getString(R.string.colorPicker_startColor_title);
                 break;
 
             case MySettings.END_COLOR_PICKER:
-                title = "Select Gradient End Color";
+                title = getActivity().getString(R.string.colorPicker_endColor_title);
                 break;
         }
 
@@ -163,8 +160,8 @@ public class dialogColorPicker extends DialogFragment {
         mDialog = new AlertDialog.Builder(getActivity())
                 .setTitle(title)
                 .setView(view)
-                .setPositiveButton("Select", null)
-                .setNegativeButton("Cancel", null)
+                .setPositiveButton(R.string.btnSelect_title, null)
+                .setNegativeButton(R.string.btnCancel_title, null)
                 .create();
 
         return mDialog;

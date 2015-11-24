@@ -28,16 +28,14 @@ import de.greenrobot.event.EventBus;
  */
 public class DownloadDataAsyncTask extends AsyncTask<Void, Void, Void> {
 
-    private static final int QUERY_LIMIT_ATTRIBUTES = 50;
-    private static final int QUERY_LIMIT_LIST_TITLES = 100;
-    private static final int QUERY_LIMIT_LIST_ITEMS = 2000;
+    public static final int QUERY_LIMIT_ATTRIBUTES = 50;
+    public static final int QUERY_LIMIT_LIST_TITLES = 100;
+    public static final int QUERY_LIMIT_LIST_ITEMS = 2000;
     private static final int NOTIFICATION_DOWNLOAD_ID = 33;
-
+    private final Context mContext;
     private List<ListAttributes> mAttributes;
     private List<ListTitle> mListTitles;
     private List<ListItem> mListItems;
-
-    private final Context mContext;
     private boolean mRestartA1List;
 
     public DownloadDataAsyncTask(Context context) {
@@ -69,7 +67,7 @@ public class DownloadDataAsyncTask extends AsyncTask<Void, Void, Void> {
         MyLog.i("DownloadDataAsyncTask", "onPostExecute");
         cancelDownLoadNotification();
         EventBus.getDefault().post(new MyEvents.updateListUI());
-        if(mRestartA1List) {
+        if (mRestartA1List) {
             EventBus.getDefault().post(new MyEvents.startA1List(false));
         }
         super.onPostExecute(aVoid);
@@ -201,8 +199,6 @@ public class DownloadDataAsyncTask extends AsyncTask<Void, Void, Void> {
         notificationBuilder.setTicker(mContext.getString(R.string.notification_download_ticker));
         notificationManager
                 .notify(NOTIFICATION_DOWNLOAD_ID, notificationBuilder.build());
-
-//        mDownloadNotificationShowing = true;
     }
 
     private void cancelDownLoadNotification() {
@@ -219,6 +215,5 @@ public class DownloadDataAsyncTask extends AsyncTask<Void, Void, Void> {
         notificationBuilder.setSmallIcon(android.R.drawable.stat_sys_download);
         notificationBuilder.setTicker(mContext.getString(R.string.notification_download_ticker));
         notificationManager.cancelAll();
-//        mDownloadNotificationShowing = false;
     }
 }

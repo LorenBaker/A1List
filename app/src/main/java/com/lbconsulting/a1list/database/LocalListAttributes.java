@@ -24,8 +24,6 @@ public class LocalListAttributes {
     private int textColor;
     private int verticalPaddingInDp;
     private String name;
-//    private String nameLowercase;
-
 
     public LocalListAttributes() {
 
@@ -105,12 +103,7 @@ public class LocalListAttributes {
 
     public void setName(String name) {
         this.name = name;
-//        this.nameLowercase = name.toLowerCase();
     }
-
-//    public String getNameLowercase() {
-//        return nameLowercase;
-//    }
 
     public int getStartColor() {
         return startColor;
@@ -148,6 +141,4 @@ public class LocalListAttributes {
         int colors[] = {getStartColor(), getEndColor()};
         return new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, colors);
     }
-
-
 }

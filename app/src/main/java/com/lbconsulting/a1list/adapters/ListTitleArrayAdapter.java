@@ -139,7 +139,7 @@ public class ListTitleArrayAdapter extends ArrayAdapter<ListTitle> implements Sw
 
     @Override
     public void swapItems(int positionOne, int positionTwo) {
-        if(MySettings.isAlphabeticallySortNavigationMenu()){
+        if (MySettings.isAlphabeticallySortNavigationMenu()) {
             return;
         }
         ListTitle itemOne = getItem(positionOne);

@@ -23,6 +23,7 @@ import android.widget.RadioGroup;
 
 import com.lbconsulting.a1list.R;
 import com.lbconsulting.a1list.adapters.ListItemsSampleArrayAdapter;
+import com.lbconsulting.a1list.classes.CommonMethods;
 import com.lbconsulting.a1list.classes.MyEvents;
 import com.lbconsulting.a1list.classes.MyLog;
 import com.lbconsulting.a1list.classes.MySettings;
@@ -42,18 +43,12 @@ import java.util.ArrayList;
 import de.greenrobot.event.EventBus;
 
 public class ListThemeActivity extends AppCompatActivity implements View.OnClickListener {
+    private static LocalListAttributes mLocalAttributes;
     private ListTitle mListTitle;
     private ListAttributes mOriginalAttributes;
-    private static LocalListAttributes mLocalAttributes;
-
-    public static LocalListAttributes getLocalAttributes() {
-        return mLocalAttributes;
-    }
-
     private LinearLayout llListTheme;
     private LinearLayout llContentListTheme;
     private LinearLayout llCancelNewSave;
-
     private Button btnAttributesName;
     private CheckBox ckIsDefaultAttributes;
     private RadioButton rbAlphabetical;
@@ -65,9 +60,12 @@ public class ListThemeActivity extends AppCompatActivity implements View.OnClick
     private CheckBox ckItemBackgroundTransparent;
     private Button btnHorizontalMargin;
     private Button btnVerticalMargin;
-
     private ListView lvSampleItems;
     private ListItemsSampleArrayAdapter mSampleArrayAdapter;
+
+    public static LocalListAttributes getLocalAttributes() {
+        return mLocalAttributes;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,23 +91,24 @@ public class ListThemeActivity extends AppCompatActivity implements View.OnClick
         Bundle args = getIntent().getExtras();
         String listTitleID = args.getString(MySettings.ARG_LIST_TITLE_ID);
         mListTitle = ListTitle.getListTitle(listTitleID);
-        String title = "Error creating ListThemeActivity";
         if (mListTitle != null) {
             if (mActionBar != null) {
-                mActionBar.setTitle(mListTitle.getName() + " Theme");
+                String actionBarTitle =
+                        String.format(getString(R.string.onCreate_listThemeActivity_actionBar_title),
+                                mListTitle.getName());
+                mActionBar.setTitle(actionBarTitle);
             }
             mOriginalAttributes = mListTitle.getAttributes();
             if (mOriginalAttributes != null) {
                 mLocalAttributes = ListAttributes.createLocalListAttributes(mOriginalAttributes);
             } else {
-                String msg = "List \"" + mListTitle.getName() + "\" does not contain attributes!";
-                EventBus.getDefault().post(new MyEvents.showOkDialog(title, msg));
+                String msg = String.format(getString(R.string.onCreate_creating_listThemeActivity_error_message), mListTitle.getName());
+                MyLog.e("ListThemeActivity", "onCreate: " + msg);
             }
         } else {
             String msg = "Unable to find ListTitle with uuid = " + listTitleID;
-            EventBus.getDefault().post(new MyEvents.showOkDialog(title, msg));
+            MyLog.e("ListThemeActivity", "onCreate: " + msg);
         }
-
         // get activity views
         llListTheme = (LinearLayout) findViewById(R.id.llListTheme);
         llContentListTheme = (LinearLayout) findViewById(R.id.llContentListTheme);
@@ -151,8 +150,8 @@ public class ListThemeActivity extends AppCompatActivity implements View.OnClick
 
         int count = 1;
         ArrayList<String> sampleList = new ArrayList<>();
-        String sampleName = "Sample Item ";
-        for (int i = 0; i < 10; i++) {
+        String sampleName = getString(R.string.onCreate_listThemeActivity_sampleitemName);
+        for (int i = 0; i < 5; i++) {
             if (count < 10) {
                 sampleList.add(sampleName + "0" + count);
             } else {
@@ -166,7 +165,7 @@ public class ListThemeActivity extends AppCompatActivity implements View.OnClick
         lvSampleItems.setAdapter(mSampleArrayAdapter);
         mSampleArrayAdapter.setData(sampleList);
 
-        upDateUI();
+        updateUI();
     }
 
     //region OnEvent
@@ -178,37 +177,37 @@ public class ListThemeActivity extends AppCompatActivity implements View.OnClick
     public void onEvent(MyEvents.setAttributesStartColor event) {
         mLocalAttributes.setStartColor(event.getColor());
         mSampleArrayAdapter.setAttributes(mLocalAttributes);
-        upDateUI();
+        updateUI();
     }
 
     public void onEvent(MyEvents.setAttributesEndColor event) {
         mLocalAttributes.setEndColor(event.getColor());
         mSampleArrayAdapter.setAttributes(mLocalAttributes);
-        upDateUI();
+        updateUI();
     }
 
     public void onEvent(MyEvents.setAttributesTextColor event) {
         mLocalAttributes.setTextColor(event.getColor());
         mSampleArrayAdapter.setAttributes(mLocalAttributes);
-        upDateUI();
+        updateUI();
     }
 
     public void onEvent(MyEvents.setAttributesTextSize event) {
         mLocalAttributes.setTextSize(event.getTextSize());
         mSampleArrayAdapter.setAttributes(mLocalAttributes);
-        upDateUI();
+        updateUI();
     }
 
     public void onEvent(MyEvents.setAttributesHorizontalPadding event) {
         mLocalAttributes.setHorizontalPaddingInDp(event.getHorizontalPadding());
         mSampleArrayAdapter.setAttributes(mLocalAttributes);
-        upDateUI();
+        updateUI();
     }
 
     public void onEvent(MyEvents.setAttributesVerticalPadding event) {
         mLocalAttributes.setVerticalPaddingInDp(event.getVerticalPadding());
         mSampleArrayAdapter.setAttributes(mLocalAttributes);
-        upDateUI();
+        updateUI();
     }
 
     public void onEvent(MyEvents.replaceAttributes event) {
@@ -217,40 +216,12 @@ public class ListThemeActivity extends AppCompatActivity implements View.OnClick
         mListTitle.setAttributes(attributes);
         ListItem.setNewAttributes(mListTitle, attributes);
         mSampleArrayAdapter.setAttributes(mLocalAttributes);
-        upDateUI();
+        updateUI();
     }
 
     //endregion
 
-    private static void showOkDialog(Context context, String title, String message) {
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
-        // set dialog title and message
-        alertDialogBuilder
-                .setTitle(title)
-                .setMessage(message)
-                .setCancelable(false)
-                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        dialog.cancel();
-                    }
-                });
-
-        // create alert dialog
-        final AlertDialog alertDialog = alertDialogBuilder.create();
-        alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
-            @Override
-            public void onShow(DialogInterface dialog) {
-                Button btnOK = alertDialog.getButton(Dialog.BUTTON_POSITIVE);
-                btnOK.setTextSize(18);
-            }
-        });
-
-        // show it
-        alertDialog.show();
-    }
-
-
-    private void upDateUI() {
+    private void updateUI() {
         // set the background drawable
         Resources res = getResources();
         llListTheme.setBackground(mLocalAttributes.getBackgroundDrawable());
@@ -336,14 +307,11 @@ public class ListThemeActivity extends AppCompatActivity implements View.OnClick
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-
         if (id == R.id.action_show_themes) {
             FragmentManager fm = getFragmentManager();
             dialogSelectTheme dialog = dialogSelectTheme.newInstance();
             dialog.show(fm, "dialogSelectTheme");
             return true;
-
         }
         return super.onOptionsItemSelected(item);
     }
@@ -354,7 +322,6 @@ public class ListThemeActivity extends AppCompatActivity implements View.OnClick
         super.onDestroy();
         MyLog.i("ListThemeActivity", "onDestroy");
         EventBus.getDefault().unregister(this);
-
     }
 
 
@@ -407,13 +374,13 @@ public class ListThemeActivity extends AppCompatActivity implements View.OnClick
             case R.id.btnTextStyle:
                 mLocalAttributes.toggleTextStyle();
                 mSampleArrayAdapter.setAttributes(mLocalAttributes);
-                upDateUI();
+                updateUI();
                 break;
 
             case R.id.ckItemBackgroundTransparent:
                 mLocalAttributes.setIsTransparent(ckItemBackgroundTransparent.isChecked());
                 mSampleArrayAdapter.setAttributes(mLocalAttributes);
-                upDateUI();
+                updateUI();
                 break;
 
             case R.id.btnHorizontalMargin:
@@ -458,7 +425,6 @@ public class ListThemeActivity extends AppCompatActivity implements View.OnClick
                     // make sure that no other attributes are set as default.
                     ListAttributes.clearAllDefaultAttributes();
                 }
-
                 ListAttributes newAttributes = new ListAttributes();
                 newAttributes.setLocalUuid();
                 newAttributes.setAttributesID();
@@ -473,9 +439,9 @@ public class ListThemeActivity extends AppCompatActivity implements View.OnClick
                 MyLog.e("ListThemeActivity", "createNewAttributes: ParseException: " + e.getMessage());
             }
         } else {
-            String title = "Failed to Create New Theme";
-            String msg = "Theme \"" + mLocalAttributes.getName() + "\" already exists.\n\nPlease enter a unique theme name.";
-            showOkDialog(this, title, msg);
+            String title = getString(R.string.failedToCreateNewTheme_title);
+            String msg = String.format(getString(R.string.failedToCreateNewTheme_message), mLocalAttributes.getName());
+            CommonMethods.showOkDialog(this, title, msg);
         }
         return attributesCreated;
     }
@@ -487,10 +453,8 @@ public class ListThemeActivity extends AppCompatActivity implements View.OnClick
             ListAttributes.clearAllDefaultAttributes();
         }
         ListAttributes attributes = mListTitle.getAttributes();
-
         attributes = ListAttributes.copyLocalListAttributes(mLocalAttributes, attributes);
         attributes.setAttributesDirty(true);
-
     }
 }
 

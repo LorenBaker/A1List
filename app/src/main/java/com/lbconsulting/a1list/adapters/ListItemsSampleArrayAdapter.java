@@ -29,13 +29,11 @@ public class ListItemsSampleArrayAdapter extends ArrayAdapter<String> {
     private final ListView mListView;
     private final String mListName;
     private LocalListAttributes mAttributes;
-//    private ListTitle mListTitle;
 
     public ListItemsSampleArrayAdapter(Context context, ListView listView, LocalListAttributes attributes, String listName) {
         super(context, 0);
         this.mContext = context;
         this.mListView = listView;
-//        this.mListTitle = listTitle;
         this.mListName = listName;
         this.mAttributes = attributes;
         MyLog.i("ListItemsSampleArrayAdapter", "Initialized for List: " + mListName);
@@ -55,7 +53,6 @@ public class ListItemsSampleArrayAdapter extends ArrayAdapter<String> {
     public void setAttributes(LocalListAttributes attributes) {
         mAttributes = attributes;
     }
-
 
 
     @Override
@@ -93,7 +90,7 @@ public class ListItemsSampleArrayAdapter extends ArrayAdapter<String> {
 
             if (mAttributes.isBold()) {
                 holder.tvListItemName.setTypeface(null, Typeface.BOLD);
-            }else{
+            } else {
                 holder.tvListItemName.setTypeface(null, Typeface.NORMAL);
             }
         }

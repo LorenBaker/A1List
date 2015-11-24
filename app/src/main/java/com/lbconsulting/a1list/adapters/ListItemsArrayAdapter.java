@@ -140,25 +140,6 @@ public class ListItemsArrayAdapter extends ArrayAdapter<ListItem> implements Swa
         // save the item so it can be retrieved later
         holder.tvListItemName.setTag(item);
 
-/*        holder.tvListItemName.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                TextView tv = (TextView) v;
-                final ListItem clickedItem = (ListItem) v.getTag();
-
-                // toggle the item's struckOut attribute
-                clickedItem.toggleStrikeout();
-                clickedItem.setListItemDirty(true);
-
-                // set the TextView's attributes to either strikeout or normal as appropriate
-                if (clickedItem.isStruckOut()) {
-                    setStrikeOut(tv);
-                } else {
-                    setNoStrikeOut(tv);
-                }
-            }
-        });*/
-
         // Return the completed view to render on screen
         return convertView;
     }
@@ -167,7 +148,6 @@ public class ListItemsArrayAdapter extends ArrayAdapter<ListItem> implements Swa
         final ListItem clickedItem = getItem(position);
         // toggle the item's struckOut attribute
         clickedItem.toggleStrikeout();
-//        clickedItem.setListItemDirty(true);
 
         // set the TextView's attributes to either strikeout or normal as appropriate
         if (clickedItem.isStruckOut()) {
@@ -201,8 +181,6 @@ public class ListItemsArrayAdapter extends ArrayAdapter<ListItem> implements Swa
         MyLog.i("ListItemsArrayAdapter", "notifyDataSetChanged for List: " + mListName);
     }
 
-
-
     @Override
     public void swapItems(int positionOne, int positionTwo) {
         if(mListTitle.sortListItemsAlphabetically()){
@@ -217,12 +195,7 @@ public class ListItemsArrayAdapter extends ArrayAdapter<ListItem> implements Swa
         itemOne.setListItemManualSortKey(origItemTwoSortKey);
         itemTwo.setListItemManualSortKey(origItemOneSortKey);
 
-//        itemOne.setListItemDirty(true);
-//        itemTwo.setListItemDirty(true);
-
         EventBus.getDefault().post(new MyEvents.updateListUI());
-
-
     }
 
     private class ListItemViewHolder {

@@ -60,21 +60,32 @@ import de.greenrobot.event.EventBus;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    private boolean mRefreshDataFromTheCloud;
-
-    private RelativeLayout mFragmentContainer;
     private static CoordinatorLayout mSnackBarView;
-
     private static ListTitle mActiveListTitle;
+    private static Toolbar mToolbar;
+    private boolean mRefreshDataFromTheCloud;
+    private RelativeLayout mFragmentContainer;
+    private String mActiveFragmentTag;
+    private Menu mNavigationMenu;
+    private List<ListTitle> mListTitles;
 
+    //region Static Methods
     public static void setActiveListTitle(ListTitle listTitle) {
         mActiveListTitle = listTitle;
     }
 
-    private Toolbar mToolbar;
-    private String mActiveFragmentTag;
-    private Menu mNavigationMenu;
-    private List<ListTitle> mListTitles;
+    private static void showSnackBar(String message) {
+        Snackbar
+                .make(mSnackBarView, message, Snackbar.LENGTH_LONG)
+                .show();
+    }
+
+    private static void showCreateNewListSnackBar() {
+        mToolbar.setTitle(R.string.toolbar_create_list_title);
+        String msg = App.getContext().getResources().getString(R.string.snackbar_create_list_message);
+        showSnackBar(msg);
+    }
+    //endregion
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,7 +100,6 @@ public class MainActivity extends AppCompatActivity
         }
 
         setContentView(R.layout.activity_main);
-
         EventBus.getDefault().register(this);
 
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -101,6 +111,8 @@ public class MainActivity extends AppCompatActivity
             public void onClick(View view) {
                 if (mActiveListTitle != null) {
                     showNewListItemDialog(mActiveListTitle);
+                } else {
+                    MainActivity.showCreateNewListSnackBar();
                 }
             }
         });
@@ -124,7 +136,6 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-
     //region OnEvent
     public void onEvent(MyEvents.setActionBarTitle event) {
         if (mToolbar != null) {
@@ -133,40 +144,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void onEvent(MyEvents.showOkDialog event) {
-        showOkDialog(this, event.getTitle(), event.getMessage());
-    }
-
-    private static void showOkDialog(Context context, String title, String message) {
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
-        // set dialog title and message
-        alertDialogBuilder
-                .setTitle(title)
-                .setMessage(message)
-                .setCancelable(false)
-                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        dialog.cancel();
-                    }
-                });
-
-        // create alert dialog
-        final AlertDialog alertDialog = alertDialogBuilder.create();
-        alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
-            @Override
-            public void onShow(DialogInterface dialog) {
-                Button btnOK = alertDialog.getButton(Dialog.BUTTON_POSITIVE);
-                btnOK.setTextSize(18);
-            }
-        });
-
-        // show it
-        alertDialog.show();
-    }
-
-    private static void showSnackBar(String message) {
-        Snackbar
-                .make(mSnackBarView, message, Snackbar.LENGTH_LONG)
-                .show();
+        CommonMethods.showOkDialog(this, event.getTitle(), event.getMessage());
     }
 
     public void onEvent(MyEvents.setFragmentContainerBackground event) {
@@ -191,6 +169,7 @@ public class MainActivity extends AppCompatActivity
     public void onEvent(MyEvents.startA1List event) {
         startA1List(event.getRefreshDataFromTheCloud());
     }
+
     //endregion
 
     @Override
@@ -269,26 +248,14 @@ public class MainActivity extends AppCompatActivity
                 // Since there are ListTitles in the datastore ... select the first ListTitle
                 mActiveListTitle = allLists.get(0);
                 activeListTitleUuid = mActiveListTitle.getLocalUuid();
-                MySettings.setCreateAListDialogShown(true);
-
             } else {
                 mActiveListTitle = null;
                 // show default gradient
-
                 ListAttributes defaultAttributes = ListAttributes.getDefaultAttributes();
                 if (defaultAttributes != null) {
                     mFragmentContainer.setBackground(defaultAttributes.getBackgroundDrawable());
                 }
-
-                mToolbar.setTitle("Please Create A List");
-                String msg = "Please create a list by selecting \"New List\" from the dropdown menu.";
-                showSnackBar(msg);
-//                if (!MySettings.getCreateAListDialogShown() && ParseUser.getCurrentUser().isNew()) {
-//                    String title = "";
-//                    MySettings.setCreateAListDialogShown(true);
-//                    showOkDialog(this, title, msg);
-//                }
-
+                showCreateNewListSnackBar();
             }
         } else {
             mActiveListTitle = ListTitle.getListTitle(activeListTitleUuid);
@@ -303,7 +270,6 @@ public class MainActivity extends AppCompatActivity
         MySettings.setRefreshDataFromTheCloud(true);
     }
 
-
     private void downloadDataFromParse() {
         if (CommonMethods.isNetworkAvailable()) {
             new DownloadDataAsyncTask(this).execute();
@@ -311,15 +277,13 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void requestEmailBeVerified() {
-        String requestEmailBeVerificationMsg = getString(R.string.requestEmailBeVerifiedMessage);
-        String title = "Please Confirm Email Address";
-        showOkDialog(this, title, requestEmailBeVerificationMsg);
+        CommonMethods.showOkDialog(this, getString(R.string.requestEmailBeVerified_title),
+                getString(R.string.requestEmailBeVerified_message));
     }
 
     private void terminateApp() {
-        String title = "Confirm Email Address";
-        String terminationMsg = "It's been more than seven days since A1List was installed and your email address is not confirmed. Please see the email from no-reply@lbconsulting.a1list.com to confirm your email address.\n\n"
-                + "After you have confirmed your email address, please restart A1List.";
+        String title = getString(R.string.terminateApp_title);
+        String terminationMsg = getString(R.string.terminateApp_message);
 
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
         // set dialog title and message
@@ -395,17 +359,14 @@ public class MainActivity extends AppCompatActivity
                                         long endTime = System.currentTimeMillis();
                                         long duration = endTime - startTime;
                                         ParseUser user = ParseUser.getCurrentUser();
-                                        String successMsg = user.get("name")  + ", your A1List account was successfully initialized.\n\n"
-                                                + "Start by selecting \"New List\" from the dropdown menu.\n\n"
-                                                + "Shortly you'll receive an email from no-reply@lbconsulting.a1list.com asking you to confirm your email address. "
-                                                + "Please confirm it as soon as practical.";
+                                        String successMsg = user.get("name") + getString(R.string.initializeNewUser_success_message);
 
                                         String successLog = "New user \"" + user.getUsername() + "\" successfully initialized. "
                                                 + numberOfAttributes + " Attributes created in Parse cloud. Duration = "
                                                 + NumberFormat.getNumberInstance(Locale.US).format(duration) + " milliseconds.";
                                         MyLog.i("MainActivity", successLog);
-                                        String title = "Welcome " + user.get("name") + " to A1List";
-                                        showOkDialog(context, title, successMsg);
+                                        String title = String.format(getString(R.string.initializeNewUser_success_title), user.get("name"));
+                                        CommonMethods.showOkDialog(context, title, successMsg);
                                     }
                                 });
 
@@ -419,14 +380,13 @@ public class MainActivity extends AppCompatActivity
                 } else {
                     // Failed to initialize new user.
                     MyLog.e("MainActivity", "initializeNewUser Failed to fully initialize new user. " + e.getMessage());
-                    String title = "Initialize New User Error";
-                    showOkDialog(MainActivity.this, title, e.getMessage());
+                    String title = getString(R.string.initializeNewUser_error_title);
+                    CommonMethods.showOkDialog(MainActivity.this, title, e.getMessage());
                 }
             }
         });
 
     }
-
 
     private void showList(String listTitleID) {
         FragmentManager fm = getFragmentManager();
@@ -485,6 +445,7 @@ public class MainActivity extends AppCompatActivity
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         MyLog.i("MainActivity", "onRestoreInstanceState");
+        setupNavigationMenu();
     }
 
     @Override
@@ -552,7 +513,7 @@ public class MainActivity extends AppCompatActivity
                     } else {
                         String title = "Failed of Log Out";
                         String msg = e.getMessage();
-                        showOkDialog(MainActivity.this, title, msg);
+                        CommonMethods.showOkDialog(MainActivity.this, title, msg);
                         MyLog.e("MainActivity", "action_logoff: " + msg);
                     }
                 }
@@ -593,7 +554,6 @@ public class MainActivity extends AppCompatActivity
         dialogNewListTitle dialog = dialogNewListTitle.newInstance(dialogNewListTitle.SOURCE_FROM_MAIN_ACTIVITY);
         dialog.show(fm, "dialogNewListTitle");
     }
-
 
     private void showNewListItemDialog(ListTitle listTitle) {
         if (listTitle != null) {

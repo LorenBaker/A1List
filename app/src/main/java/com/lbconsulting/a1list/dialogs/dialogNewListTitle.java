@@ -37,7 +37,7 @@ public class dialogNewListTitle extends DialogFragment {
     private EditText txtListTitleName;
     private TextInputLayout txtListTitleName_input_layout;
 
-    private AlertDialog mNewListTitleDialog;
+    private AlertDialog mCreateListTitleDialog;
     private int mSource;
 
     public dialogNewListTitle() {
@@ -70,16 +70,16 @@ public class dialogNewListTitle extends DialogFragment {
         super.onActivityCreated(savedInstanceState);
         MyLog.i("dialogNewListTitle", "onActivityCreated");
         getDialog().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
-        mNewListTitleDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+        mCreateListTitleDialog.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
             public void onShow(DialogInterface dialog) {
-                Button positiveButton = mNewListTitleDialog.getButton(Dialog.BUTTON_POSITIVE);
+                Button positiveButton = mCreateListTitleDialog.getButton(Dialog.BUTTON_POSITIVE);
                 positiveButton.setTextSize(17);
                 positiveButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(final View v) {
                         if (addNewList(txtListTitleName.getText().toString().trim())) {
-                            switch (mSource){
+                            switch (mSource) {
                                 case SOURCE_FROM_MAIN_ACTIVITY:
                                     EventBus.getDefault().post(new MyEvents.startA1List(false));
                                     break;
@@ -94,7 +94,7 @@ public class dialogNewListTitle extends DialogFragment {
                     }
                 });
 
-                Button negativeButton = mNewListTitleDialog.getButton(Dialog.BUTTON_NEGATIVE);
+                Button negativeButton = mCreateListTitleDialog.getButton(Dialog.BUTTON_NEGATIVE);
                 negativeButton.setTextSize(17);
                 negativeButton.setOnClickListener(new View.OnClickListener() {
 
@@ -106,7 +106,7 @@ public class dialogNewListTitle extends DialogFragment {
                     }
                 });
 
-                Button neutralButton = mNewListTitleDialog.getButton(Dialog.BUTTON_NEUTRAL);
+                Button neutralButton = mCreateListTitleDialog.getButton(Dialog.BUTTON_NEUTRAL);
                 neutralButton.setTextSize(17);
                 neutralButton.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -123,12 +123,12 @@ public class dialogNewListTitle extends DialogFragment {
     private boolean addNewList(String newListName) {
         boolean result = false;
         if (newListName.isEmpty()) {
-            String errorMsg = "The List's name cannot be empty.\nPlease enter a unique List name.";
+            String errorMsg = getActivity().getString(R.string.newListName_isEmpty_error);
             txtListTitleName_input_layout.setError(errorMsg);
 
         } else if (ListTitle.listExists(newListName)) {
-            String errorMsg = "List \"" + newListName
-                    + "\" already exists.\nPlease enter a unique List name.";
+            String errorMsg = String.format(getActivity()
+                    .getString(R.string.newListName_listExists_error), newListName);
             txtListTitleName_input_layout.setError(errorMsg);
 
         } else {
@@ -173,7 +173,7 @@ public class dialogNewListTitle extends DialogFragment {
         // find the dialog's views
         txtListTitleName = (EditText) view.findViewById(R.id.txtName);
         txtListTitleName_input_layout = (TextInputLayout) view.findViewById(R.id.txtName_input_layout);
-        txtListTitleName_input_layout.setHint("List Name");
+        txtListTitleName_input_layout.setHint(getActivity().getString(R.string.txtListTitleName_hint));
         txtListTitleName.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -192,15 +192,15 @@ public class dialogNewListTitle extends DialogFragment {
         });
 
         // build the dialog
-        mNewListTitleDialog = new AlertDialog.Builder(getActivity())
-                .setTitle("Create New List")
+        mCreateListTitleDialog = new AlertDialog.Builder(getActivity())
+                .setTitle(R.string.createListTitleDialog_title)
                 .setView(view)
-                .setPositiveButton("Save", null)
-                .setNegativeButton("Cancel", null)
-                .setNeutralButton("Save/New", null)
+                .setPositiveButton(R.string.btnSave_title, null)
+                .setNegativeButton(R.string.btnCancel_title, null)
+                .setNeutralButton(R.string.btnSaveNew_title, null)
                 .create();
 
-        return mNewListTitleDialog;
+        return mCreateListTitleDialog;
     }
 
 }

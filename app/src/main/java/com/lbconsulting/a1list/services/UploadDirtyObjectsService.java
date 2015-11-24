@@ -310,8 +310,5 @@ public class UploadDirtyObjectsService extends Service {
 
             return networkAvailable;
         }
-
     }
-
-
 }

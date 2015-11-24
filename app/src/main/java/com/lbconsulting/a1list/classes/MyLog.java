@@ -25,7 +25,7 @@ public class MyLog {
         }
     }
 
-    public static void v(String className, String msg) {
+/*    public static void v(String className, String msg) {
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             Log.v(TAG, className + ": " + msg);
         }
@@ -35,5 +35,5 @@ public class MyLog {
         if (Log.isLoggable(TAG, Log.WARN)) {
             Log.w(TAG, className + ": " + msg);
         }
-    }
+    }*/
 }

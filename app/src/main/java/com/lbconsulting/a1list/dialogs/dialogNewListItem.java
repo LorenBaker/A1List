@@ -60,9 +60,7 @@ public class dialogNewListItem extends DialogFragment {
             String listUuid = args.getString((ARG_LIST_UUID));
             mListTitle = ListTitle.getListTitle(listUuid);
             if (mListTitle == null) {
-                String okDialogTitle = "Error Creating New Item";
                 String msg = "ListTitle with uuid = \"" + listUuid + "\" does not exist!";
-                EventBus.getDefault().post(new MyEvents.showOkDialog(okDialogTitle, msg));
                 MyLog.e("dialogNewListItem", "onCreate: " + msg);
             }
         }
@@ -81,7 +79,7 @@ public class dialogNewListItem extends DialogFragment {
                 saveButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(final View v) {
-                        if(addNewItem(txtItemName.getText().toString().trim())) {
+                        if (addNewItem(txtItemName.getText().toString().trim())) {
                             EventBus.getDefault().post(new MyEvents.updateListUI());
                             dismiss();
                         }
@@ -104,9 +102,9 @@ public class dialogNewListItem extends DialogFragment {
                 addNewButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(final View v) {
-                       if( addNewItem(txtItemName.getText().toString().trim())) {
-                           txtItemName.setText("");
-                       }
+                        if (addNewItem(txtItemName.getText().toString().trim())) {
+                            txtItemName.setText("");
+                        }
                     }
                 });
             }
@@ -116,19 +114,19 @@ public class dialogNewListItem extends DialogFragment {
     private boolean addNewItem(String newItemName) {
         boolean result = false;
         if (newItemName.isEmpty()) {
-            String errorMsg = "The Item's name cannot be empty.\nPlease enter a unique Item name.";
+            String errorMsg = getActivity().getString(R.string.newItemName_isEmpty_error);
             txtName_input_layout.setError(errorMsg);
 
         } else if (ListItem.itemExists(mListTitle, newItemName)) {
 
-            String errorMsg = "Item \"" + newItemName
-                    + "\" already exists.\nPlease enter a unique Item name.";
+            String errorMsg = String.format(getActivity()
+                    .getString(R.string.newItemName_itemExists_error), newItemName);
             txtName_input_layout.setError(errorMsg);
 
         } else {
             // ok to create item
             createNewItem(newItemName);
-            result=true;
+            result = true;
         }
         return result;
     }
@@ -143,7 +141,6 @@ public class dialogNewListItem extends DialogFragment {
             newItem.setAttributes(mListTitle.getAttributes());
             newItem.setAuthor(ParseUser.getCurrentUser());
             newItem.setChecked(false);
-//            newItem.setListItemDirty(true);
             newItem.setMarkedForDeletion(false);
             newItem.setIsStruckOut(false);
             newItem.setListItemManualSortKey(newItem.getItemID());
@@ -165,7 +162,7 @@ public class dialogNewListItem extends DialogFragment {
         // find the dialog's views
         txtItemName = (EditText) view.findViewById(R.id.txtName);
         txtName_input_layout = (TextInputLayout) view.findViewById(R.id.txtName_input_layout);
-        txtName_input_layout.setHint("Item Name");
+        txtName_input_layout.setHint(getActivity().getString(R.string.txtItemName_hint));
         txtItemName.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -185,11 +182,11 @@ public class dialogNewListItem extends DialogFragment {
 
         // build the dialog
         mNewListItemDialog = new AlertDialog.Builder(getActivity())
-                .setTitle("Create New Item")
+                .setTitle(R.string.newListItemDialog_title)
                 .setView(view)
-                .setPositiveButton("Save", null)
-                .setNegativeButton("Cancel", null)
-                .setNeutralButton("Save/New", null)
+                .setPositiveButton(R.string.btnSave_title, null)
+                .setNegativeButton(R.string.btnCancel_title, null)
+                .setNeutralButton(R.string.btnSaveNew_title, null)
                 .create();
 
         return mNewListItemDialog;

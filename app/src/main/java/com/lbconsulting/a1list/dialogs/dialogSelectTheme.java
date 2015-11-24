@@ -10,14 +10,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.NumberPicker;
-import android.widget.Toast;
 
 import com.lbconsulting.a1list.R;
 import com.lbconsulting.a1list.adapters.ListAttributesArrayAdapter;
 import com.lbconsulting.a1list.classes.MyEvents;
 import com.lbconsulting.a1list.classes.MyLog;
-import com.lbconsulting.a1list.classes.MySettings;
 import com.lbconsulting.a1list.database.ListAttributes;
 import com.nhaarman.listviewanimations.itemmanipulation.DynamicListView;
 
@@ -38,10 +35,9 @@ public class dialogSelectTheme extends DialogFragment {
         // Empty constructor required for DialogFragment
     }
 
-
     public static dialogSelectTheme newInstance() {
         MyLog.i("dialogSelectTheme", "newInstance");
-        return  new dialogSelectTheme();
+        return new dialogSelectTheme();
     }
 
     @Override
@@ -63,7 +59,6 @@ public class dialogSelectTheme extends DialogFragment {
                 cancelButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Toast.makeText(getActivity(), "cancelButton clicked", Toast.LENGTH_SHORT).show();
                         // Cancel
                         dismiss();
                     }
@@ -82,10 +77,10 @@ public class dialogSelectTheme extends DialogFragment {
         View view = inflater.inflate(R.layout.dialog_themes, null, false);
 
         // find the dialog's views
-        DynamicListView lvAttributes = (DynamicListView)view.findViewById(R.id.lvAttributes);
+        DynamicListView lvAttributes = (DynamicListView) view.findViewById(R.id.lvAttributes);
 
         lvAttributes.setBackgroundColor(ContextCompat.getColor(getActivity(), R.color.whiteSmoke));
-        mAttributesArrayAdapter = new ListAttributesArrayAdapter(getActivity(),lvAttributes);
+        mAttributesArrayAdapter = new ListAttributesArrayAdapter(getActivity(), lvAttributes);
         lvAttributes.setAdapter(mAttributesArrayAdapter);
         List<ListAttributes> attributesList = ListAttributes.getAllListAttributes();
         mAttributesArrayAdapter.setData(attributesList);
@@ -102,9 +97,9 @@ public class dialogSelectTheme extends DialogFragment {
 
         // build the dialog
         mDialog = new AlertDialog.Builder(getActivity())
-                .setTitle("Select a Theme")
+                .setTitle(R.string.dialogSelectTheme_title)
                 .setView(view)
-                .setNegativeButton("Cancel", null)
+                .setNegativeButton(R.string.btnCancel_title, null)
                 .create();
 
         return mDialog;

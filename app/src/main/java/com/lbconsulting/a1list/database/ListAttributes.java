@@ -5,6 +5,7 @@ import android.graphics.drawable.GradientDrawable;
 import com.lbconsulting.a1list.classes.CommonMethods;
 import com.lbconsulting.a1list.classes.MyLog;
 import com.lbconsulting.a1list.classes.MySettings;
+import com.lbconsulting.a1list.services.DownloadDataAsyncTask;
 import com.parse.ParseClassName;
 import com.parse.ParseException;
 import com.parse.ParseObject;
@@ -12,7 +13,6 @@ import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -23,27 +23,234 @@ import java.util.UUID;
 @ParseClassName("ListAttributes")
 public class ListAttributes extends ParseObject {
 
-    public static final String AUTHOR = "author";
-    public static final String END_COLOR = "endColor"; // int
-    public static final String HORIZONTAL_PADDING_DP = "horizontalPaddingInDp"; //float dp. Need to convert to float px
-    public static final String IS_ATTRIBUTES_DIRTY = "isAttributesDirty";
-    public static final String IS_BOLD = "isBold";
-    public static final String IS_CHECKED = "isChecked";
-    public static final String IS_DEFAULT_ATTRIBUTES = "isDefaultAttributes";
-    public static final String IS_MARKED_FOR_DELETION = "isMarkedForDeletion";
-    public static final String IS_TRANSPARENT = "isTransparent";
-    public static final String LOCAL_UUID = "localUuid";
-    public static final String NAME = "name";
     public static final String NAME_LOWERCASE = "nameLowercase";
-    public static final String START_COLOR = "startColor"; // int
-    public static final String TEXT_COLOR = "textColor"; // int
-    public static final String TEXT_SIZE = "textSize"; //float
-    public static final String VERTICAL_PADDING_DP = "verticalPaddingInDp"; //float dp. Need to convert to float px
-    public static final String LIST_ATTRIBUTES_ID = "listAttributesID";
-
+    private static final String AUTHOR = "author";
+    private static final String END_COLOR = "endColor"; // int
+    private static final String HORIZONTAL_PADDING_DP = "horizontalPaddingInDp"; //float dp. Need to convert to float px
+    private static final String IS_ATTRIBUTES_DIRTY = "isAttributesDirty";
+    private static final String IS_BOLD = "isBold";
+    private static final String IS_CHECKED = "isChecked";
+    private static final String IS_DEFAULT_ATTRIBUTES = "isDefaultAttributes";
+    private static final String IS_MARKED_FOR_DELETION = "isMarkedForDeletion";
+    private static final String IS_TRANSPARENT = "isTransparent";
+    private static final String LOCAL_UUID = "localUuid";
+    private static final String NAME = "name";
+    private static final String START_COLOR = "startColor"; // int
+    private static final String TEXT_COLOR = "textColor"; // int
+    private static final String TEXT_SIZE = "textSize"; //float
+    private static final String VERTICAL_PADDING_DP = "verticalPaddingInDp"; //float dp. Need to convert to float px
+    private static final String LIST_ATTRIBUTES_ID = "listAttributesID";
 
     public ListAttributes() {
         // A default constructor is required.
+    }
+
+    public static void clearAllDefaultAttributes() {
+        List<ListAttributes> allDefaultAttributes = new ArrayList<>();
+        try {
+            ParseQuery<ListAttributes> query = getQuery();
+            query.whereEqualTo(IS_MARKED_FOR_DELETION, false);
+            query.whereEqualTo(IS_DEFAULT_ATTRIBUTES, true);
+            query.fromLocalDatastore();
+            allDefaultAttributes = query.find();
+        } catch (ParseException e) {
+            MyLog.e("ListAttributes", "getAllListAttributes: ParseException: " + e.getMessage());
+        }
+        for (ListAttributes attributes : allDefaultAttributes) {
+            attributes.setDefaultAttributes(false);
+        }
+    }
+
+    public static ParseQuery<ListAttributes> getQuery() {
+        return ParseQuery.getQuery(ListAttributes.class);
+    }
+
+    public static ListAttributes getAttributes(String attributeID) {
+        boolean isUuid = attributeID.contains("-");
+        ListAttributes attributes = null;
+        try {
+            ParseQuery<ListAttributes> query = getQuery();
+            if (isUuid) {
+                query.whereEqualTo(LOCAL_UUID, attributeID);
+            } else {
+                query.whereEqualTo("objectId", attributeID);
+            }
+            query.fromLocalDatastore();
+            attributes = query.getFirst();
+        } catch (ParseException e) {
+            MyLog.i("ListAttributes", "getAttributes: ParseException: " + e.getMessage());
+        }
+        return attributes;
+    }
+
+    public static List<ListAttributes> getAllListAttributes() {
+        List<ListAttributes> allAttributes = new ArrayList<>();
+        try {
+            ParseQuery<ListAttributes> query = getQuery();
+            query.whereEqualTo(IS_MARKED_FOR_DELETION, false);
+            query.orderByAscending(NAME_LOWERCASE);
+            query.setLimit(DownloadDataAsyncTask.QUERY_LIMIT_ATTRIBUTES);
+            query.fromLocalDatastore();
+            allAttributes = query.find();
+        } catch (ParseException e) {
+            MyLog.e("ListAttributes", "getAllListAttributes: ParseException: " + e.getMessage());
+        }
+        return allAttributes;
+    }
+
+    public static ListAttributes getDefaultAttributes() {
+        ListAttributes defaultAttributes = null;
+        try {
+            ParseQuery<ListAttributes> query = getQuery();
+            query.whereEqualTo(IS_DEFAULT_ATTRIBUTES, true);
+            query.whereEqualTo(IS_MARKED_FOR_DELETION, false);
+            query.fromLocalDatastore();
+            defaultAttributes = query.getFirst();
+        } catch (ParseException e) {
+            MyLog.i("ListAttributes", "getDefaultAttributes: ParseException: " + e.getMessage());
+        }
+        if (defaultAttributes == null) {
+            List<ListAttributes> allAttributes = getAllListAttributes();
+            if (allAttributes.size() > 0) {
+                int defaultAttributesID = MySettings.getDefaultAttributesID();
+                if (defaultAttributesID >= allAttributes.size()) {
+                    defaultAttributesID = 0;
+                    MySettings.setDefaultAttributesID(1);
+                }
+                defaultAttributes = allAttributes.get(defaultAttributesID);
+            }
+        }
+        return defaultAttributes;
+    }
+
+    public static List<ListAttributes> getAllDirtyListAttributes() {
+        List<ListAttributes> allDirtyAttributes = new ArrayList<>();
+        try {
+            ParseQuery<ListAttributes> query = getQuery();
+            query.whereEqualTo(IS_ATTRIBUTES_DIRTY, true);
+            query.setLimit(DownloadDataAsyncTask.QUERY_LIMIT_ATTRIBUTES);
+            query.fromLocalDatastore();
+            allDirtyAttributes = query.find();
+        } catch (ParseException e) {
+            MyLog.e("ListAttributes", "getAllDirtyListAttributes: ParseException: " + e.getMessage());
+        }
+        return allDirtyAttributes;
+    }
+
+    public static List<ListAttributes> getAllAttributesMarkedForDeletion() {
+        List<ListAttributes> allAttributesMarkedForDeletion = new ArrayList<>();
+        try {
+            ParseQuery<ListAttributes> query = getQuery();
+            query.whereEqualTo(IS_MARKED_FOR_DELETION, true);
+            query.setLimit(DownloadDataAsyncTask.QUERY_LIMIT_ATTRIBUTES);
+            query.fromLocalDatastore();
+            allAttributesMarkedForDeletion = query.find();
+        } catch (ParseException e) {
+            MyLog.e("ListAttributes", "getAllAttributesMarkedForDeletion: ParseException: " + e.getMessage());
+        }
+        return allAttributesMarkedForDeletion;
+    }
+
+    public static void unPinAll() {
+        try {
+            List<ListAttributes> attributes = getAllListAttributes();
+            if (attributes != null && attributes.size() > 0) {
+                ParseObject.unpinAll(attributes);
+            }
+        } catch (ParseException e) {
+            MyLog.e("ListAttributes", "unPinAll: ParseException: " + e.getMessage());
+        }
+    }
+
+    public static boolean isValidAttributesName(String attributesProposedName) {
+
+        boolean isValidName = false;
+        if (!attributesProposedName.isEmpty()) {
+            ListAttributes existingAttributes = getExistingAttributes(attributesProposedName);
+            if (existingAttributes == null) {
+                isValidName = true;
+            }
+        }
+        return isValidName;
+    }
+
+    public static boolean isValidAttributesName(ListAttributes originalAttributes, String attributesProposedName) {
+
+        boolean isValidName = false;
+        if (!attributesProposedName.isEmpty()) {
+            ListAttributes existingAttributes = getExistingAttributes(attributesProposedName);
+            if (existingAttributes == null) {
+                isValidName = true;
+            } else {
+                // found existing attributes ... now see if it is the same object
+                if (existingAttributes.getLocalUuid().equals(originalAttributes.getLocalUuid())) {
+                    // both the original and existing attributes are the same Parse Object
+                    isValidName = true;
+                }
+            }
+        }
+        return isValidName;
+    }
+
+    private static ListAttributes getExistingAttributes(String proposedAttributesName) {
+        // The ListItem exist if its lowercase name is in the datastore, AND
+        // it is not marked for deletion
+
+        ListAttributes attributes = null;
+
+        try {
+            ParseQuery<ListAttributes> query = getQuery();
+            query.whereEqualTo(NAME_LOWERCASE, proposedAttributesName.trim().toLowerCase());
+            query.whereEqualTo(IS_MARKED_FOR_DELETION, false);
+            query.fromLocalDatastore();
+            attributes = query.getFirst();
+
+        } catch (ParseException e) {
+
+            if (e.getCode() != 101) {  // 101 = ObjectNotFound
+                MyLog.e("ListItem", "itemExists: ParseException: " + e.getMessage());
+            }
+        }
+        return attributes;
+    }
+
+    public static LocalListAttributes createLocalListAttributes(ListAttributes sourceAttributes) {
+        LocalListAttributes targetAttributes = new LocalListAttributes();
+
+        targetAttributes.setEndColor(sourceAttributes.getEndColor());
+        targetAttributes.setHorizontalPaddingInDp(sourceAttributes.getHorizontalPaddingDp());
+        targetAttributes.setIsAttributesDirty(sourceAttributes.isAttributesDirty());
+        targetAttributes.setIsBold(sourceAttributes.isBold());
+        targetAttributes.setIsChecked(sourceAttributes.isChecked());
+        targetAttributes.setIsDefaultAttributes(sourceAttributes.isDefaultAttributes());
+        targetAttributes.setIsMarkedForDeletion(sourceAttributes.isMarkedForDeletion());
+        targetAttributes.setIsTransparent(sourceAttributes.isBackgroundTransparent());
+        targetAttributes.setName(sourceAttributes.getName());
+        targetAttributes.setStartColor(sourceAttributes.getStartColor());
+        targetAttributes.setTextColor(sourceAttributes.getTextColor());
+        targetAttributes.setTextSize(sourceAttributes.getTextSize());
+        targetAttributes.setVerticalPaddingInDp(sourceAttributes.getVerticalPaddingDp());
+
+        return targetAttributes;
+    }
+
+    public static ListAttributes copyLocalListAttributes(LocalListAttributes sourceAttributes, ListAttributes targetAttributes) {
+
+        targetAttributes.setEndColor(sourceAttributes.getEndColor());
+        targetAttributes.setHorizontalPaddingDp(sourceAttributes.getHorizontalPaddingInDp());
+        targetAttributes.setAttributesDirty(sourceAttributes.isAttributesDirty());
+        targetAttributes.setBold(sourceAttributes.isBold());
+        targetAttributes.setChecked(sourceAttributes.isChecked());
+        targetAttributes.setDefaultAttributes(sourceAttributes.isDefaultAttributes());
+        targetAttributes.setMarkedForDeletion(sourceAttributes.isMarkedForDeletion());
+        targetAttributes.setBackgroundTransparent(sourceAttributes.isTransparent());
+        targetAttributes.setName(sourceAttributes.getName());
+        targetAttributes.setStartColor(sourceAttributes.getStartColor());
+        targetAttributes.setTextColor(sourceAttributes.getTextColor());
+        targetAttributes.setTextSize(sourceAttributes.getTextSize());
+        targetAttributes.setVerticalPaddingDp(sourceAttributes.getVerticalPaddingInDp());
+
+        return targetAttributes;
     }
 
     private String getObjectID() {
@@ -74,11 +281,6 @@ public class ListAttributes extends ParseObject {
         setAttributesDirty(true);
     }
 
-
-    public ParseUser getAuthor() {
-        return getParseUser(AUTHOR);
-    }
-
     public void setAuthor(ParseUser currentUser) {
         put(AUTHOR, currentUser);
         setAttributesDirty(true);
@@ -94,12 +296,7 @@ public class ListAttributes extends ParseObject {
         setAttributesDirty(true);
     }
 
-    public String getLowercaseName() {
-        return getString(NAME_LOWERCASE);
-    }
-
-
-    public boolean isDefaultAttributes() {
+    private boolean isDefaultAttributes() {
         return getBoolean(IS_DEFAULT_ATTRIBUTES);
     }
 
@@ -108,23 +305,7 @@ public class ListAttributes extends ParseObject {
         setAttributesDirty(true);
     }
 
-    public static void clearAllDefaultAttributes() {
-        List<ListAttributes> allDefaultAttributes = new ArrayList<>();
-        try {
-            ParseQuery<ListAttributes> query = getQuery();
-            query.whereEqualTo(IS_MARKED_FOR_DELETION, false);
-            query.whereEqualTo(IS_DEFAULT_ATTRIBUTES, true);
-            query.fromLocalDatastore();
-            allDefaultAttributes = query.find();
-        } catch (ParseException e) {
-            MyLog.e("ListAttributes", "getAllListAttributes: ParseException: " + e.getMessage());
-        }
-        for (ListAttributes attributes : allDefaultAttributes) {
-            attributes.setDefaultAttributes(false);
-        }
-    }
-
-    public boolean isChecked() {
+    private boolean isChecked() {
         return getBoolean(IS_CHECKED);
     }
 
@@ -133,7 +314,7 @@ public class ListAttributes extends ParseObject {
         setAttributesDirty(true);
     }
 
-    public boolean isAttributesDirty() {
+    private boolean isAttributesDirty() {
         return getBoolean(IS_ATTRIBUTES_DIRTY);
     }
 
@@ -141,7 +322,7 @@ public class ListAttributes extends ParseObject {
         put(IS_ATTRIBUTES_DIRTY, isDirty);
     }
 
-    public boolean isMarkedForDeletion() {
+    private boolean isMarkedForDeletion() {
         return getBoolean(IS_MARKED_FOR_DELETION);
     }
 
@@ -206,7 +387,7 @@ public class ListAttributes extends ParseObject {
         return CommonMethods.convertDpToPixel(getInt(HORIZONTAL_PADDING_DP));
     }
 
-    public int getHorizontalPaddingDp() {
+    private int getHorizontalPaddingDp() {
         return getInt(HORIZONTAL_PADDING_DP);
     }
 
@@ -219,7 +400,7 @@ public class ListAttributes extends ParseObject {
         return CommonMethods.convertDpToPixel(getInt(VERTICAL_PADDING_DP));
     }
 
-    public int getVerticalPaddingDp() {
+    private int getVerticalPaddingDp() {
         return getInt(VERTICAL_PADDING_DP);
     }
 
@@ -237,258 +418,8 @@ public class ListAttributes extends ParseObject {
         setAttributesDirty(true);
     }
 
-    public Date getDateModified() {
-        return getUpdatedAt();
-    }
-
-    public Date getDateCreated() {
-        return getCreatedAt();
-    }
-
-    public static ParseQuery<ListAttributes> getQuery() {
-        return ParseQuery.getQuery(ListAttributes.class);
-    }
-
     @Override
     public String toString() {
         return getName();
     }
-
-    public static ListAttributes getAttributes(String attributeID) {
-        boolean isUuid = attributeID.contains("-");
-        ListAttributes attributes = null;
-        try {
-            ParseQuery<ListAttributes> query = getQuery();
-            if (isUuid) {
-                query.whereEqualTo(LOCAL_UUID, attributeID);
-            } else {
-                query.whereEqualTo("objectId", attributeID);
-            }
-            query.fromLocalDatastore();
-            attributes = query.getFirst();
-        } catch (ParseException e) {
-            MyLog.i("ListAttributes", "getAttributes: ParseException: " + e.getMessage());
-        }
-        return attributes;
-    }
-
-    public static List<ListAttributes> getAllListAttributes() {
-        List<ListAttributes> allAttributes = new ArrayList<>();
-        try {
-            ParseQuery<ListAttributes> query = getQuery();
-            query.whereEqualTo(IS_MARKED_FOR_DELETION, false);
-            query.orderByAscending(NAME_LOWERCASE);
-            query.fromLocalDatastore();
-            allAttributes = query.find();
-        } catch (ParseException e) {
-            MyLog.e("ListAttributes", "getAllListAttributes: ParseException: " + e.getMessage());
-        }
-        return allAttributes;
-    }
-
-    public static ListAttributes getDefaultAttributes() {
-        ListAttributes defaultAttributes = null;
-        try {
-            ParseQuery<ListAttributes> query = getQuery();
-            query.whereEqualTo(IS_DEFAULT_ATTRIBUTES, true);
-            query.whereEqualTo(IS_MARKED_FOR_DELETION, false);
-            query.fromLocalDatastore();
-            defaultAttributes = query.getFirst();
-        } catch (ParseException e) {
-            MyLog.i("ListAttributes", "getDefaultAttributes: ParseException: " + e.getMessage());
-        }
-        if (defaultAttributes == null) {
-            List<ListAttributes> allAttributes = getAllListAttributes();
-            if (allAttributes.size() > 0) {
-                int defaultAttributesID = MySettings.getDefaultAttributesID();
-                if (defaultAttributesID >= allAttributes.size()) {
-                    defaultAttributesID = 0;
-                    MySettings.setDefaultAttributesID(1);
-                }
-                defaultAttributes = allAttributes.get(defaultAttributesID);
-            }
-        }
-        return defaultAttributes;
-    }
-
-    public static List<ListAttributes> getAllDirtyListAttributes() {
-        List<ListAttributes> allDirtyAttributes = new ArrayList<>();
-        try {
-            ParseQuery<ListAttributes> query = getQuery();
-            query.whereEqualTo(IS_ATTRIBUTES_DIRTY, true);
-            query.fromLocalDatastore();
-            allDirtyAttributes = query.find();
-        } catch (ParseException e) {
-            MyLog.e("ListAttributes", "getAllDirtyListAttributes: ParseException: " + e.getMessage());
-        }
-        return allDirtyAttributes;
-    }
-
-    public static List<ListAttributes> getAllAttributesMarkedForDeletion() {
-        List<ListAttributes> allAttributesMarkedForDeletion = new ArrayList<>();
-        try {
-            ParseQuery<ListAttributes> query = getQuery();
-            query.whereEqualTo(IS_MARKED_FOR_DELETION, true);
-            query.fromLocalDatastore();
-            allAttributesMarkedForDeletion = query.find();
-        } catch (ParseException e) {
-            MyLog.e("ListAttributes", "getAllAttributesMarkedForDeletion: ParseException: " + e.getMessage());
-        }
-        return allAttributesMarkedForDeletion;
-    }
-
-    public static void unPinAll() {
-        try {
-            List<ListAttributes> attributes = getAllListAttributes();
-            if (attributes != null && attributes.size() > 0) {
-                ParseObject.unpinAll(attributes);
-            }
-        } catch (ParseException e) {
-            MyLog.e("ListAttributes", "unPinAll: ParseException: " + e.getMessage());
-        }
-    }
-
-//    public static boolean isValidAttributesName(String attributesProposedName, ListAttributes sourceAttributes) {
-//
-//        boolean isValidName = false;
-//        String title = "Invalid Theme Name";
-//
-//        if (attributesProposedName.isEmpty()) {
-//            String msg = "Theme name cannot be empty!";
-//            EventBus.getDefault().post(new MyEvents.showOkDialog(title, msg));
-//
-//        } else {
-//            String existingAttributesID = getExistingAttributes(attributesProposedName);
-//            if (existingAttributesID != null) {
-//                // Found uuid for the proposed attributes name ...
-//                // check if the uuid is the same a the provided mAttributes' uuid
-//                if (existingAttributesID.equals(sourceAttributes.getLocalUuid())) {
-//                    isValidName = true;
-//                } else {
-//                    String msg = "Theme name already exists!";
-//                    EventBus.getDefault().post(new MyEvents.showOkDialog(title, msg));
-//                }
-//            } else {
-//                isValidName = true;
-//            }
-//        }
-//
-//        return isValidName;
-//    }
-
-    public static boolean isValidAttributesName(String attributesProposedName) {
-
-        boolean isValidName = false;
-        if (!attributesProposedName.isEmpty()) {
-            ListAttributes existingAttributes = getExistingAttributes(attributesProposedName);
-            if (existingAttributes == null) {
-                isValidName = true;
-            }
-        }
-
-        return isValidName;
-    }
-
-    public static boolean isValidAttributesName(ListAttributes originalAttributes, String attributesProposedName) {
-
-        boolean isValidName = false;
-        if (!attributesProposedName.isEmpty()) {
-            ListAttributes existingAttributes = getExistingAttributes(attributesProposedName);
-            if (existingAttributes == null) {
-                isValidName = true;
-            } else {
-                // found existing attributes ... now see if it is the same object
-                if (existingAttributes.getLocalUuid().equals(originalAttributes.getLocalUuid())) {
-                    // both the original and existing attributes are the same Parse Object
-                    isValidName=true;
-                }
-            }
-        }
-
-        return isValidName;
-    }
-
-    private static ListAttributes getExistingAttributes(String proposedAttributesName) {
-        // The ListItem exist if its lowercase name is in the datastore, AND
-        // it is not marked for deletion
-
-        ListAttributes attributes = null;
-
-        try {
-            ParseQuery<ListAttributes> query = getQuery();
-            query.whereEqualTo(NAME_LOWERCASE, proposedAttributesName.trim().toLowerCase());
-            query.whereEqualTo(IS_MARKED_FOR_DELETION, false);
-            query.fromLocalDatastore();
-            attributes = query.getFirst();
-
-        } catch (ParseException e) {
-
-            if (e.getCode() != 101) {  // 101 = ObjectNotFound
-                MyLog.e("ListItem", "itemExists: ParseException: " + e.getMessage());
-            }
-        }
-
-        return attributes;
-    }
-
-//    public static  ListAttributes copyLocalListAttributes(ListAttributes sourceAttributes, ListAttributes targetAttributes) {
-//
-//        targetAttributes.setAuthor(ParseUser.getCurrentUser());
-//        targetAttributes.setEndColor(sourceAttributes.getEndColor());
-//        targetAttributes.setHorizontalPaddingDp(sourceAttributes.getHorizontalPaddingDp());
-//        targetAttributes.setAttributesDirty(sourceAttributes.isAttributesDirty());
-//        targetAttributes.setBold(sourceAttributes.isBold());
-//        targetAttributes.setChecked(sourceAttributes.isChecked());
-//        targetAttributes.setDefaultAttributes(sourceAttributes.isDefaultAttributes());
-//        targetAttributes.setMarkedForDeletion(sourceAttributes.isMarkedForDeletion());
-//        targetAttributes.setBackgroundTransparent(sourceAttributes.isBackgroundTransparent());
-//        targetAttributes.setName(sourceAttributes.getName());
-//        targetAttributes.setStartColor(sourceAttributes.getStartColor());
-//        targetAttributes.setTextColor(sourceAttributes.getTextColor());
-//        targetAttributes.setTextSize(sourceAttributes.getTextSize());
-//        targetAttributes.setVerticalPaddingDp(sourceAttributes.getVerticalPaddingDp());
-//
-//        return targetAttributes;
-//    }
-
-    public static LocalListAttributes createLocalListAttributes(ListAttributes sourceAttributes) {
-        LocalListAttributes targetAttributes = new LocalListAttributes();
-
-        targetAttributes.setEndColor(sourceAttributes.getEndColor());
-        targetAttributes.setHorizontalPaddingInDp(sourceAttributes.getHorizontalPaddingDp());
-        targetAttributes.setIsAttributesDirty(sourceAttributes.isAttributesDirty());
-        targetAttributes.setIsBold(sourceAttributes.isBold());
-        targetAttributes.setIsChecked(sourceAttributes.isChecked());
-        targetAttributes.setIsDefaultAttributes(sourceAttributes.isDefaultAttributes());
-        targetAttributes.setIsMarkedForDeletion(sourceAttributes.isMarkedForDeletion());
-        targetAttributes.setIsTransparent(sourceAttributes.isBackgroundTransparent());
-        targetAttributes.setName(sourceAttributes.getName());
-        targetAttributes.setStartColor(sourceAttributes.getStartColor());
-        targetAttributes.setTextColor(sourceAttributes.getTextColor());
-        targetAttributes.setTextSize(sourceAttributes.getTextSize());
-        targetAttributes.setVerticalPaddingInDp(sourceAttributes.getVerticalPaddingDp());
-
-        return targetAttributes;
-    }
-
-    public static ListAttributes copyLocalListAttributes(LocalListAttributes sourceAttributes, ListAttributes targetAttributes) {
-
-        targetAttributes.setEndColor(sourceAttributes.getEndColor());
-        targetAttributes.setHorizontalPaddingDp(sourceAttributes.getHorizontalPaddingInDp());
-        targetAttributes.setAttributesDirty(sourceAttributes.isAttributesDirty());
-        targetAttributes.setBold(sourceAttributes.isBold());
-        targetAttributes.setChecked(sourceAttributes.isChecked());
-        targetAttributes.setDefaultAttributes(sourceAttributes.isDefaultAttributes());
-        targetAttributes.setMarkedForDeletion(sourceAttributes.isMarkedForDeletion());
-        targetAttributes.setBackgroundTransparent(sourceAttributes.isTransparent());
-        targetAttributes.setName(sourceAttributes.getName());
-        targetAttributes.setStartColor(sourceAttributes.getStartColor());
-        targetAttributes.setTextColor(sourceAttributes.getTextColor());
-        targetAttributes.setTextSize(sourceAttributes.getTextSize());
-        targetAttributes.setVerticalPaddingDp(sourceAttributes.getVerticalPaddingInDp());
-
-        return targetAttributes;
-    }
-
-
 }

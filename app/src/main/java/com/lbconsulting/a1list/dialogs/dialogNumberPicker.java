@@ -58,9 +58,7 @@ public class dialogNumberPicker extends DialogFragment {
             mNumberPickerId = args.getInt(ARG_NUMBER_PICKER_ID);
             mStartingNumberPickerValue = args.getInt(ARG_STARTING_VALUE);
         } else {
-            String okDialogTitle = "Error Getting Number Picker";
             String msg = "Fragment arguments do not contain Number Picker ID = " + ARG_NUMBER_PICKER_ID + "!";
-            EventBus.getDefault().post(new MyEvents.showOkDialog(okDialogTitle, msg));
             MyLog.e("dialogNumberPicker", "onCreate: " + msg);
         }
     }
@@ -146,15 +144,15 @@ public class dialogNumberPicker extends DialogFragment {
         String title = "";
         switch (mNumberPickerId) {
             case MySettings.TEXT_SIZE_PICKER:
-                title = "Select Text Size";
+                title = getActivity().getString(R.string.numberPickerDialog_select_text_size_title);
                 break;
 
             case MySettings.HORIZONTAL_PADDING_PICKER:
-                title = "Select Horizontal Padding";
+                title = getActivity().getString(R.string.numberPickerDialog_select_horizontal_padding_title);
                 break;
 
             case MySettings.VERTICAL_PADDING_PICKER:
-                title = "Select Vertical Padding";
+                title = getActivity().getString(R.string.numberPickerDialog_select_vertical_padding_title);
                 break;
         }
 
@@ -162,8 +160,8 @@ public class dialogNumberPicker extends DialogFragment {
         mDialog = new AlertDialog.Builder(getActivity())
                 .setTitle(title)
                 .setView(view)
-                .setPositiveButton("Select", null)
-                .setNegativeButton("Cancel", null)
+                .setPositiveButton(R.string.btnSelect_title, null)
+                .setNegativeButton(R.string.btnCancel_title, null)
                 .create();
 
         return mDialog;
@@ -171,7 +169,7 @@ public class dialogNumberPicker extends DialogFragment {
 
     private void setPickerValues(int value) {
 
-        int tens  = value / 10;
+        int tens = value / 10;
         int ones = value % 10;
 
         npTens.setValue(tens);

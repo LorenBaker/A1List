@@ -23,12 +23,11 @@ import de.greenrobot.event.EventBus;
 public class dialogListTitleSorting extends DialogFragment {
 
     private RadioButton rbAlphabetical;
-    private AlertDialog mListItemSortingDialog;
+    private AlertDialog mListTitleSortingDialog;
 
     public dialogListTitleSorting() {
         // Empty constructor required for DialogFragment
     }
-
 
     public static dialogListTitleSorting newInstance() {
         MyLog.i("dialogListTitleSorting", "newInstance");
@@ -47,10 +46,10 @@ public class dialogListTitleSorting extends DialogFragment {
         super.onActivityCreated(savedInstanceState);
         MyLog.i("dialogListTitleSorting", "onActivityCreated");
 
-        mListItemSortingDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+        mListTitleSortingDialog.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
             public void onShow(DialogInterface dialog) {
-                Button okButton = mListItemSortingDialog.getButton(Dialog.BUTTON_POSITIVE);
+                Button okButton = mListTitleSortingDialog.getButton(Dialog.BUTTON_POSITIVE);
                 okButton.setTextSize(17);
                 okButton.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -65,7 +64,7 @@ public class dialogListTitleSorting extends DialogFragment {
                     }
                 });
 
-                Button cancelButton = mListItemSortingDialog.getButton(Dialog.BUTTON_NEGATIVE);
+                Button cancelButton = mListTitleSortingDialog.getButton(Dialog.BUTTON_NEGATIVE);
                 cancelButton.setTextSize(17);
                 cancelButton.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -97,14 +96,14 @@ public class dialogListTitleSorting extends DialogFragment {
         }
 
         // build the dialog
-        mListItemSortingDialog = new AlertDialog.Builder(getActivity())
-                .setTitle("List Title Sorting")
+        mListTitleSortingDialog = new AlertDialog.Builder(getActivity())
+                .setTitle(R.string.listTitleSortingDialog_title)
                 .setView(view)
-                .setPositiveButton("OK", null)
-                .setNegativeButton("Cancel", null)
+                .setPositiveButton(R.string.btnOk_title, null)
+                .setNegativeButton(R.string.btnCancel_title, null)
                 .create();
 
-        return mListItemSortingDialog;
+        return mListTitleSortingDialog;
     }
 
 }

@@ -26,7 +26,7 @@ import de.greenrobot.event.EventBus;
  */
 public class dialogEditListAttributesName extends DialogFragment {
 
-    public static final String ARG_ATTRIBUTES_ID = "argAttributesID";
+    private static final String ARG_ATTRIBUTES_ID = "argAttributesID";
 
     private EditText txtListAttributesName;
     private TextInputLayout txtListAttributesName_input_layout;
@@ -58,9 +58,7 @@ public class dialogEditListAttributesName extends DialogFragment {
             mAttributes = ListAttributes.getAttributes(attributesID);
         }
         if (mAttributes == null) {
-            String okDialogTitle = "Error Getting Attributes";
             String msg = "Attributes is null!";
-            EventBus.getDefault().post(new MyEvents.showOkDialog(okDialogTitle, msg));
             MyLog.e("dialogEditListAttributesName", "onCreate: " + msg);
         }
     }
@@ -81,13 +79,14 @@ public class dialogEditListAttributesName extends DialogFragment {
                         String attributesProposedName = txtListAttributesName.getText().toString().trim();
 
                         if (attributesProposedName.isEmpty()) {
-                            String errorMsg = "The Theme's name cannot be empty.\nPlease enter a unique Theme name.";
+                            String errorMsg = getActivity().getString(R.string.attributesProposedName_isEmpty_error);
                             txtListAttributesName_input_layout.setError(errorMsg);
 
                         } else if (!ListAttributes.isValidAttributesName(mAttributes, attributesProposedName)) {
                             txtListAttributesName.setText(mAttributes.getName());
-                            String errorMsg = "Theme \"" + attributesProposedName
-                                    + "\" already exists.\nPlease enter a unique theme name.";
+                            String errorMsg = String.format(getActivity()
+                                            .getString(R.string.attributesProposedName_invalidName_error),
+                                    attributesProposedName);
                             txtListAttributesName_input_layout.setError(errorMsg);
                         } else {
                             mAttributes.setName(attributesProposedName);
@@ -124,7 +123,7 @@ public class dialogEditListAttributesName extends DialogFragment {
         txtListAttributesName = (EditText) view.findViewById(R.id.txtName);
         txtListAttributesName.setText(mAttributes.getName());
         txtListAttributesName_input_layout = (TextInputLayout) view.findViewById(R.id.txtName_input_layout);
-        txtListAttributesName_input_layout.setHint("Theme Name");
+        txtListAttributesName_input_layout.setHint(getActivity().getString(R.string.txtListAttributesName_hint));
         txtListAttributesName.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -144,10 +143,10 @@ public class dialogEditListAttributesName extends DialogFragment {
 
         // build the dialog
         mEditListAttributesNameDialog = new AlertDialog.Builder(getActivity())
-                .setTitle("Edit Theme Name")
+                .setTitle(R.string.editListAttributesNameDialog_title)
                 .setView(view)
-                .setPositiveButton("Save", null)
-                .setNegativeButton("Cancel", null)
+                .setPositiveButton(R.string.btnSave_title, null)
+                .setNegativeButton(R.string.btnCancel_title, null)
                 .create();
 
         return mEditListAttributesNameDialog;

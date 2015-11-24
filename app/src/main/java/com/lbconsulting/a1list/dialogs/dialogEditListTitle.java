@@ -98,17 +98,17 @@ public class dialogEditListTitle extends DialogFragment {
     private boolean reviseListName(String newListName) {
         boolean result = false;
         if (newListName.isEmpty()) {
-            String errorMsg = "The List's name cannot be empty.\nPlease enter a unique List name.";
+            String errorMsg = getActivity().getString(R.string.reviseListName_isEmpty_error);
             txtListTitleName_input_layout.setError(errorMsg);
 
         } else if (ListTitle.listExists(newListName)) {
             boolean isSameObject = ListTitle.getIsSameObject(mListTitle, newListName);
-            if(isSameObject){
+            if (isSameObject) {
                 mListTitle.setName(newListName);
                 result = true;
-            }else {
-                String errorMsg = "List \"" + newListName
-                        + "\" already exists.\nPlease enter a unique List name.";
+            } else {
+                String errorMsg = String.format(getActivity()
+                        .getString(R.string.reviseListName_listExists_error), newListName);
                 txtListTitleName_input_layout.setError(errorMsg);
             }
 
@@ -133,7 +133,7 @@ public class dialogEditListTitle extends DialogFragment {
         txtListTitleName = (EditText) view.findViewById(R.id.txtName);
         txtListTitleName.setText(mListTitle.getName());
         txtListTitleName_input_layout = (TextInputLayout) view.findViewById(R.id.txtName_input_layout);
-        txtListTitleName_input_layout.setHint("List Name");
+        txtListTitleName_input_layout.setHint(getActivity().getString(R.string.txtListTitleName_hint));
         txtListTitleName.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -153,10 +153,10 @@ public class dialogEditListTitle extends DialogFragment {
 
         // build the dialog
         mNewListTitleDialog = new AlertDialog.Builder(getActivity())
-                .setTitle("Edit List Name")
+                .setTitle(R.string.editListTitleDialog_title)
                 .setView(view)
-                .setPositiveButton("Save", null)
-                .setNegativeButton("Cancel", null)
+                .setPositiveButton(R.string.btnSave_title, null)
+                .setNegativeButton(R.string.btnCancel_title, null)
                 .create();
 
         return mNewListTitleDialog;

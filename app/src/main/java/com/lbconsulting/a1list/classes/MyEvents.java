@@ -20,7 +20,7 @@ public class MyEvents {
     }
 
     public static class startA1List {
-        private boolean mRefreshDataFromTheCloud;
+        private final boolean mRefreshDataFromTheCloud;
 
         public startA1List(boolean refreshDataFromTheCloud) {
             this.mRefreshDataFromTheCloud = refreshDataFromTheCloud;
@@ -32,7 +32,7 @@ public class MyEvents {
     }
 
     public static class setActionBarTitle {
-        private String mTitle;
+        private final String mTitle;
 
         public setActionBarTitle(String title) {
             this.mTitle = title;
@@ -62,8 +62,8 @@ public class MyEvents {
     }
 
     public static class setFragmentContainerBackground {
-        private int mStartColor;
-        private int mEndColor;
+        private final int mStartColor;
+        private final int mEndColor;
 
         public setFragmentContainerBackground(int startColor, int endColor) {
             mStartColor = startColor;
@@ -80,7 +80,7 @@ public class MyEvents {
     }
 
     public static class setAttributesName {
-        private String mName;
+        private final String mName;
 
         public setAttributesName(String name) {
             mName = name;
@@ -92,7 +92,7 @@ public class MyEvents {
     }
 
     public static class setAttributesStartColor {
-        private int mColor;
+        private final int mColor;
 
         public setAttributesStartColor(int color) {
             mColor = color;
@@ -104,7 +104,7 @@ public class MyEvents {
     }
 
     public static class setAttributesEndColor {
-        private int mColor;
+        private final int mColor;
 
         public setAttributesEndColor(int color) {
             mColor = color;
@@ -116,7 +116,7 @@ public class MyEvents {
     }
 
     public static class setAttributesTextColor {
-        private int mColor;
+        private final int mColor;
 
         public setAttributesTextColor(int color) {
             mColor = color;
@@ -128,7 +128,7 @@ public class MyEvents {
     }
 
     public static class setAttributesTextSize {
-        private int mSelectedTextSize;
+        private final int mSelectedTextSize;
 
         public setAttributesTextSize(int selectedTextSize) {
             mSelectedTextSize = selectedTextSize;
@@ -140,7 +140,7 @@ public class MyEvents {
     }
 
     public static class setAttributesHorizontalPadding {
-        private int mHorizontalPadding;
+        private final int mHorizontalPadding;
 
         public setAttributesHorizontalPadding(int selectedHorizontalPadding) {
             mHorizontalPadding = selectedHorizontalPadding;
@@ -152,7 +152,7 @@ public class MyEvents {
     }
 
     public static class setAttributesVerticalPadding {
-        private int mVerticalPadding;
+        private final int mVerticalPadding;
 
         public setAttributesVerticalPadding(int selectedVerticalPadding) {
             mVerticalPadding = selectedVerticalPadding;
@@ -164,7 +164,7 @@ public class MyEvents {
     }
 
     public static class replaceAttributes {
-        private String mAttributeUuid;
+        private final String mAttributeUuid;
 
         public replaceAttributes(String attributeUuid) {
             mAttributeUuid = attributeUuid;

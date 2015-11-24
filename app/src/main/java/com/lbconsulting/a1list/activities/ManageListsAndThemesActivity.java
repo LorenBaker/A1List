@@ -19,11 +19,11 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.lbconsulting.a1list.R;
 import com.lbconsulting.a1list.adapters.ListAttributesArrayAdapter;
 import com.lbconsulting.a1list.adapters.ListTitleArrayAdapter;
+import com.lbconsulting.a1list.classes.CommonMethods;
 import com.lbconsulting.a1list.classes.MyEvents;
 import com.lbconsulting.a1list.classes.MyLog;
 import com.lbconsulting.a1list.classes.MySettings;
@@ -104,7 +104,6 @@ public class ManageListsAndThemesActivity extends AppCompatActivity {
             mDataType = savedInstanceState.getInt(ARG_DATA_TYPE);
         }
 
-
         if (mDataType == MANAGE_THEMES) {
             fab.setVisibility(View.GONE);
         }
@@ -184,33 +183,6 @@ public class ManageListsAndThemesActivity extends AppCompatActivity {
         dialog.show(fm, "dialogNewListTitle");
     }
 
-    private static void showOkDialog(Context context, String title, String message) {
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
-        // set dialog title and message
-        alertDialogBuilder
-                .setTitle(title)
-                .setMessage(message)
-                .setCancelable(false)
-                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        dialog.cancel();
-                    }
-                });
-
-        // create alert dialog
-        final AlertDialog alertDialog = alertDialogBuilder.create();
-        alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
-            @Override
-            public void onShow(DialogInterface dialog) {
-                Button btnOK = alertDialog.getButton(Dialog.BUTTON_POSITIVE);
-                btnOK.setTextSize(18);
-            }
-        });
-
-        // show it
-        alertDialog.show();
-    }
-
     private void deleteListAttributes(ListAttributes listAttributes) {
         listAttributes.setMarkedForDeletion(true);
         List<ListAttributes> listAttributesList = ListAttributes.getAllListAttributes();
@@ -231,10 +203,10 @@ public class ManageListsAndThemesActivity extends AppCompatActivity {
             }
         } else {
             listAttributes.setMarkedForDeletion(false);
-            String title = "Unable to Delete Theme";
-            String msg = "Theme \"" + listAttributes.getName() +
-                    "\" is the last Theme in the datastore. There must be a minimum of one Theme in the datastore.";
-            showOkDialog(this, title, msg);
+            String title = getString(R.string.unableToDeleteListAttributes_title);
+            String msg = String.format(getString(R.string.unableToDeleteListAttributes_message),
+                    listAttributes.getName());
+            CommonMethods.showOkDialog(this, title, msg);
         }
 
     }

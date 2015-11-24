@@ -5,30 +5,94 @@
     <string name="action_editListTheme_title">Change List Theme</string>
     <string name="action_listSorting_title">List Item Sorting</string>
     <string name="action_listTitleSorting_title">List Title Sorting</string>
+    <string name="action_logoff_title">Logoff</string>
     <string name="action_manageLists_title">Manage Lists</string>
     <string name="action_manageThemes_title">Delete Themes</string>
     <string name="action_newList_title">New List</string>
     <string name="action_refresh_title">Refresh</string>
     <string name="action_settings">Settings</string>
 
+    <string name="attributesProposedName_invalidName_error">Theme \"%1s\" already exists.\nPlease enter a unique theme name.</string>
+    <string name="attributesProposedName_isEmpty_error">The Theme\'s name cannot be empty.\nPlease enter a unique Theme name.</string>
+
     <string name="btnAttributesName_text">"Theme Name: %1$s"</string>
+    <string name="btnCancel_title">Cancel</string>
     <string name="btnHorizontalMargin_text">"Horizontal Margin: %1d"</string>
+    <string name="btnOk_title">OK</string>
+    <string name="btnSave_title">Save</string>
+    <string name="btnSaveNew_title">Save/New</string>
+    <string name="btnSelect_title">Select</string>
     <string name="btnTextSize_text">"Text Size: %1.0f"</string>
     <string name="btnTextStyle_text_bold">Text Bold</string>
     <string name="btnTextStyle_text_normal">Text Normal</string>
     <string name="btnVerticalMargin_text">"Vertical Margin: %1d"</string>
 
+    <string name="colorPicker_endColor_title">Select Gradient End Color</string>
+    <string name="colorPicker_startColor_title">Select Gradient Start Color</string>
+    <string name="colorPicker_textColor_title">Select Text Color</string>
+
+    <string name="createListTitleDialog_title">Create New List</string>
+    <string name="dialogSelectTheme_title">Select a Theme</string>
+    <string name="editListAttributesNameDialog_title">Edit Theme Name</string>
+    <string name="editListTitleDialog_title">Edit List Name</string>
+
+    <string name="failedToCreateNewTheme_message">Theme \"%1s\" already exists.\n\nPlease enter a unique theme name.</string>
+    <string name="failedToCreateNewTheme_title">Failed to Create New Theme</string>
+
+    <string name="initializeNewUser_error_title">Initialize New User Error</string>
+    <string name="initializeNewUser_success_message">, your A1List account was successfully initialized.\n\nStart by selecting \"New List\" from the dropdown menu.\n\nShortly you\'ll receive an email from no-reply@lbconsulting.a1list.com asking you to confirm your email address. Please confirm it as soon as practical.</string>
+    <string name="initializeNewUser_success_title">Welcome %1$s to A1List</string>
+
+    <string name="listItemSortingDialog_title">\"%1s\" Item Sorting</string>
+    <string name="listTitleSortingDialog_title">List Title Sorting</string>
+
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
+
+    <string name="newItemName_isEmpty_error">The Item\'s name cannot be empty.\nPlease enter a unique Item name.</string>
+    <string name="newItemName_itemExists_error">Item \"%1s\" already exists.\nPlease enter a unique Item name.</string>
+
+    <string name="newListItemDialog_title">Create New Item</string>
+    <string name="newListName_isEmpty_error">The List\'s name cannot be empty.\nPlease enter a unique List name.</string>
+    <string name="newListName_listExists_error">List \"%1s\" already exists.\nPlease enter a unique List name.</string>
 
     <string name="notification_download_ticker">A1List Ticker</string>
     <string name="notification_downloading_text">Downloading data from the cloud.</string>
     <string name="notification_downloading_title">A1List</string>
 
+    <string name="numberPickerDialog_select_horizontal_padding_title">Select Horizontal Padding</string>
+    <string name="numberPickerDialog_select_text_size_title">Select Text Size</string>
+    <string name="numberPickerDialog_select_vertical_padding_title">Select Vertical Padding</string>
+
+    <string name="onColorChanged">#%1s</string>
+
+    <string name="onCreate_creating_listThemeActivity_error_message">List \"%1s\" does not contain attributes!</string>
+    <string name="onCreate_listThemeActivity_actionBar_title">"\"%1s\" Theme"</string>
+    <string name="onCreate_listThemeActivity_sampleitemName">"Sample Item "</string>
+
+    <string name="requestEmailBeVerified_message">Please see the email from no-reply@lbconsulting.a1list.com to confirm your email address. Please confirm it as soon as practical.\n\nIf your email address is not confirmed within seven days of A1List\'s installation A1List will stop working.</string>
+    <string name="requestEmailBeVerified_title">Please Confirm Email Address</string>
+
+    <string name="reviseListName_isEmpty_error">The List\'s name cannot be empty.\nPlease enter a unique List name.</string>
+    <string name="reviseListName_listExists_error">List \"%1s\" already exists.\nPlease enter a unique List name.</string>
+
+    <string name="snackbar_create_list_message">Please create a list by selecting \"New List\" from the dropdown menu.</string>
+
+    <string name="terminateApp_message">It\'s been more than seven days since A1List was installed and your email address is not confirmed. Please see the email from no-reply@lbconsulting.a1list.com to confirm your email address.\n\nAfter you have confirmed your email address, please restart A1List.</string>
+    <string name="terminateApp_title">Confirm Email Address</string>
+
+    <string name="title_activity_manage_lists_and_themes">ManageListsAndThemesActivity</string>
     <string name="title_activity_test_data">activity_test_data</string>
     <string name="title_activity_test2">activity_test2</string>
-    <string name="title_activity_manage_lists_and_themes">ManageListsAndThemesActivity</string>
-    <string name="action_logoff_title">Logoff</string>
-    <string name="requestEmailBeVerifiedMessage">Please see the email from no-reply@lbconsulting.a1list.com to confirm your email address. Please confirm it as soon as practical.\n\nIf your email address is not confirmed within seven days of A1List\'s installation A1List will stop working.</string>
+
+    <string name="toolbar_create_list_title">Please Create A List</string>
+
+    <string name="txtItemName_hint">Item Name</string>
+    <string name="txtListAttributesName_hint">Theme Name</string>
+    <string name="txtListTitleName_hint">List Name</string>
+
+    <string name="unableToDeleteListAttributes_message">Theme \"%1s\" is the last Theme in the datastore. There must be a minimum of one Theme in the datastore.</string>
+    <string name="unableToDeleteListAttributes_title">Unable to Delete Theme</string>
+
 
 </resources>

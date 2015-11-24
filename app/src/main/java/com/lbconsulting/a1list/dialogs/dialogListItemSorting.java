@@ -8,17 +8,12 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.RadioButton;
 
 import com.lbconsulting.a1list.R;
 import com.lbconsulting.a1list.classes.MyEvents;
 import com.lbconsulting.a1list.classes.MyLog;
-import com.lbconsulting.a1list.database.ListAttributes;
-import com.lbconsulting.a1list.database.ListItem;
 import com.lbconsulting.a1list.database.ListTitle;
-import com.parse.ParseException;
-import com.parse.ParseUser;
 
 import de.greenrobot.event.EventBus;
 
@@ -30,7 +25,6 @@ public class dialogListItemSorting extends DialogFragment {
     private static final String ARG_LIST_UUID = "argListUuid";
 
     private RadioButton rbAlphabetical;
-    private RadioButton rbManual;
 
     private ListTitle mListTitle;
     private AlertDialog mListItemSortingDialog;
@@ -58,9 +52,7 @@ public class dialogListItemSorting extends DialogFragment {
             String listUuid = args.getString((ARG_LIST_UUID));
             mListTitle = ListTitle.getListTitle(listUuid);
             if (mListTitle == null) {
-                String okDialogTitle = "List Item Sorting Error";
                 String msg = "ListTitle with uuid = \"" + listUuid + "\" does not exist!";
-                EventBus.getDefault().post(new MyEvents.showOkDialog(okDialogTitle, msg));
                 MyLog.e("dialogListItemSorting", "onCreate: " + msg);
             }
         }
@@ -79,9 +71,9 @@ public class dialogListItemSorting extends DialogFragment {
                 okButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(final View v) {
-                        if(rbAlphabetical.isChecked()){
+                        if (rbAlphabetical.isChecked()) {
                             mListTitle.setSortListItemsAlphabetically(true);
-                        }else{
+                        } else {
                             mListTitle.setSortListItemsAlphabetically(false);
                         }
                         mListTitle.setListTitleDirty(true);
@@ -113,20 +105,21 @@ public class dialogListItemSorting extends DialogFragment {
 
         // find the dialog's views
         rbAlphabetical = (RadioButton) view.findViewById(R.id.rbAlphabetical);
-        rbManual = (RadioButton) view.findViewById(R.id.rbManual);
+        RadioButton rbManual = (RadioButton) view.findViewById(R.id.rbManual);
 
-        if(mListTitle.sortListItemsAlphabetically()){
+        if (mListTitle.sortListItemsAlphabetically()) {
             rbAlphabetical.setChecked(true);
-        }else{
+        } else {
             rbManual.setChecked(true);
         }
 
         // build the dialog
         mListItemSortingDialog = new AlertDialog.Builder(getActivity())
-                .setTitle("\"" + mListTitle.getName() + "\" Item Sorting")
+                .setTitle(String.format(getActivity().getString(R.string.listItemSortingDialog_title),
+                        mListTitle.getName()))
                 .setView(view)
-                .setPositiveButton("OK", null)
-                .setNegativeButton("Cancel", null)
+                .setPositiveButton(R.string.btnOk_title, null)
+                .setNegativeButton(R.string.btnCancel_title, null)
                 .create();
 
         return mListItemSortingDialog;

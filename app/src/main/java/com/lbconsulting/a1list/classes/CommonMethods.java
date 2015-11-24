@@ -1,15 +1,16 @@
 package com.lbconsulting.a1list.classes;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.DisplayMetrics;
+import android.widget.Button;
 
 import com.lbconsulting.a1list.activities.App;
-import com.lbconsulting.a1list.database.ListAttributes;
-
-import java.util.List;
 
 
 /**
@@ -17,30 +18,36 @@ import java.util.List;
  */
 public class CommonMethods {
 
-    public static boolean stringsIdentical(String itemName1, String itemName2) {
-        return itemName1 == null & itemName2 == null || !(itemName1 == null || itemName2 == null) && itemName1.equals(itemName2);
+    public static void showOkDialog(Context context, String title, String message) {
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
+        // set dialog title and message
+        alertDialogBuilder
+                .setTitle(title)
+                .setMessage(message)
+                .setCancelable(false)
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                });
+
+        // create alert dialog
+        final AlertDialog alertDialog = alertDialogBuilder.create();
+        alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialog) {
+                Button btnOK = alertDialog.getButton(Dialog.BUTTON_POSITIVE);
+                btnOK.setTextSize(18);
+            }
+        });
+
+        // show it
+        alertDialog.show();
     }
 
-//    public static ListAttributes getDefaultAttributes() {
-//        ListAttributes defaultAttributes = null;
-//
-//        List<ListAttributes> allAttributes = ListAttributes.getAllListAttributes();
-//        if (allAttributes.size() > 0) {
-//            int defaultAttributesID = MySettings.getDefaultAttributesID();
-//            if (defaultAttributesID >= allAttributes.size()) {
-//                defaultAttributesID = 0;
-//                MySettings.setDefaultAttributesID(1);
-//            }
-//            defaultAttributes = allAttributes.get(defaultAttributesID);
-//        }
-//
-//        return defaultAttributes;
-//    }
-
     public static boolean isNetworkAvailable() {
-        Context context = App.getContext();
         boolean networkAvailable = false;
-        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        ConnectivityManager cm = (ConnectivityManager) App.getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo ni = cm.getActiveNetworkInfo();
 
         if ((ni != null) && (ni.isConnected())) {
@@ -70,16 +77,15 @@ public class CommonMethods {
         return Math.round(px);
     }
 
-    /**
+/*    *//**
      * This method converts device specific pixels to density independent pixels.
      *
      * @param px A value in px (pixels) unit. Which we need to convert into db
      * @return A float value to represent dp equivalent to px value
-     */
+     *//*
     public static float convertPixelsToDp(float px) {
         Resources resources = App.getContext().getResources();
         DisplayMetrics metrics = resources.getDisplayMetrics();
-        float dp = px / (metrics.densityDpi / 160f);
-        return dp;
-    }
+        return px / (metrics.densityDpi / 160f);
+    }*/
 }

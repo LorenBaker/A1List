@@ -27,7 +27,6 @@ import de.greenrobot.event.EventBus;
  * A fragment that shows master list of grocery items
  */
 public class fragListItems extends Fragment {
-    private static final int LIST_ITEMS_QUERY_LIMIT = 500;
     private static final String ARG_LIST_TITLE_UUID = "argListTitleUuid";
 
     private com.nhaarman.listviewanimations.itemmanipulation.DynamicListView lvListItems;
@@ -125,18 +124,6 @@ public class fragListItems extends Fragment {
             lvListItems.setOnItemLongClickListener(null);
         }
 
-//        lvListItems.enableDragAndDrop();
-//        lvListItems.setOnItemLongClickListener(
-//                new AdapterView.OnItemLongClickListener() {
-//                    @Override
-//                    public boolean onItemLongClick(final AdapterView<?> parent, final View view,
-//                                                   final int position, final long id) {
-//                        lvListItems.startDragging(position);
-//                        return true;
-//                    }
-//                }
-//        );
-
         lvListItems.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -153,8 +140,6 @@ public class fragListItems extends Fragment {
     }
 
     private void updateListUI() {
-
-
         List<ListItem> listItems = ListItem.getAllListItems(mListTitle);
         MyLog.i("fragListItems", "updateListUI List " + mListTitleName + " with " + listItems.size() + " items.");
         mListItemsArrayAdapter.setData(listItems);
@@ -224,12 +209,4 @@ public class fragListItems extends Fragment {
         MyLog.i("fragListItems", "onDestroy: " + mListTitleName);
         EventBus.getDefault().unregister(this);
     }
-
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        MyLog.i("fragListItems", "onDetach: " + mListTitleName);
-    }
-
 }
