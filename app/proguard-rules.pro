@@ -15,3 +15,17 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+
+-keepclassmembers class ** {
+    public void onEvent*(***);
+}
+
+-keepattributes Annotation
+-keep class org.apache.** { *; }
+-keep class com.parse.** { *; }
+
+-dontwarn com.parse.**
+-dontwarn org.apache.**
+-dontwarn com.squareup.**
+-dontwarn com.nhaarman.listviewanimations.**
+

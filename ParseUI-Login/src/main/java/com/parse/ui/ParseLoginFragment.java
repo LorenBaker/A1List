@@ -153,8 +153,8 @@ public class ParseLoginFragment extends ParseLoginFragmentBase {
     parseLogin.setVisibility(View.VISIBLE);
 
     // TODO: remove hard coded username and password
-//    usernameField.setText("LorenABaker@comcast.net");
-//    passwordField.setText("A1Lprmbaker5493");
+    usernameField.setText("LorenABaker@comcast.net");
+    passwordField.setText("A1Lprmbaker5493");
 
     if (config.isParseLoginEmailAsUsername()) {
       usernameField.setHint(R.string.com_parse_ui_email_input_hint);

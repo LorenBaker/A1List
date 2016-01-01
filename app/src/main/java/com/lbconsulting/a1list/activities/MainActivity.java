@@ -37,6 +37,7 @@ import com.lbconsulting.a1list.database.ListTitle;
 import com.lbconsulting.a1list.dialogs.dialogListItemSorting;
 import com.lbconsulting.a1list.dialogs.dialogNewListItem;
 import com.lbconsulting.a1list.dialogs.dialogNewListTitle;
+import com.lbconsulting.a1list.dialogs.dialogSelectFavorites;
 import com.lbconsulting.a1list.fragments.fragListItems;
 import com.lbconsulting.a1list.services.DownloadDataAsyncTask;
 import com.lbconsulting.a1list.services.UploadDirtyObjectsService;
@@ -44,6 +45,7 @@ import com.parse.DeleteCallback;
 import com.parse.FindCallback;
 import com.parse.FunctionCallback;
 import com.parse.LogOutCallback;
+import com.parse.ParseAnalytics;
 import com.parse.ParseCloud;
 import com.parse.ParseException;
 import com.parse.ParseObject;
@@ -101,6 +103,7 @@ public class MainActivity extends AppCompatActivity
 
         setContentView(R.layout.activity_main);
         EventBus.getDefault().register(this);
+        ParseAnalytics.trackAppOpenedInBackground(getIntent());
 
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
@@ -255,7 +258,9 @@ public class MainActivity extends AppCompatActivity
                 if (defaultAttributes != null) {
                     mFragmentContainer.setBackground(defaultAttributes.getBackgroundDrawable());
                 }
-                showCreateNewListSnackBar();
+                if (!MySettings.isFirstTimeRun()) {
+                    showCreateNewListSnackBar();
+                }
             }
         } else {
             mActiveListTitle = ListTitle.getListTitle(activeListTitleUuid);
@@ -268,6 +273,7 @@ public class MainActivity extends AppCompatActivity
         }
 
         MySettings.setRefreshDataFromTheCloud(true);
+        MySettings.setIsFirstTimeRun(false);
     }
 
     private void downloadDataFromParse() {
@@ -467,6 +473,10 @@ public class MainActivity extends AppCompatActivity
             deleteStrikeoutItems();
             return true;
 
+        } else if (id == R.id.action_showFavorites) {
+            showFavoriteItems();
+            return true;
+
         } else if (id == R.id.action_newList) {
             showNewListDialog();
             return true;
@@ -533,6 +543,7 @@ public class MainActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
+
     private void showListItemSortingDialog() {
         FragmentManager fm = getFragmentManager();
         dialogListItemSorting dialog = dialogListItemSorting.newInstance(mActiveListTitle.getLocalUuid());
@@ -544,9 +555,16 @@ public class MainActivity extends AppCompatActivity
         if (strikeoutItems.size() > 0) {
             for (ListItem item : strikeoutItems) {
                 item.setMarkedForDeletion(true);
+                item.setIsStruckOut(false);
             }
             EventBus.getDefault().post(new MyEvents.updateListUI());
         }
+    }
+
+    private void showFavoriteItems() {
+        FragmentManager fm = getFragmentManager();
+        dialogSelectFavorites dialog = dialogSelectFavorites.newInstance(mActiveListTitle.getLocalUuid());
+        dialog.show(fm, "dialogSelectFavorites");
     }
 
     private void showNewListDialog() {

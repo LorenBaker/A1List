@@ -272,7 +272,7 @@ public class UploadDirtyObjectsService extends Service {
         private void deleteMarkedListItems() {
             long startTime = System.currentTimeMillis();
 
-            List<ListItem> allListItemsMarkedForDeletion = ListItem.getAllListItemsMarkedForDeletion();
+            List<ListItem> allListItemsMarkedForDeletion = ListItem.getAllNonFavoriteListItemsMarkedForDeletion();
             MyLog.i("deleteMarkedListItems", "Found " + allListItemsMarkedForDeletion.size() + " marked List Items.");
             int count = 0;
             for (ListItem item : allListItemsMarkedForDeletion) {

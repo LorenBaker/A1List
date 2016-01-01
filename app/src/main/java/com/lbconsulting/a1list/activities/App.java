@@ -3,7 +3,6 @@ package com.lbconsulting.a1list.activities;
 import android.app.Application;
 import android.content.Context;
 
-
 import com.lbconsulting.a1list.classes.MyLog;
 import com.lbconsulting.a1list.classes.MySettings;
 import com.lbconsulting.a1list.database.ListAttributes;
@@ -11,7 +10,9 @@ import com.lbconsulting.a1list.database.ListItem;
 import com.lbconsulting.a1list.database.ListTitle;
 import com.parse.Parse;
 import com.parse.ParseACL;
+import com.parse.ParseCrashReporting;
 import com.parse.ParseObject;
+
 
 
 public class App extends Application {
@@ -25,9 +26,8 @@ public class App extends Application {
 
         mContext = this;
 
-        // TODO: Enable crash reporting and other analytics
         // Initialize Crash Reporting.
-        //ParseCrashReporting.enable(this);
+        ParseCrashReporting.enable(this);
 
         // Add your initialization code here
         ParseObject.registerSubclass(ListAttributes.class);

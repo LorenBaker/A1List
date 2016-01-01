@@ -19,6 +19,7 @@
     <string name="btnCancel_title">Cancel</string>
     <string name="btnHorizontalMargin_text">"Horizontal Margin: %1d"</string>
     <string name="btnOk_title">OK</string>
+    <string name="btnApply_title">Apply</string>
     <string name="btnSave_title">Save</string>
     <string name="btnSaveNew_title">Save/New</string>
     <string name="btnSelect_title">Select</string>
@@ -93,6 +94,7 @@
 
     <string name="unableToDeleteListAttributes_message">Theme \"%1s\" is the last Theme in the datastore. There must be a minimum of one Theme in the datastore.</string>
     <string name="unableToDeleteListAttributes_title">Unable to Delete Theme</string>
+    <string name="btnFavorite_contentDescription">Favorite</string>
 
 
 </resources>

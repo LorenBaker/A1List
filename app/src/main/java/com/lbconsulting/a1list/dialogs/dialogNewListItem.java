@@ -141,6 +141,7 @@ public class dialogNewListItem extends DialogFragment {
             newItem.setAttributes(mListTitle.getAttributes());
             newItem.setAuthor(ParseUser.getCurrentUser());
             newItem.setChecked(false);
+            newItem.setIsFavorite(true);
             newItem.setMarkedForDeletion(false);
             newItem.setIsStruckOut(false);
             newItem.setListItemManualSortKey(newItem.getItemID());

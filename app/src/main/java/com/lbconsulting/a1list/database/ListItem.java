@@ -27,6 +27,7 @@ public class ListItem extends ParseObject {
     private static final String ATTRIBUTES = "ListAttributes";
     private static final String IS_STRUCK_OUT = "isStruckOut";
     private static final String IS_CHECKED = "isChecked";
+    private static final String IS_FAVORITE = "isFavorite";
     private static final String IS_LIST_ITEM_DIRTY = "isListItemDirty";
     private static final String IS_MARKED_FOR_DELETION = "isMarkedForDeletion";
     private static final String LIST_ITEM_MANUAL_SORT_KEY = "manualSortKey";
@@ -67,6 +68,23 @@ public class ListItem extends ParseObject {
                 listItems = query.find();
             } catch (ParseException e) {
                 MyLog.e("ListItem", "getAllListItems: ParseException" + e.getMessage());
+            }
+        }
+        return listItems;
+    }
+
+    public static List<ListItem> getFavorites(ListTitle listTitle) {
+        List<ListItem> listItems = new ArrayList<>();
+        if (listTitle != null) {
+            try {
+                ParseQuery<ListItem> query = getQuery();
+                query.whereEqualTo(LIST_TITLE, listTitle);
+                query.whereEqualTo(IS_FAVORITE, true);
+                query.orderByAscending(NAME_LOWERCASE);
+                query.fromLocalDatastore();
+                listItems = query.find();
+            } catch (ParseException e) {
+                MyLog.e("ListItem", "getFavorites: ParseException" + e.getMessage());
             }
         }
         return listItems;
@@ -121,17 +139,18 @@ public class ListItem extends ParseObject {
         return listDirtyItems;
     }
 
-    public static List<ListItem> getAllListItemsMarkedForDeletion() {
+    public static List<ListItem> getAllNonFavoriteListItemsMarkedForDeletion() {
 
         List<ListItem> listItemsMarkedForDeletion = new ArrayList<>();
         try {
             ParseQuery<ListItem> query = getQuery();
             query.whereEqualTo(IS_MARKED_FOR_DELETION, true);
+            query.whereEqualTo(IS_FAVORITE, false);
             query.setLimit(DownloadDataAsyncTask.QUERY_LIMIT_LIST_ITEMS);
             query.fromLocalDatastore();
             listItemsMarkedForDeletion = query.find();
         } catch (ParseException e) {
-            MyLog.e("ListItem", "getAllListItemsMarkedForDeletion: ParseException" + e.getMessage());
+            MyLog.e("ListItem", "getAllNonFavoriteListItemsMarkedForDeletion: ParseException" + e.getMessage());
         }
 
         return listItemsMarkedForDeletion;
@@ -227,6 +246,20 @@ public class ListItem extends ParseObject {
         setListItemDirty(true);
     }
 
+    public boolean isFavorite() {
+        return getBoolean(IS_FAVORITE);
+    }
+
+    public void setIsFavorite(boolean isFavorite) {
+        put(IS_FAVORITE, isFavorite);
+        setListItemDirty(true);
+    }
+
+    public void toggleFavorite() {
+        put(IS_FAVORITE, !isFavorite());
+        setListItemDirty(true);
+    }
+
     public boolean isStruckOut() {
         return getBoolean(IS_STRUCK_OUT);
     }
@@ -290,4 +323,5 @@ public class ListItem extends ParseObject {
     public String toString() {
         return getName();
     }
+
 }

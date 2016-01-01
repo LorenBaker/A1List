@@ -11,6 +11,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -29,7 +31,7 @@ import de.greenrobot.event.EventBus;
 /**
  * An ArrayAdapter for displaying a ListItems.
  */
-public class ListItemsArrayAdapter extends ArrayAdapter<ListItem> implements Swappable{
+public class ListItemsArrayAdapter extends ArrayAdapter<ListItem> implements Swappable {
 
     private final Context mContext;
     private final ListView mListView;
@@ -47,7 +49,7 @@ public class ListItemsArrayAdapter extends ArrayAdapter<ListItem> implements Swa
     }
 
     public void setData(List<ListItem> data) {
-        if(data== null){
+        if (data == null) {
             MyLog.i("ListItemsArrayAdapter", "setData: data NULL");
         }
         clear();
@@ -60,7 +62,7 @@ public class ListItemsArrayAdapter extends ArrayAdapter<ListItem> implements Swa
     @Override
     public long getItemId(int position) {
         ListItem listItem = getItem(position);
-        return  listItem.getItemID();
+        return listItem.getItemID();
     }
 
     @Override
@@ -115,11 +117,11 @@ public class ListItemsArrayAdapter extends ArrayAdapter<ListItem> implements Swa
                         horizontalPadding, verticalPadding);
 
                 if (mAttributes.isBackgroundTransparent()) {
-                    holder.tvListItemName.setBackgroundColor(Color.TRANSPARENT);
+                    holder.llRowItemName.setBackgroundColor(Color.TRANSPARENT);
                     mListView.setDivider(null);
                     mListView.setDividerHeight(0);
                 } else {
-                    holder.tvListItemName.setBackground(mAttributes.getBackgroundDrawable());
+                    holder.llRowItemName.setBackground(mAttributes.getBackgroundDrawable());
                     mListView.setDivider(new ColorDrawable(ContextCompat.getColor(mContext, R.color.greyLight3_50Transparent)));
                     mListView.setDividerHeight(1);
                 }
@@ -137,25 +139,63 @@ public class ListItemsArrayAdapter extends ArrayAdapter<ListItem> implements Swa
             setNoStrikeOut(holder.tvListItemName);
         }
 
+        if (item.isFavorite()) {
+            setAsFavorite(holder.btnFavorite);
+        } else {
+            setAsNotFavorite(holder.btnFavorite);
+        }
+
+        holder.tvListItemName.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ListItem clickedItem = (ListItem) v.getTag();
+                if (clickedItem != null) {
+                    clickedItem.toggleStrikeout();
+                    if (clickedItem.isStruckOut()) {
+                        setStrikeOut((TextView) v);
+                    } else {
+                        setNoStrikeOut((TextView) v);
+                    }
+                }
+            }
+        });
+
+        holder.btnFavorite.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ListItem clickedItem = (ListItem) v.getTag();
+                if (clickedItem != null) {
+                    clickedItem.toggleFavorite();
+                    if (clickedItem.isFavorite()) {
+                        setAsFavorite((ImageButton) v);
+                    } else {
+                        setAsNotFavorite((ImageButton) v);
+                    }
+                }
+            }
+        });
         // save the item so it can be retrieved later
         holder.tvListItemName.setTag(item);
+        holder.btnFavorite.setTag(item);
 
         // Return the completed view to render on screen
         return convertView;
     }
 
-    public void toggleStrikeout(int position, TextView tv){
-        final ListItem clickedItem = getItem(position);
-        // toggle the item's struckOut attribute
-        clickedItem.toggleStrikeout();
+    private void toggleStrikeout() {
 
-        // set the TextView's attributes to either strikeout or normal as appropriate
-        if (clickedItem.isStruckOut()) {
-            setStrikeOut(tv);
-        } else {
-            setNoStrikeOut(tv);
-        }
     }
+
+    private void setAsFavorite(ImageButton btnFavorite) {
+        btnFavorite.setImageResource(R.drawable.ic_favorite_black);
+        btnFavorite.setAlpha(1f);
+    }
+
+    private void setAsNotFavorite(ImageButton btnFavorite) {
+        btnFavorite.setImageResource(R.drawable.ic_favorite_border_black);
+        btnFavorite.setAlpha(0.50f);
+    }
+
 
     private void setStrikeOut(TextView tv) {
         if (mAttributes.isBold()) {
@@ -183,7 +223,7 @@ public class ListItemsArrayAdapter extends ArrayAdapter<ListItem> implements Swa
 
     @Override
     public void swapItems(int positionOne, int positionTwo) {
-        if(mListTitle.sortListItemsAlphabetically()){
+        if (mListTitle.sortListItemsAlphabetically()) {
             return;
         }
         ListItem itemOne = getItem(positionOne);
@@ -199,10 +239,14 @@ public class ListItemsArrayAdapter extends ArrayAdapter<ListItem> implements Swa
     }
 
     private class ListItemViewHolder {
+        public final LinearLayout llRowItemName;
         public final TextView tvListItemName;
+        public final ImageButton btnFavorite;
 
         public ListItemViewHolder(View base) {
+            llRowItemName = (LinearLayout) base.findViewById(R.id.llRowItemName);
             tvListItemName = (TextView) base.findViewById(R.id.tvItemName);
+            btnFavorite = (ImageButton) base.findViewById(R.id.btnFavorite);
         }
     }
 }

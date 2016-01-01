@@ -33,6 +33,7 @@ public class MySettings {
     private static final String SETTING_NEXT_LIST_ITEM_ID = "nextListItemID";
     private static final String SETTING_NEXT_LIST_TITLE_ID = "nextListTitleID";
     private static final String SETTING_REFRESH_DATA_FROM_THE_CLOUD = "refreshDataFromTheCloud";
+    private static final String SETTING_IS_FIRST_TIME_RUN = "isFirstTimeRun";
 
     private static SharedPreferences mPreferences;
 
@@ -120,6 +121,18 @@ public class MySettings {
     public static void setIsUserEmailVerified(boolean isUserEmailVerified) {
         SharedPreferences.Editor editor = mPreferences.edit();
         editor.putBoolean(SETTING_IS_USER_EMAIL_VERIFIED, isUserEmailVerified);
+        editor.apply();
+    }
+    //endregion
+
+    //region SETTING_IS_FIRST_TIME_RUN
+    public static boolean isFirstTimeRun() {
+        return mPreferences.getBoolean(SETTING_IS_FIRST_TIME_RUN, true);
+    }
+
+    public static void setIsFirstTimeRun(boolean isFirstTimeRun) {
+        SharedPreferences.Editor editor = mPreferences.edit();
+        editor.putBoolean(SETTING_IS_FIRST_TIME_RUN, isFirstTimeRun);
         editor.apply();
     }
     //endregion

@@ -7,7 +7,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.TextView;
 
 import com.lbconsulting.a1list.R;
 import com.lbconsulting.a1list.activities.MainActivity;
@@ -89,6 +88,7 @@ public class fragListItems extends Fragment {
         View rootView = inflater.inflate(R.layout.frag_list_items, container, false);
 
         lvListItems = (com.nhaarman.listviewanimations.itemmanipulation.DynamicListView) rootView.findViewById(R.id.lvListItems);
+        lvListItems.setLongClickable(true);
 
         // Set up the ListView adapter
         mListItemsArrayAdapter = new ListItemsArrayAdapter(getActivity(), lvListItems, mListTitle);
@@ -123,14 +123,6 @@ public class fragListItems extends Fragment {
             lvListItems.disableDragAndDrop();
             lvListItems.setOnItemLongClickListener(null);
         }
-
-        lvListItems.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                TextView tv = (TextView) view.findViewById(R.id.tvItemName);
-                mListItemsArrayAdapter.toggleStrikeout(position, tv);
-            }
-        });
 
         return rootView;
     }
