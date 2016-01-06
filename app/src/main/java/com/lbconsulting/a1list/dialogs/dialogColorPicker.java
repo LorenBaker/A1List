@@ -1,13 +1,14 @@
 package com.lbconsulting.a1list.dialogs;
 
-import android.app.AlertDialog;
+
 import android.app.Dialog;
-import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -81,15 +82,15 @@ public class dialogColorPicker extends DialogFragment {
                     public void onClick(final View v) {
                         switch (mColorPickerId) {
                             case MySettings.TEXT_COLOR_PICKER:
-                                EventBus.getDefault().post(new MyEvents.setAttributesTextColor(mSelectedColor));
+                                EventBus.getDefault().post(new MyEvents.setLocalAttributesTextColor(mSelectedColor));
                                 break;
 
                             case MySettings.START_COLOR_PICKER:
-                                EventBus.getDefault().post(new MyEvents.setAttributesStartColor(mSelectedColor));
+                                EventBus.getDefault().post(new MyEvents.setLocalAttributesStartColor(mSelectedColor));
                                 break;
 
                             case MySettings.END_COLOR_PICKER:
-                                EventBus.getDefault().post(new MyEvents.setAttributesEndColor(mSelectedColor));
+                                EventBus.getDefault().post(new MyEvents.setLocalAttributesEndColor(mSelectedColor));
                                 break;
                         }
                         dismiss();

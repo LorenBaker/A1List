@@ -1,10 +1,11 @@
 package com.lbconsulting.a1list.dialogs;
 
-import android.app.AlertDialog;
+
 import android.app.Dialog;
-import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
+import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -77,15 +78,15 @@ public class dialogNumberPicker extends DialogFragment {
                     public void onClick(final View v) {
                         switch (mNumberPickerId) {
                             case MySettings.TEXT_SIZE_PICKER:
-                                EventBus.getDefault().post(new MyEvents.setAttributesTextSize(mSelectedValue));
+                                EventBus.getDefault().post(new MyEvents.setLocalAttributesTextSize(mSelectedValue));
                                 break;
 
                             case MySettings.HORIZONTAL_PADDING_PICKER:
-                                EventBus.getDefault().post(new MyEvents.setAttributesHorizontalPadding(mSelectedValue));
+                                EventBus.getDefault().post(new MyEvents.setLocalAttributesHorizontalPadding(mSelectedValue));
                                 break;
 
                             case MySettings.VERTICAL_PADDING_PICKER:
-                                EventBus.getDefault().post(new MyEvents.setAttributesVerticalPadding(mSelectedValue));
+                                EventBus.getDefault().post(new MyEvents.setLocalAttributesVerticalPadding(mSelectedValue));
                                 break;
                         }
                         dismiss();

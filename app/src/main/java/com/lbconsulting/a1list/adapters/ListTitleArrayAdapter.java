@@ -9,6 +9,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -94,7 +96,7 @@ public class ListTitleArrayAdapter extends ArrayAdapter<ListTitle> implements Sw
 
         // Check if an existing view is being reused, otherwise inflate the view
         if (convertView == null) {
-            convertView = LayoutInflater.from(getContext()).inflate(R.layout.row_item_name, parent, false);
+            convertView = LayoutInflater.from(getContext()).inflate(R.layout.row_list_title, parent, false);
             holder = new ListTitleViewHolder(convertView);
             convertView.setTag(holder);
         } else {
@@ -118,14 +120,43 @@ public class ListTitleArrayAdapter extends ArrayAdapter<ListTitle> implements Sw
                 mListView.setDivider(null);
                 mListView.setDividerHeight(0);
             } else {
-                holder.tvListTitleName.setBackground(attributes.getBackgroundDrawable());
+                holder.llRowListTitle.setBackground(attributes.getBackgroundDrawable());
                 mListView.setDivider(new ColorDrawable(ContextCompat.getColor(mContext, R.color.greyLight3_50Transparent)));
                 mListView.setDividerHeight(1);
             }
         }
 
+        if(listTitle.isListLocked()){
+            holder.btnLockList.setBackground(ContextCompat.getDrawable(mContext, R.drawable.ic_lock_black));
+        }else{
+            holder.btnLockList.setBackground(ContextCompat.getDrawable(mContext, R.drawable.ic_lock_open_black));
+        }
+
+        holder.btnLockList.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ImageButton button = (ImageButton)v;
+                ListTitle selectedListTitle = (ListTitle) v.getTag();
+                selectedListTitle.setLockList(!selectedListTitle.isListLocked());
+                if(selectedListTitle.isListLocked()){
+                    button.setBackground(ContextCompat.getDrawable(mContext, R.drawable.ic_lock_black));
+                }else{
+                    button.setBackground(ContextCompat.getDrawable(mContext, R.drawable.ic_lock_open_black));
+                }
+            }
+        });
+
+        holder.btnEditListTitle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ListTitle selectedListTitle = (ListTitle) v.getTag();
+                EventBus.getDefault().post(new MyEvents.showEditListTitleDialog(selectedListTitle.getLocalUuid()));
+            }
+        });
+
         // save the item so it can be retrieved later
-        holder.tvListTitleName.setTag(listTitle);
+        holder.btnEditListTitle.setTag(listTitle);
+        holder.btnLockList.setTag(listTitle);
 
         // Return the completed view to render on screen
         return convertView;
@@ -155,10 +186,16 @@ public class ListTitleArrayAdapter extends ArrayAdapter<ListTitle> implements Sw
     }
 
     private class ListTitleViewHolder {
+        public final LinearLayout llRowListTitle;
         public final TextView tvListTitleName;
+        public final ImageButton btnLockList;
+        public final ImageButton btnEditListTitle;
 
         public ListTitleViewHolder(View base) {
-            tvListTitleName = (TextView) base.findViewById(R.id.tvItemName);
+            llRowListTitle = (LinearLayout) base.findViewById(R.id.llRowListTitle);
+            tvListTitleName = (TextView) base.findViewById(R.id.tvListTitleName);
+            btnLockList = (ImageButton) base.findViewById(R.id.btnLockList);
+            btnEditListTitle = (ImageButton) base.findViewById(R.id.btnEditListTitle);
         }
     }
 }

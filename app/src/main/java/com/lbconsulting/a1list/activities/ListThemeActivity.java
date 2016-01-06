@@ -1,13 +1,10 @@
 package com.lbconsulting.a1list.activities;
 
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.app.FragmentManager;
-import android.content.Context;
-import android.content.DialogInterface;
+
 import android.content.pm.ActivityInfo;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -17,12 +14,10 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
 import com.lbconsulting.a1list.R;
-import com.lbconsulting.a1list.adapters.ListItemsSampleArrayAdapter;
 import com.lbconsulting.a1list.classes.CommonMethods;
 import com.lbconsulting.a1list.classes.MyEvents;
 import com.lbconsulting.a1list.classes.MyLog;
@@ -60,8 +55,8 @@ public class ListThemeActivity extends AppCompatActivity implements View.OnClick
     private CheckBox ckItemBackgroundTransparent;
     private Button btnHorizontalMargin;
     private Button btnVerticalMargin;
-    private ListView lvSampleItems;
-    private ListItemsSampleArrayAdapter mSampleArrayAdapter;
+//    private ListView lvSampleItems;
+//    private ListItemsSampleArrayAdapter mSampleArrayAdapter;
 
     public static LocalListAttributes getLocalAttributes() {
         return mLocalAttributes;
@@ -80,6 +75,7 @@ public class ListThemeActivity extends AppCompatActivity implements View.OnClick
         }
         setContentView(R.layout.activity_list_theme);
         EventBus.getDefault().register(this);
+        MySettings.setRefreshDataFromTheCloud(false);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -100,7 +96,7 @@ public class ListThemeActivity extends AppCompatActivity implements View.OnClick
             }
             mOriginalAttributes = mListTitle.getAttributes();
             if (mOriginalAttributes != null) {
-                mLocalAttributes = ListAttributes.createLocalListAttributes(mOriginalAttributes);
+                mLocalAttributes = ListAttributes.createLocalAttributes(mOriginalAttributes);
             } else {
                 String msg = String.format(getString(R.string.onCreate_creating_listThemeActivity_error_message), mListTitle.getName());
                 MyLog.e("ListThemeActivity", "onCreate: " + msg);
@@ -126,7 +122,7 @@ public class ListThemeActivity extends AppCompatActivity implements View.OnClick
         btnHorizontalMargin = (Button) findViewById(R.id.btnHorizontalMargin);
         btnVerticalMargin = (Button) findViewById(R.id.btnVerticalMargin);
 
-        lvSampleItems = (ListView) findViewById(R.id.lvSampleItems);
+//        lvSampleItems = (ListView) findViewById(R.id.lvSampleItems);
 
         // set button OnClickListeners
         for (int i = 0; i < llContentListTheme.getChildCount(); i++) {
@@ -160,62 +156,62 @@ public class ListThemeActivity extends AppCompatActivity implements View.OnClick
             count++;
         }
 
-        mSampleArrayAdapter = new ListItemsSampleArrayAdapter(this, lvSampleItems,
-                mLocalAttributes, mListTitle.getName());
-        lvSampleItems.setAdapter(mSampleArrayAdapter);
-        mSampleArrayAdapter.setData(sampleList);
+//        mSampleArrayAdapter = new ListItemsSampleArrayAdapter(this, lvSampleItems,
+//                mLocalAttributes, mListTitle.getName());
+//        lvSampleItems.setAdapter(mSampleArrayAdapter);
+//        mSampleArrayAdapter.setData(sampleList);
 
         updateUI();
     }
 
     //region OnEvent
-    public void onEvent(MyEvents.setAttributesName event) {
+    public void onEvent(MyEvents.setLocalAttributesName event) {
         mLocalAttributes.setName(event.getName());
         btnAttributesName.setText(String.format(getString(R.string.btnAttributesName_text), event.getName()));
     }
 
-    public void onEvent(MyEvents.setAttributesStartColor event) {
+    public void onEvent(MyEvents.setLocalAttributesStartColor event) {
         mLocalAttributes.setStartColor(event.getColor());
-        mSampleArrayAdapter.setAttributes(mLocalAttributes);
+//        mSampleArrayAdapter.setAttributes(mLocalAttributes);
         updateUI();
     }
 
-    public void onEvent(MyEvents.setAttributesEndColor event) {
+    public void onEvent(MyEvents.setLocalAttributesEndColor event) {
         mLocalAttributes.setEndColor(event.getColor());
-        mSampleArrayAdapter.setAttributes(mLocalAttributes);
+//        mSampleArrayAdapter.setAttributes(mLocalAttributes);
         updateUI();
     }
 
-    public void onEvent(MyEvents.setAttributesTextColor event) {
+    public void onEvent(MyEvents.setLocalAttributesTextColor event) {
         mLocalAttributes.setTextColor(event.getColor());
-        mSampleArrayAdapter.setAttributes(mLocalAttributes);
+//        mSampleArrayAdapter.setAttributes(mLocalAttributes);
         updateUI();
     }
 
-    public void onEvent(MyEvents.setAttributesTextSize event) {
+    public void onEvent(MyEvents.setLocalAttributesTextSize event) {
         mLocalAttributes.setTextSize(event.getTextSize());
-        mSampleArrayAdapter.setAttributes(mLocalAttributes);
+//        mSampleArrayAdapter.setAttributes(mLocalAttributes);
         updateUI();
     }
 
-    public void onEvent(MyEvents.setAttributesHorizontalPadding event) {
+    public void onEvent(MyEvents.setLocalAttributesHorizontalPadding event) {
         mLocalAttributes.setHorizontalPaddingInDp(event.getHorizontalPadding());
-        mSampleArrayAdapter.setAttributes(mLocalAttributes);
+//        mSampleArrayAdapter.setAttributes(mLocalAttributes);
         updateUI();
     }
 
-    public void onEvent(MyEvents.setAttributesVerticalPadding event) {
+    public void onEvent(MyEvents.setLocalAttributesVerticalPadding event) {
         mLocalAttributes.setVerticalPaddingInDp(event.getVerticalPadding());
-        mSampleArrayAdapter.setAttributes(mLocalAttributes);
+//        mSampleArrayAdapter.setAttributes(mLocalAttributes);
         updateUI();
     }
 
-    public void onEvent(MyEvents.replaceAttributes event) {
+    public void onEvent(MyEvents.setLocalAttributes event) {
         ListAttributes attributes = ListAttributes.getAttributes(event.getAttributeUuid());
-        mLocalAttributes = ListAttributes.createLocalListAttributes(attributes);
+        mLocalAttributes = ListAttributes.createLocalAttributes(attributes);
         mListTitle.setAttributes(attributes);
-        ListItem.setNewAttributes(mListTitle, attributes);
-        mSampleArrayAdapter.setAttributes(mLocalAttributes);
+        ListItem.updateListItemAttributes(mListTitle);
+//        mSampleArrayAdapter.setAttributes(mLocalAttributes);
         updateUI();
     }
 
@@ -225,6 +221,7 @@ public class ListThemeActivity extends AppCompatActivity implements View.OnClick
         // set the background drawable
         Resources res = getResources();
         llListTheme.setBackground(mLocalAttributes.getBackgroundDrawable());
+        llCancelNewSave.setBackground(mLocalAttributes.getBackgroundDrawable());
 
         // set views' text color
         for (int i = 0; i < llContentListTheme.getChildCount(); i++) {
@@ -278,8 +275,8 @@ public class ListThemeActivity extends AppCompatActivity implements View.OnClick
 
 
         // set list views' background drawables
-        lvSampleItems.setBackground(mLocalAttributes.getBackgroundDrawable());
-        mSampleArrayAdapter.notifyDataSetChanged();
+//        lvSampleItems.setBackground(mLocalAttributes.getBackgroundDrawable());
+//        mSampleArrayAdapter.notifyDataSetChanged();
     }
 
 
@@ -308,7 +305,7 @@ public class ListThemeActivity extends AppCompatActivity implements View.OnClick
         int id = item.getItemId();
 
         if (id == R.id.action_show_themes) {
-            FragmentManager fm = getFragmentManager();
+            FragmentManager fm = getSupportFragmentManager();
             dialogSelectTheme dialog = dialogSelectTheme.newInstance();
             dialog.show(fm, "dialogSelectTheme");
             return true;
@@ -328,7 +325,7 @@ public class ListThemeActivity extends AppCompatActivity implements View.OnClick
     @Override
     public void onClick(View v) {
 
-        FragmentManager fm = getFragmentManager();
+        FragmentManager fm = getSupportFragmentManager();
         dialogColorPicker colorPickerDialog;
         switch (v.getId()) {
 
@@ -373,13 +370,13 @@ public class ListThemeActivity extends AppCompatActivity implements View.OnClick
 
             case R.id.btnTextStyle:
                 mLocalAttributes.toggleTextStyle();
-                mSampleArrayAdapter.setAttributes(mLocalAttributes);
+//                mSampleArrayAdapter.setAttributes(mLocalAttributes);
                 updateUI();
                 break;
 
             case R.id.ckItemBackgroundTransparent:
                 mLocalAttributes.setIsTransparent(ckItemBackgroundTransparent.isChecked());
-                mSampleArrayAdapter.setAttributes(mLocalAttributes);
+//                mSampleArrayAdapter.setAttributes(mLocalAttributes);
                 updateUI();
                 break;
 
@@ -397,7 +394,7 @@ public class ListThemeActivity extends AppCompatActivity implements View.OnClick
 
             case R.id.btnCancel:
                 mListTitle.setAttributes(mOriginalAttributes);
-                ListItem.setNewAttributes(mListTitle, mOriginalAttributes);
+                ListItem.updateListItemAttributes(mListTitle);
                 finish();
                 break;
 
@@ -432,7 +429,7 @@ public class ListThemeActivity extends AppCompatActivity implements View.OnClick
                 newAttributes = ListAttributes.copyLocalListAttributes(mLocalAttributes, newAttributes);
                 newAttributes.pin();
                 mListTitle.setAttributes(newAttributes);
-                ListItem.setNewAttributes(mListTitle, newAttributes);
+                ListItem.updateListItemAttributes(mListTitle);
 
                 attributesCreated = true;
             } catch (ParseException e) {
@@ -454,6 +451,8 @@ public class ListThemeActivity extends AppCompatActivity implements View.OnClick
         }
         ListAttributes attributes = mListTitle.getAttributes();
         attributes = ListAttributes.copyLocalListAttributes(mLocalAttributes, attributes);
+        ListItem.updateListItemAttributes(mListTitle);
+        mListTitle.setIsForceViewInflation(true);
         attributes.setAttributesDirty(true);
     }
 }

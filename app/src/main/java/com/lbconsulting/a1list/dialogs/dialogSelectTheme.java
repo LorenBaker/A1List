@@ -1,14 +1,15 @@
 package com.lbconsulting.a1list.dialogs;
 
-import android.app.AlertDialog;
+
 import android.app.Dialog;
-import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.Button;
 
 import com.lbconsulting.a1list.R;
@@ -27,8 +28,6 @@ import de.greenrobot.event.EventBus;
  */
 public class dialogSelectTheme extends DialogFragment {
 
-    private ListAttributesArrayAdapter mAttributesArrayAdapter;
-
     private AlertDialog mDialog;
 
     public dialogSelectTheme() {
@@ -44,6 +43,11 @@ public class dialogSelectTheme extends DialogFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         MyLog.i("dialogSelectTheme", "onCreate");
+        EventBus.getDefault().register(this);
+    }
+
+    public void onEvent(MyEvents.dismissDialogSelectTheme event) {
+        dismiss();
     }
 
     @Override
@@ -68,6 +72,7 @@ public class dialogSelectTheme extends DialogFragment {
     }
 
 
+    @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         MyLog.i("dialogSelectTheme", "onCreateDialog");
@@ -80,20 +85,11 @@ public class dialogSelectTheme extends DialogFragment {
         DynamicListView lvAttributes = (DynamicListView) view.findViewById(R.id.lvAttributes);
 
         lvAttributes.setBackgroundColor(ContextCompat.getColor(getActivity(), R.color.whiteSmoke));
-        mAttributesArrayAdapter = new ListAttributesArrayAdapter(getActivity(), lvAttributes);
+        ListAttributesArrayAdapter mAttributesArrayAdapter = new ListAttributesArrayAdapter(getActivity(), lvAttributes, false);
         lvAttributes.setAdapter(mAttributesArrayAdapter);
         List<ListAttributes> attributesList = ListAttributes.getAllListAttributes();
         mAttributesArrayAdapter.setData(attributesList);
         mAttributesArrayAdapter.notifyDataSetChanged();
-
-        lvAttributes.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                ListAttributes selectedAttributes = mAttributesArrayAdapter.getItem(position);
-                EventBus.getDefault().post(new MyEvents.replaceAttributes(selectedAttributes.getLocalUuid()));
-                dismiss();
-            }
-        });
 
         // build the dialog
         mDialog = new AlertDialog.Builder(getActivity())
@@ -105,4 +101,10 @@ public class dialogSelectTheme extends DialogFragment {
         return mDialog;
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        MyLog.i("dialogSelectTheme", "onDestroy");
+        EventBus.getDefault().unregister(this);
+    }
 }

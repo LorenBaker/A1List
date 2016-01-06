@@ -62,7 +62,7 @@ public class ListItemsSampleArrayAdapter extends ArrayAdapter<String> {
         // Get the data item for this position
         String item = getItem(position);
         if (convertView == null) {
-            convertView = LayoutInflater.from(getContext()).inflate(R.layout.row_item_name, parent, false);
+            convertView = LayoutInflater.from(getContext()).inflate(R.layout.row_list_item, parent, false);
             holder = new ListItemViewHolder(convertView);
             convertView.setTag(holder);
         } else {

@@ -24,30 +24,28 @@ import java.util.List;
 import de.greenrobot.event.EventBus;
 
 /**
- * An ArrayAdapter for displaying a ListAttributes.
+ * An ArrayAdapter for displaying a Theme names.
  */
-public class ListAttributesArrayAdapter extends ArrayAdapter<ListAttributes> {
+public class ThemeNameArrayAdapter extends ArrayAdapter<ListAttributes> {
 
     private final Context mContext;
     private final ListView mListView;
-    private final boolean mShowBtnEditThemeName;
 
-    public ListAttributesArrayAdapter(Context context, ListView listView, boolean showBtnEditThemeName) {
+    public ThemeNameArrayAdapter(Context context, ListView listView) {
         super(context, 0);
         this.mContext = context;
         this.mListView = listView;
-        this.mShowBtnEditThemeName=showBtnEditThemeName;
-        MyLog.i("ListAttributesArrayAdapter", "Initialized");
+        MyLog.i("ThemeNameArrayAdapter", "Initialized");
     }
 
     public void setData(List<ListAttributes> data) {
         if (data == null) {
-            MyLog.i("ListAttributesArrayAdapter", "setData: data NULL");
+            MyLog.i("ThemeNameArrayAdapter", "setData: data NULL");
         }
         clear();
         if (data != null) {
             addAll(data);
-            MyLog.i("ListAttributesArrayAdapter", "Loaded " + data.size() + " ListAttributes.");
+            MyLog.i("ThemeNameArrayAdapter", "Loaded " + data.size() + " ListAttributes.");
         }
     }
 
@@ -127,23 +125,16 @@ public class ListAttributesArrayAdapter extends ArrayAdapter<ListAttributes> {
         holder.tvThemeName.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ListAttributes selectedAttributes = (ListAttributes) v.getTag();
-                EventBus.getDefault().post(new MyEvents.setLocalAttributes(selectedAttributes.getLocalUuid()));
-                EventBus.getDefault().post(new MyEvents.dismissDialogSelectTheme());
+                ListAttributes listAttributes = (ListAttributes) v.getTag();
+                showEditThemeNameDialog(listAttributes.getLocalUuid());
             }
         });
-
-        if(!mShowBtnEditThemeName){
-            holder.btnEditThemeName.setVisibility(View.GONE);
-        }else {
-            holder.btnEditThemeName.setVisibility(View.VISIBLE);
-        }
 
         holder.btnEditThemeName.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ListAttributes selectedAttributes = (ListAttributes) v.getTag();
-                showEditThemeNameDialog(selectedAttributes.getLocalUuid());
+                ListAttributes listAttributes = (ListAttributes) v.getTag();
+                showEditThemeNameDialog(listAttributes.getLocalUuid());
             }
         });
 
@@ -162,18 +153,18 @@ public class ListAttributesArrayAdapter extends ArrayAdapter<ListAttributes> {
     @Override
     public void notifyDataSetChanged() {
         super.notifyDataSetChanged();
-        MyLog.i("ListAttributesArrayAdapter", "notifyDataSetChanged");
+        MyLog.i("ThemeNameArrayAdapter", "notifyDataSetChanged");
     }
 
     private class ListAttributesViewHolder {
+        public final LinearLayout llRowThemeName;
         public final TextView tvThemeName;
         public final ImageButton btnEditThemeName;
-        public final LinearLayout llRowThemeName;
 
         public ListAttributesViewHolder(View base) {
+            llRowThemeName = (LinearLayout) base.findViewById(R.id.llRowThemeName);
             tvThemeName = (TextView) base.findViewById(R.id.tvThemeName);
             btnEditThemeName = (ImageButton) base.findViewById(R.id.btnEditThemeName);
-            llRowThemeName = (LinearLayout) base.findViewById(R.id.llRowThemeName);
         }
     }
 }

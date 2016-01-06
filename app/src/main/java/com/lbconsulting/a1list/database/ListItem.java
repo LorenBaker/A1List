@@ -38,10 +38,49 @@ public class ListItem extends ParseObject {
         // A default constructor is required.
     }
 
-    public static void setNewAttributes(ListTitle listTitle, ListAttributes newAttributes) {
+    public static void newInstance(String newItemName, ListTitle listTitle) {
+        try {
+            ListItem newItem = new ListItem();
+            newItem.setItemUuid();
+            newItem.setItemID();
+            newItem.setName(newItemName);
+            newItem.setListTitle(listTitle);
+            newItem.setAttributes(listTitle.getAttributes());
+            newItem.setAuthor(ParseUser.getCurrentUser());
+            newItem.setChecked(false);
+            newItem.setIsFavorite(true);
+            newItem.setMarkedForDeletion(false);
+            newItem.setIsStruckOut(false);
+            newItem.setListItemManualSortKey(newItem.getItemID());
+            newItem.pin();
+        } catch (ParseException e) {
+            MyLog.e("ListItem", "newInstance: ParseException: " + e.getMessage());
+        }
+    }
+
+    public static ListItem getListItem(String listItemID) {
+        boolean isUuid = listItemID.contains("-");
+        ListItem listItem = null;
+        try {
+            ParseQuery<ListItem> query = getQuery();
+            if (isUuid) {
+                query.whereEqualTo(LOCAL_UUID, listItemID);
+            } else {
+                query.whereEqualTo("objectId", listItemID);
+            }
+            query.include(ATTRIBUTES);
+            query.include(LIST_TITLE);
+            query.fromLocalDatastore();
+            listItem = query.getFirst();
+        } catch (ParseException e) {
+            MyLog.e("ListItem", "getListItem: ParseException: " + e.getMessage());
+        }
+        return listItem;
+    }
+    public static void updateListItemAttributes(ListTitle listTitle) {
         List<ListItem> allItems = getAllListItems(listTitle);
         for (ListItem item : allItems) {
-            item.setAttributes(newAttributes);
+            item.setAttributes(listTitle.getAttributes());
         }
     }
 
@@ -324,4 +363,48 @@ public class ListItem extends ParseObject {
         return getName();
     }
 
+    public static boolean itemExists(String proposedItemName) {
+        // The Item exist if its lowercase name is in the datastore, AND
+        // it is not marked for deletion
+
+        boolean result = false;
+        try {
+            ParseQuery<ListItem> query = getQuery();
+            query.whereEqualTo(NAME_LOWERCASE, proposedItemName.trim().toLowerCase());
+            query.whereEqualTo(IS_MARKED_FOR_DELETION, false);
+            query.fromLocalDatastore();
+            ListItem listItem = query.getFirst();
+            if (listItem != null) {
+                result = true;
+            }
+
+        } catch (ParseException e) {
+            if (e.getCode() != 101) {  // 101 = ObjectNotFound
+                MyLog.e("ListItem", "itemExists: ParseException: " + e.getMessage());
+            }
+        }
+
+        return result;
+    }
+
+    public static boolean getIsSameObject(ListItem listItem, String proposedListName) {
+        boolean result = false;
+        try {
+            ParseQuery<ListItem> query = getQuery();
+            query.whereEqualTo(NAME_LOWERCASE, proposedListName.trim().toLowerCase());
+            query.whereEqualTo(IS_MARKED_FOR_DELETION, false);
+            query.fromLocalDatastore();
+            ListItem existingListItem = query.getFirst();
+            if (existingListItem.getItemUuid().equals(listItem.getItemUuid())) {
+                result = true;
+            }
+
+        } catch (ParseException e) {
+            if (e.getCode() != 101) {  // 101 = ObjectNotFound
+                MyLog.e("ListItem", "getIsSameObject: ParseException: " + e.getMessage());
+            }
+        }
+
+        return result;
+    }
 }

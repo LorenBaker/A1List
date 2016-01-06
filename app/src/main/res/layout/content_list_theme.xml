@@ -25,17 +25,17 @@
         android:layout_marginBottom="2dp"
         android:background="@android:color/darker_gray"/>
 
-    <ListView
-        android:id="@+id/lvSampleItems"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="12"/>
+    <!--<ListView-->
+        <!--android:id="@+id/lvSampleItems"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="0dp"-->
+        <!--android:layout_weight="12"/>-->
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginTop="2dp"
-        android:background="@android:color/darker_gray"/>
+    <!--<View-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="1dp"-->
+        <!--android:layout_marginTop="2dp"-->
+        <!--android:background="@android:color/darker_gray"/>-->
 
     <include
         layout="@layout/content_cancel_new_save_buttons"

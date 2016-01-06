@@ -65,6 +65,18 @@ public class MySettings {
     }
     //endregion
 
+    //region SETTING_IS_FORCE_VIEW_INFLATION
+//    public static boolean isForceViewInflation() {
+//        return mPreferences.getBoolean(SETTING_IS_FORCE_VIEW_INFLATION, false);
+//    }
+//
+//    public static void setIsForceViewInflation(boolean isForceViewInflation) {
+//        SharedPreferences.Editor editor = mPreferences.edit();
+//        editor.putBoolean(SETTING_IS_FORCE_VIEW_INFLATION, isForceViewInflation);
+//        editor.apply();
+//    }
+    //endregion
+
     //region SETTING_APP_INITIALIZATION_DATE
     private static Calendar getAppInitializationDatePlus7Days() {
         Date createdAt = ParseUser.getCurrentUser().getCreatedAt();

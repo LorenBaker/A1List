@@ -2,13 +2,10 @@ package com.lbconsulting.a1list.database;
 
 import android.graphics.drawable.GradientDrawable;
 
-import com.parse.ParseClassName;
-
 /**
  * A class to hold local A1List Attributes.
  */
 
-@ParseClassName("ListAttributes")
 public class LocalListAttributes {
 
     private boolean isAttributesDirty;

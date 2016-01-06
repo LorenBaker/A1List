@@ -1,22 +1,21 @@
 package com.lbconsulting.a1list.fragments;
 
-import android.app.Fragment;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.LinearLayout;
 
 import com.lbconsulting.a1list.R;
-import com.lbconsulting.a1list.activities.MainActivity;
 import com.lbconsulting.a1list.adapters.ListItemsArrayAdapter;
 import com.lbconsulting.a1list.classes.MyEvents;
 import com.lbconsulting.a1list.classes.MyLog;
 import com.lbconsulting.a1list.classes.MySettings;
+import com.lbconsulting.a1list.database.ListAttributes;
 import com.lbconsulting.a1list.database.ListItem;
 import com.lbconsulting.a1list.database.ListTitle;
-import com.nhaarman.listviewanimations.itemmanipulation.swipedismiss.OnDismissCallback;
 
 import java.util.List;
 
@@ -29,10 +28,18 @@ public class fragListItems extends Fragment {
     private static final String ARG_LIST_TITLE_UUID = "argListTitleUuid";
 
     private com.nhaarman.listviewanimations.itemmanipulation.DynamicListView lvListItems;
+    private String mListTitleUuid;
     private ListTitle mListTitle;
     private String mListTitleName = "Unknown";
+    private ListAttributes mAttributes;
+
+    private LinearLayout llListItems;
 
     private ListItemsArrayAdapter mListItemsArrayAdapter;
+
+    public fragListItems() {
+        // Required empty public constructor
+    }
 
     public static fragListItems newInstance(String listTitleID) {
         MyLog.i("fragListItems", "newInstance: ListTitleID = " + listTitleID);
@@ -43,10 +50,6 @@ public class fragListItems extends Fragment {
         return frag;
     }
 
-    public fragListItems() {
-        // Required empty public constructor
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,29 +58,19 @@ public class fragListItems extends Fragment {
         mListTitle = null;
         Bundle args = getArguments();
         if (args.containsKey(ARG_LIST_TITLE_UUID)) {
-            String listTitleUuid = args.getString(ARG_LIST_TITLE_UUID);
-            if (listTitleUuid != null && !listTitleUuid.equals(MySettings.NOT_AVAILABLE)) {
-                mListTitle = ListTitle.getListTitle(listTitleUuid);
+            mListTitleUuid = args.getString(ARG_LIST_TITLE_UUID);
+            if (mListTitleUuid != null && !mListTitleUuid.equals(MySettings.NOT_AVAILABLE)) {
+                mListTitle = ListTitle.getListTitle(mListTitleUuid);
             }
             if (mListTitle != null) {
                 mListTitleName = mListTitle.getName();
+                mAttributes = mListTitle.getAttributes();
                 MyLog.i("fragListItems", "onCreate: " + mListTitleName);
-            } else {
-                MyLog.e("fragListItems", "onCreate: ListTitle is Null! uuid = " + listTitleUuid);
-                List<ListTitle> allListTitles = ListTitle.getAllListTitles(MySettings.isAlphabeticallySortNavigationMenu());
-                if (allListTitles.size() > 0) {
-                    mListTitle = allListTitles.get(0);
-                } else {
-                    MyLog.e("fragListItems", "onCreate: ListTitle is null!");
-                }
             }
+
         } else {
 
             MyLog.e("fragListItems", "onCreate: No ListTitle found!");
-        }
-
-        if (mListTitle != null) {
-            MainActivity.setActiveListTitle(mListTitle);
         }
     }
 
@@ -87,25 +80,15 @@ public class fragListItems extends Fragment {
         MyLog.i("fragListItems", "onCreateView: " + mListTitleName);
         View rootView = inflater.inflate(R.layout.frag_list_items, container, false);
 
+        llListItems = (LinearLayout) rootView.findViewById(R.id.llListItems);
+        llListItems.setBackground(mAttributes.getBackgroundDrawable());
+
         lvListItems = (com.nhaarman.listviewanimations.itemmanipulation.DynamicListView) rootView.findViewById(R.id.lvListItems);
         lvListItems.setLongClickable(true);
 
         // Set up the ListView adapter
         mListItemsArrayAdapter = new ListItemsArrayAdapter(getActivity(), lvListItems, mListTitle);
         lvListItems.setAdapter(mListItemsArrayAdapter);
-
-        lvListItems.enableSwipeToDismiss(
-                new OnDismissCallback() {
-                    @Override
-                    public void onDismiss(@NonNull final ViewGroup listView, @NonNull final int[] reverseSortedPositions) {
-
-                        int position = reverseSortedPositions[0];
-                        ListItem item = mListItemsArrayAdapter.getItem(position);
-                        item.setMarkedForDeletion(true);
-                        updateListUI();
-                    }
-                }
-        );
 
         if (!mListTitle.sortListItemsAlphabetically()) {
             lvListItems.enableDragAndDrop();
@@ -128,31 +111,26 @@ public class fragListItems extends Fragment {
     }
 
     public void onEvent(MyEvents.updateListUI event) {
-        updateListUI();
+        if (event.getListTitleUuid() == null) {
+            updateListUI();
+        } else if (mListTitleUuid.equals(event.getListTitleUuid())) {
+            updateListUI();
+        }
     }
 
     private void updateListUI() {
+        mAttributes = mListTitle.getAttributes();
         List<ListItem> listItems = ListItem.getAllListItems(mListTitle);
         MyLog.i("fragListItems", "updateListUI List " + mListTitleName + " with " + listItems.size() + " items.");
         mListItemsArrayAdapter.setData(listItems);
         mListItemsArrayAdapter.notifyDataSetChanged();
+        llListItems.setBackground(mAttributes.getBackgroundDrawable());
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         MyLog.i("fragListItems", "onActivityCreated: " + mListTitleName);
-        String title = "";
-        int startColor = -1;
-        int endColor = -1;
-        if (mListTitle != null) {
-            title = mListTitleName;
-            MySettings.setActiveListTitleUuid(mListTitle.getLocalUuid());
-            startColor = mListTitle.getAttributes().getStartColor();
-            endColor = mListTitle.getAttributes().getEndColor();
-        }
-        EventBus.getDefault().post(new MyEvents.setActionBarTitle(title));
-        EventBus.getDefault().post(new MyEvents.setFragmentContainerBackground(startColor, endColor));
     }
 
 
@@ -160,6 +138,7 @@ public class fragListItems extends Fragment {
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         MyLog.i("fragListItems", "onSaveInstanceState: " + mListTitleName);
+        outState.putString(ARG_LIST_TITLE_UUID, mListTitle.getLocalUuid());
         /*
         Called to ask the fragment to save its current dynamic state,
         so it can later be reconstructed in a new instance if its process is restarted.
@@ -178,7 +157,20 @@ public class fragListItems extends Fragment {
     @Override
     public void onViewStateRestored(Bundle savedInstanceState) {
         super.onViewStateRestored(savedInstanceState);
-        MyLog.i("fragListItems", "onViewStateRestored: " + mListTitleName);
+        updateListUI();
+//        EventBus.getDefault().post(new MyEvents.refreshSectionsPagerAdapter());
+//        if(savedInstanceState!=null && savedInstanceState.containsKey(ARG_LIST_TITLE_UUID)){
+//            mListTitleUuid = savedInstanceState.getString(ARG_LIST_TITLE_UUID);
+//            if (mListTitleUuid != null && !mListTitleUuid.equals(MySettings.NOT_AVAILABLE)) {
+//                mListTitle = ListTitle.getListTitle(mListTitleUuid);
+//            }
+//            if (mListTitle != null) {
+//                mListTitleName = mListTitle.getName();
+//                mAttributes = mListTitle.getAttributes();
+//            }
+//            llListItems.setBackground(mAttributes.getBackgroundDrawable());
+            MyLog.i("fragListItems", "onViewStateRestored: " + mListTitleName);
+//        }
     }
 
     @Override
@@ -192,8 +184,8 @@ public class fragListItems extends Fragment {
     public void onPause() {
         super.onPause();
         MyLog.i("fragListItems", "onPause: " + mListTitleName);
+        mListTitle.setIsForceViewInflation(false);
     }
-
 
     @Override
     public void onDestroy() {

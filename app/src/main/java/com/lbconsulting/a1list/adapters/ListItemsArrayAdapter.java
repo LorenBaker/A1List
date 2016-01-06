@@ -38,6 +38,7 @@ public class ListItemsArrayAdapter extends ArrayAdapter<ListItem> implements Swa
     private final String mListName;
     private ListAttributes mAttributes;
     private ListTitle mListTitle;
+    private  boolean mIsForceViewInflation;
 
     public ListItemsArrayAdapter(Context context, ListView listView, ListTitle listTitle) {
         super(context, 0);
@@ -45,6 +46,7 @@ public class ListItemsArrayAdapter extends ArrayAdapter<ListItem> implements Swa
         this.mListView = listView;
         this.mListTitle = listTitle;
         this.mListName = listTitle.getName();
+        this.mIsForceViewInflation = listTitle.isForceViewInflation();
         MyLog.i("ListItemsArrayAdapter", "Initialized for List: " + mListName);
     }
 
@@ -102,8 +104,10 @@ public class ListItemsArrayAdapter extends ArrayAdapter<ListItem> implements Swa
         ListItem item = getItem(position);
 
         // Check if an existing view is being reused, otherwise inflate the view
-        if (convertView == null) {
-            convertView = LayoutInflater.from(getContext()).inflate(R.layout.row_item_name, parent, false);
+        // mIsForceViewInflation is used when the Attributes have changed
+        mIsForceViewInflation = mListTitle.isForceViewInflation();
+        if (convertView == null || mIsForceViewInflation) {
+            convertView = LayoutInflater.from(getContext()).inflate(R.layout.row_list_item, parent, false);
             holder = new ListItemViewHolder(convertView);
 
             mAttributes = item.getAttributes();
@@ -148,6 +152,7 @@ public class ListItemsArrayAdapter extends ArrayAdapter<ListItem> implements Swa
         holder.tvListItemName.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                mListTitle.setIsForceViewInflation(false);
                 ListItem clickedItem = (ListItem) v.getTag();
                 if (clickedItem != null) {
                     clickedItem.toggleStrikeout();
@@ -163,6 +168,7 @@ public class ListItemsArrayAdapter extends ArrayAdapter<ListItem> implements Swa
         holder.btnFavorite.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                mListTitle.setIsForceViewInflation(false);
                 ListItem clickedItem = (ListItem) v.getTag();
                 if (clickedItem != null) {
                     clickedItem.toggleFavorite();
@@ -174,9 +180,19 @@ public class ListItemsArrayAdapter extends ArrayAdapter<ListItem> implements Swa
                 }
             }
         });
+
+        holder.btnEditItemName.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ListItem selectedListItem = (ListItem) v.getTag();
+                EventBus.getDefault().post(new MyEvents.showEditListItemDialog(selectedListItem.getItemUuid()));
+            }
+        });
+
         // save the item so it can be retrieved later
         holder.tvListItemName.setTag(item);
         holder.btnFavorite.setTag(item);
+        holder.btnEditItemName.setTag(item);
 
         // Return the completed view to render on screen
         return convertView;
@@ -235,18 +251,20 @@ public class ListItemsArrayAdapter extends ArrayAdapter<ListItem> implements Swa
         itemOne.setListItemManualSortKey(origItemTwoSortKey);
         itemTwo.setListItemManualSortKey(origItemOneSortKey);
 
-        EventBus.getDefault().post(new MyEvents.updateListUI());
+        EventBus.getDefault().post(new MyEvents.updateListUI(mListTitle.getLocalUuid()));
     }
 
     private class ListItemViewHolder {
         public final LinearLayout llRowItemName;
         public final TextView tvListItemName;
         public final ImageButton btnFavorite;
+        public final ImageButton btnEditItemName;
 
         public ListItemViewHolder(View base) {
             llRowItemName = (LinearLayout) base.findViewById(R.id.llRowItemName);
             tvListItemName = (TextView) base.findViewById(R.id.tvItemName);
             btnFavorite = (ImageButton) base.findViewById(R.id.btnFavorite);
+            btnEditItemName = (ImageButton) base.findViewById(R.id.btnEditItemName);
         }
     }
 }

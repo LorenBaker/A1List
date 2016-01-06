@@ -1,5 +1,6 @@
 package com.lbconsulting.a1list.database;
 
+import com.lbconsulting.a1list.activities.App;
 import com.lbconsulting.a1list.classes.MyLog;
 import com.lbconsulting.a1list.classes.MySettings;
 import com.lbconsulting.a1list.services.DownloadDataAsyncTask;
@@ -25,12 +26,16 @@ public class ListTitle extends ParseObject {
     private static final String NAME = "name";
     private static final String ATTRIBUTES = "ListAttributes";
     private static final String IS_CHECKED = "isChecked";
+    private static final String IS_FORCE_VIEW_INFLATION = "isForceViewInflation";
     private static final String IS_LIST_TITLE_DIRTY = "isListTitleDirty";
     private static final String IS_MARKED_FOR_DELETION = "isMarkedForDeletion";
     private static final String LIST_TITLE_MANUAL_SORT_KEY = "manualSortKey";
     private static final String SORT_LIST_ITEMS_ALPHABETICALLY = "sortListItemsAlphabetically";
     private static final String LOCAL_UUID = "localUuid";
     private static final String LIST_TITLE_ID = "listTitleId";
+    private static final String LIST_LOCK_STRING = "listLockString";
+    private static final String LIST_NOT_LOCK = "listNotLocked";
+
 
     public ListTitle() {
         // A default constructor is required.
@@ -38,6 +43,29 @@ public class ListTitle extends ParseObject {
 
     public static ParseQuery<ListTitle> getQuery() {
         return ParseQuery.getQuery(ListTitle.class);
+    }
+
+    public static void newInstance(String newListName) {
+        ListTitle newListTitle = new ListTitle();
+        try {
+            newListTitle.setName(newListName);
+            ListAttributes defaultAttributes = ListAttributes.getDefaultAttributes();
+            newListTitle.setAttributes(defaultAttributes);
+            newListTitle.setLocalUuid();
+            newListTitle.setListID();
+            newListTitle.setAuthor(ParseUser.getCurrentUser());
+            newListTitle.setChecked(false);
+            newListTitle.setListTitleDirty(true);
+            newListTitle.setMarkedForDeletion(false);
+            newListTitle.setSortListItemsAlphabetically(true);
+            MySettings.setActiveListTitleUuid(newListTitle.getLocalUuid());
+            newListTitle.setListTitleManualSortKey(newListTitle.getListID());
+            newListTitle.setListLockString(LIST_NOT_LOCK);
+            newListTitle.pin();
+
+        } catch (ParseException e) {
+            MyLog.e("MainActivity", "createNewList; newListTitle.pin(): ParseException: " + e.getMessage());
+        }
     }
 
     public static ListTitle getListTitle(String listTitleID) {
@@ -62,17 +90,28 @@ public class ListTitle extends ParseObject {
     public static List<ListTitle> getAllListTitles(boolean sortAlphabetically) {
         List<ListTitle> allListTitles = new ArrayList<>();
         try {
-            ParseQuery<ListTitle> query = getQuery();
-            query.whereEqualTo(IS_MARKED_FOR_DELETION, false);
+            ParseQuery<ListTitle> orQuery1 = getQuery();
+            orQuery1.whereEqualTo(LIST_LOCK_STRING, LIST_NOT_LOCK);
+
+            ParseQuery<ListTitle> orQuery2 = getQuery();
+            orQuery2.whereEqualTo(LIST_LOCK_STRING, getDeviceId());
+
+            List<ParseQuery<ListTitle>> orQueries = new ArrayList<>();
+            orQueries.add(orQuery1);
+            orQueries.add(orQuery2);
+
+            ParseQuery<ListTitle> mainQuery = ParseQuery.or(orQueries);
+            mainQuery.whereEqualTo(IS_MARKED_FOR_DELETION, false);
+
             if (sortAlphabetically) {
-                query.orderByAscending(NAME_LOWERCASE);
+                mainQuery.orderByAscending(NAME_LOWERCASE);
             } else {
-                query.orderByAscending(LIST_TITLE_MANUAL_SORT_KEY);
+                mainQuery.orderByAscending(LIST_TITLE_MANUAL_SORT_KEY);
             }
-            query.include(ATTRIBUTES);
-            query.setLimit(DownloadDataAsyncTask.QUERY_LIMIT_LIST_TITLES);
-            query.fromLocalDatastore();
-            allListTitles = query.find();
+            mainQuery.include(ATTRIBUTES);
+            mainQuery.setLimit(DownloadDataAsyncTask.QUERY_LIMIT_LIST_TITLES);
+            mainQuery.fromLocalDatastore();
+            allListTitles = mainQuery.find();
         } catch (ParseException e) {
             MyLog.e("ListTitle", "getAllListTitles: ParseException: " + e.getMessage());
         }
@@ -171,18 +210,33 @@ public class ListTitle extends ParseObject {
 
         } catch (ParseException e) {
             if (e.getCode() != 101) {  // 101 = ObjectNotFound
-                MyLog.e("ListTitle", "listExists: ParseException: " + e.getMessage());
+                MyLog.e("ListTitle", "getIsSameObject: ParseException: " + e.getMessage());
             }
         }
 
         return result;
     }
 
+    private static String getDeviceId() {
+        String androidDeviceId = "NoAndroidId";
+        try {
+            androidDeviceId = android.provider.Settings.Secure.getString(App.getContext().getContentResolver(),
+                    android.provider.Settings.Secure.ANDROID_ID);
+            if (androidDeviceId == null) {
+                androidDeviceId = "NoAndroidId";
+            }
+        } catch (Exception e) {
+            MyLog.e("ListTitle", "getDeviceId: Exception: " + e.getMessage());
+        }
+
+        return androidDeviceId;
+    }
+
     private String getObjectID() {
         return getObjectId();
     }
 
-    public void setLocalUuid() {
+    private void setLocalUuid() {
         UUID uuid = UUID.randomUUID();
         put(LOCAL_UUID, uuid.toString());
         setListTitleDirty(true);
@@ -220,26 +274,41 @@ public class ListTitle extends ParseObject {
         setListTitleDirty(true);
     }
 
-    public boolean isChecked() {
-        return getBoolean(IS_CHECKED);
-    }
+// --Commented out by Inspection START (1/3/2016 8:32 AM):
+//    public boolean isChecked() {
+//        return getBoolean(IS_CHECKED);
+//    }
+// --Commented out by Inspection STOP (1/3/2016 8:32 AM)
 
     public void setChecked(boolean isChecked) {
         put(IS_CHECKED, isChecked);
         setListTitleDirty(true);
     }
 
-    public boolean isListTitleDirty() {
-        return getBoolean(IS_LIST_TITLE_DIRTY);
+    public boolean isForceViewInflation() {
+        return getBoolean(IS_FORCE_VIEW_INFLATION);
     }
+
+    public void setIsForceViewInflation(boolean isForceViewInflation) {
+        put(IS_FORCE_VIEW_INFLATION, isForceViewInflation);
+        setListTitleDirty(true);
+    }
+
+// --Commented out by Inspection START (1/3/2016 8:32 AM):
+//    public boolean isListTitleDirty() {
+//        return getBoolean(IS_LIST_TITLE_DIRTY);
+//    }
+// --Commented out by Inspection STOP (1/3/2016 8:32 AM)
 
     public void setListTitleDirty(boolean isDirty) {
         put(IS_LIST_TITLE_DIRTY, isDirty);
     }
 
-    public boolean isMarkedForDeletion() {
-        return getBoolean(IS_MARKED_FOR_DELETION);
-    }
+// --Commented out by Inspection START (1/3/2016 8:32 AM):
+//    public boolean isMarkedForDeletion() {
+//        return getBoolean(IS_MARKED_FOR_DELETION);
+//    }
+// --Commented out by Inspection STOP (1/3/2016 8:32 AM)
 
     public void setMarkedForDeletion(boolean isMarkedForDeletion) {
         put(IS_MARKED_FOR_DELETION, isMarkedForDeletion);
@@ -259,7 +328,7 @@ public class ListTitle extends ParseObject {
         return getLong(LIST_TITLE_ID);
     }
 
-    public void setListID() {
+    private void setListID() {
         long titleID = MySettings.getNextListTitleID();
         put(LIST_TITLE_ID, titleID);
         setListTitleDirty(true);
@@ -272,6 +341,27 @@ public class ListTitle extends ParseObject {
     public void setSortListItemsAlphabetically(boolean sortAlphabetically) {
         put(SORT_LIST_ITEMS_ALPHABETICALLY, sortAlphabetically);
         setListTitleDirty(true);
+    }
+
+    private String getListLockString() {
+        return getString(LIST_LOCK_STRING);
+    }
+
+    private void setListLockString(String listLockString) {
+        put(LIST_LOCK_STRING, listLockString);
+        setListTitleDirty(true);
+    }
+
+    public boolean isListLocked() {
+        return !getListLockString().equals(LIST_NOT_LOCK);
+    }
+
+    public void setLockList(boolean lockList) {
+        if (lockList) {
+            setListLockString(getDeviceId());
+        } else {
+            setListLockString(LIST_NOT_LOCK);
+        }
     }
 
     @Override

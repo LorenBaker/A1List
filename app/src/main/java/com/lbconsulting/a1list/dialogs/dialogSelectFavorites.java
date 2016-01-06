@@ -1,11 +1,12 @@
 package com.lbconsulting.a1list.dialogs;
 
-import android.app.AlertDialog;
+
 import android.app.Dialog;
-import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -76,7 +77,7 @@ public class dialogSelectFavorites extends DialogFragment {
                     public void onClick(View v) {
                         // Apply
                         mFavoritesArrayAdapter.selectCheckedItems();
-                        EventBus.getDefault().post(new MyEvents.updateListUI());
+                        EventBus.getDefault().post(new MyEvents.updateListUI(mListTitle.getLocalUuid()));
                         dismiss();
                     }
                 });
@@ -126,7 +127,7 @@ public class dialogSelectFavorites extends DialogFragment {
 //            @Override
 //            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 //                ListAttributes selectedAttributes = mFavoritesArrayAdapter.getItem(position);
-//                EventBus.getDefault().post(new MyEvents.replaceAttributes(selectedAttributes.getLocalUuid()));
+//                EventBus.getDefault().post(new MyEvents.setLocalAttributes(selectedAttributes.getLocalUuid()));
 //                dismiss();
 //            }
 //        });

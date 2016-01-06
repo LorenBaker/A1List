@@ -214,7 +214,7 @@ public class ListAttributes extends ParseObject {
         return attributes;
     }
 
-    public static LocalListAttributes createLocalListAttributes(ListAttributes sourceAttributes) {
+    public static LocalListAttributes createLocalAttributes(ListAttributes sourceAttributes) {
         LocalListAttributes targetAttributes = new LocalListAttributes();
 
         targetAttributes.setEndColor(sourceAttributes.getEndColor());

@@ -2,31 +2,26 @@ package com.lbconsulting.a1list.activities;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.design.widget.TabLayout;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.RelativeLayout;
 
 import com.lbconsulting.a1list.R;
+import com.lbconsulting.a1list.adapters.SectionsPagerAdapter;
 import com.lbconsulting.a1list.classes.CommonMethods;
 import com.lbconsulting.a1list.classes.MyEvents;
 import com.lbconsulting.a1list.classes.MyLog;
@@ -34,11 +29,11 @@ import com.lbconsulting.a1list.classes.MySettings;
 import com.lbconsulting.a1list.database.ListAttributes;
 import com.lbconsulting.a1list.database.ListItem;
 import com.lbconsulting.a1list.database.ListTitle;
+import com.lbconsulting.a1list.dialogs.dialogEditListItem;
 import com.lbconsulting.a1list.dialogs.dialogListItemSorting;
 import com.lbconsulting.a1list.dialogs.dialogNewListItem;
 import com.lbconsulting.a1list.dialogs.dialogNewListTitle;
 import com.lbconsulting.a1list.dialogs.dialogSelectFavorites;
-import com.lbconsulting.a1list.fragments.fragListItems;
 import com.lbconsulting.a1list.services.DownloadDataAsyncTask;
 import com.lbconsulting.a1list.services.UploadDirtyObjectsService;
 import com.parse.DeleteCallback;
@@ -59,22 +54,17 @@ import java.util.Locale;
 
 import de.greenrobot.event.EventBus;
 
-public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends AppCompatActivity {
 
     private static CoordinatorLayout mSnackBarView;
     private static ListTitle mActiveListTitle;
     private static Toolbar mToolbar;
+    private SectionsPagerAdapter mSectionsPagerAdapter;
+    private ViewPager mViewPager;
+    private TabLayout mTabLayout;
     private boolean mRefreshDataFromTheCloud;
-    private RelativeLayout mFragmentContainer;
-    private String mActiveFragmentTag;
-    private Menu mNavigationMenu;
-    private List<ListTitle> mListTitles;
 
     //region Static Methods
-    public static void setActiveListTitle(ListTitle listTitle) {
-        mActiveListTitle = listTitle;
-    }
 
     private static void showSnackBar(String message) {
         Snackbar
@@ -105,8 +95,36 @@ public class MainActivity extends AppCompatActivity
         EventBus.getDefault().register(this);
         ParseAnalytics.trackAppOpenedInBackground(getIntent());
 
+        mSnackBarView = (CoordinatorLayout) findViewById(R.id.main_content);
+
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
+
+        // Set up the ViewPager with the sections adapter.
+        mViewPager = (ViewPager) findViewById(R.id.container);
+        // Create the adapter that will return a fragListItems fragment
+        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+        mViewPager.setAdapter(mSectionsPagerAdapter);
+        mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                updateActiveListTitle(position);
+                mActiveListTitle.setIsForceViewInflation(false);
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
+
+        mTabLayout = (TabLayout) findViewById(R.id.tabs);
+        mTabLayout.setupWithViewPager(mViewPager);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -114,59 +132,44 @@ public class MainActivity extends AppCompatActivity
             public void onClick(View view) {
                 if (mActiveListTitle != null) {
                     showNewListItemDialog(mActiveListTitle);
+                    mActiveListTitle.setIsForceViewInflation(false);
                 } else {
                     MainActivity.showCreateNewListSnackBar();
                 }
             }
         });
 
-        mFragmentContainer = (RelativeLayout) findViewById(R.id.rlActivityMain);
-        mSnackBarView = (CoordinatorLayout) findViewById(R.id.snackbarPosition);
+    }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, mToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
-        toggle.syncState();
+    private void updateActiveListTitle(int position) {
+        mActiveListTitle = mSectionsPagerAdapter.getListTitle(position);
+        if(mActiveListTitle!=null) {
+            MySettings.setActiveListTitleUuid(mActiveListTitle.getLocalUuid());
+            setToolBarTitle(mActiveListTitle.getName());
+        }
+    }
 
-
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
-
-        mNavigationMenu = navigationView.getMenu();
-
-        mRefreshDataFromTheCloud = MySettings.getRefreshDataFromTheCloud();
-
+    private void setToolBarTitle(String title) {
+        mToolbar.setTitle(title);
     }
 
     //region OnEvent
-    public void onEvent(MyEvents.setActionBarTitle event) {
-        if (mToolbar != null) {
-            mToolbar.setTitle(event.getTitle());
-        }
+
+    public void onEvent(MyEvents.refreshSectionsPagerAdapter event) {
+        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+        mViewPager.setAdapter(mSectionsPagerAdapter);
+        mTabLayout.setupWithViewPager(mViewPager);
+        startA1List(false);
+    }
+
+    public void onEvent(MyEvents.showEditListItemDialog event) {
+        FragmentManager fm = getSupportFragmentManager();
+        dialogEditListItem dialog = dialogEditListItem.newInstance(event.getListItemUuid());
+        dialog.show(fm, "dialogEditListItem");
     }
 
     public void onEvent(MyEvents.showOkDialog event) {
         CommonMethods.showOkDialog(this, event.getTitle(), event.getMessage());
-    }
-
-    public void onEvent(MyEvents.setFragmentContainerBackground event) {
-        setFragmentContainerBackground(event.getStartColor(), event.getEndColor());
-    }
-
-    private void setFragmentContainerBackground(int startColor, int endColor) {
-        int colors[] = {startColor, endColor};
-        GradientDrawable backgroundDrawable = new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, colors);
-        mFragmentContainer.setBackground(backgroundDrawable);
-    }
-
-    public void onEvent(MyEvents.updateUI event) {
-        updateUI();
-    }
-
-    private void updateUI() {
-        MyLog.i("MainActivity", "updateUI");
-        startA1List(mRefreshDataFromTheCloud);
     }
 
     public void onEvent(MyEvents.startA1List event) {
@@ -175,15 +178,6 @@ public class MainActivity extends AppCompatActivity
 
     //endregion
 
-    @Override
-    public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
-        }
-    }
 
     @Override
     protected void onResume() {
@@ -240,33 +234,23 @@ public class MainActivity extends AppCompatActivity
 
     private void startA1List(boolean refreshDataFromTheCloud) {
         MyLog.i("MainActivity", "startA1List");
-        setupNavigationMenu();
 
         String activeListTitleUuid = MySettings.getActiveListTitleUuid();
         if (activeListTitleUuid.equals(MySettings.NOT_AVAILABLE)) {
-            // get all ListTitles
-            List<ListTitle> allLists = ListTitle.getAllListTitles(MySettings.isAlphabeticallySortNavigationMenu());
-
-            if (allLists.size() > 0) {
-                // Since there are ListTitles in the datastore ... select the first ListTitle
-                mActiveListTitle = allLists.get(0);
-                activeListTitleUuid = mActiveListTitle.getLocalUuid();
-            } else {
-                mActiveListTitle = null;
-                // show default gradient
-                ListAttributes defaultAttributes = ListAttributes.getDefaultAttributes();
-                if (defaultAttributes != null) {
-                    mFragmentContainer.setBackground(defaultAttributes.getBackgroundDrawable());
-                }
-                if (!MySettings.isFirstTimeRun()) {
-                    showCreateNewListSnackBar();
-                }
+            if (mSectionsPagerAdapter.getCount() > 0) {
+                mViewPager.setCurrentItem(0);
             }
         } else {
-            mActiveListTitle = ListTitle.getListTitle(activeListTitleUuid);
+            int position = mSectionsPagerAdapter.getPosition(activeListTitleUuid);
+            int currentPosition = mViewPager.getCurrentItem();
+            mViewPager.setCurrentItem(position);
+            if (position == currentPosition) {
+                // Since position and currentPosition are equal
+                // mViewPager's OnPageChangeListener won't fire
+                // but the activeListTitle still needs to be updated... so update it.
+                updateActiveListTitle(position);
+            }
         }
-
-        showList(activeListTitleUuid);
 
         if (refreshDataFromTheCloud) {
             downloadDataFromParse();
@@ -394,29 +378,6 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-    private void showList(String listTitleID) {
-        FragmentManager fm = getFragmentManager();
-
-        if (listTitleID.equals(MySettings.NOT_AVAILABLE)) {
-            if (mActiveFragmentTag != null && !mActiveFragmentTag.isEmpty()) {
-                Fragment activeFragment = fm.findFragmentByTag(mActiveFragmentTag);
-                if (activeFragment != null) {
-                    fm.beginTransaction()
-                            .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-                            .remove(activeFragment)
-                            .commit();
-                }
-            }
-        } else {
-            mActiveFragmentTag = "frag_" + listTitleID;
-            fm.beginTransaction()
-                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-                    .replace(R.id.rlActivityMain,
-                            fragListItems.newInstance(listTitleID), mActiveFragmentTag)
-                    .commit();
-        }
-    }
-
     @Override
     protected void onPause() {
         // A1List sync strategy:
@@ -427,6 +388,14 @@ public class MainActivity extends AppCompatActivity
         MyLog.i("MainActivity", "onPause");
         uploadDirtyObjects();
     }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        MyLog.i("MainActivity", "onStart");
+        mRefreshDataFromTheCloud = MySettings.getRefreshDataFromTheCloud();
+    }
+
 
     private void uploadDirtyObjects() {
         MyLog.i("MainActivity", "uploadDirtyObjects");
@@ -451,7 +420,7 @@ public class MainActivity extends AppCompatActivity
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         MyLog.i("MainActivity", "onRestoreInstanceState");
-        setupNavigationMenu();
+//        setupNavigationMenu();
     }
 
     @Override
@@ -545,7 +514,7 @@ public class MainActivity extends AppCompatActivity
 
 
     private void showListItemSortingDialog() {
-        FragmentManager fm = getFragmentManager();
+        FragmentManager fm = getSupportFragmentManager();
         dialogListItemSorting dialog = dialogListItemSorting.newInstance(mActiveListTitle.getLocalUuid());
         dialog.show(fm, "dialogListItemSorting");
     }
@@ -557,55 +526,28 @@ public class MainActivity extends AppCompatActivity
                 item.setMarkedForDeletion(true);
                 item.setIsStruckOut(false);
             }
-            EventBus.getDefault().post(new MyEvents.updateListUI());
+            EventBus.getDefault().post(new MyEvents.updateListUI(mActiveListTitle.getLocalUuid()));
         }
     }
 
     private void showFavoriteItems() {
-        FragmentManager fm = getFragmentManager();
+        FragmentManager fm = getSupportFragmentManager();
         dialogSelectFavorites dialog = dialogSelectFavorites.newInstance(mActiveListTitle.getLocalUuid());
         dialog.show(fm, "dialogSelectFavorites");
     }
 
     private void showNewListDialog() {
-        FragmentManager fm = getFragmentManager();
+        FragmentManager fm = getSupportFragmentManager();
         dialogNewListTitle dialog = dialogNewListTitle.newInstance(dialogNewListTitle.SOURCE_FROM_MAIN_ACTIVITY);
         dialog.show(fm, "dialogNewListTitle");
     }
 
     private void showNewListItemDialog(ListTitle listTitle) {
         if (listTitle != null) {
-            FragmentManager fm = getFragmentManager();
+            FragmentManager fm = getSupportFragmentManager();
             dialogNewListItem dialog = dialogNewListItem.newInstance(listTitle.getLocalUuid());
             dialog.show(fm, "dialogNewListItem");
         }
-    }
-
-    private void setupNavigationMenu() {
-
-        mListTitles = ListTitle.getAllListTitles(MySettings.isAlphabeticallySortNavigationMenu());
-        MyLog.i("MainActivity", "setupNavigationMenu with " + mListTitles.size() + " ListTitles.");
-        mNavigationMenu.clear();
-        if (mListTitles != null) {
-            int itemID = 0;
-            for (ListTitle listTitle : mListTitles) {
-                mNavigationMenu.add(Menu.NONE, itemID, Menu.NONE, listTitle.getName());
-                itemID++;
-            }
-        }
-    }
-
-    @SuppressWarnings("StatementWithEmptyBody")
-    @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
-        int itemId = item.getItemId();
-        ListTitle listTitle = mListTitles.get(itemId);
-        showList(listTitle.getLocalUuid());
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
-        return true;
     }
 
 }

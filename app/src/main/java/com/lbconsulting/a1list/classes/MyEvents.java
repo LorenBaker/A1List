@@ -4,14 +4,66 @@ package com.lbconsulting.a1list.classes;
  * EventBus events.
  */
 public class MyEvents {
-    public static class updateUI {
-        public updateUI() {
+//    public static class updateUI {
+//        public updateUI() {
+//        }
+//    }
+
+
+    public static class refreshSectionsPagerAdapter {
+        public refreshSectionsPagerAdapter() {
+
         }
     }
 
-    public static class updateListUI {
-        public updateListUI() {
+    public static class showEditListTitleDialog {
+        String mListTitleUuid;
+
+        public showEditListTitleDialog(String listTitleUuid) {
+            mListTitleUuid = listTitleUuid;
         }
+
+        public String getListTitleUuid() {
+            return mListTitleUuid;
+        }
+    }
+
+    public static class showEditListItemDialog {
+        String mListItemUuid;
+
+        public showEditListItemDialog(String listItemUuid) {
+            mListItemUuid = listItemUuid;
+        }
+
+        public String getListItemUuid() {
+            return mListItemUuid;
+        }
+    }
+
+    public static class showEditAttributesNameDialog {
+        String mAttributesUuid;
+
+        public showEditAttributesNameDialog(String attributesUuid) {
+            mAttributesUuid = attributesUuid;
+        }
+
+        public String getAttributesUuid() {
+            return mAttributesUuid;
+        }
+    }
+
+
+    public static class updateListUI {
+        String mListTitleUuid;
+
+        public updateListUI(String listTitleUuid) {
+            mListTitleUuid = listTitleUuid;
+        }
+
+        public String getListTitleUuid() {
+            return mListTitleUuid;
+        }
+
     }
 
     public static class updateListTitleUI {
@@ -31,15 +83,9 @@ public class MyEvents {
         }
     }
 
-    public static class setActionBarTitle {
-        private final String mTitle;
+    public static class dismissDialogSelectTheme {
+        public dismissDialogSelectTheme() {
 
-        public setActionBarTitle(String title) {
-            this.mTitle = title;
-        }
-
-        public String getTitle() {
-            return mTitle;
         }
     }
 
@@ -61,28 +107,10 @@ public class MyEvents {
         }
     }
 
-    public static class setFragmentContainerBackground {
-        private final int mStartColor;
-        private final int mEndColor;
-
-        public setFragmentContainerBackground(int startColor, int endColor) {
-            mStartColor = startColor;
-            mEndColor = endColor;
-        }
-
-        public int getStartColor() {
-            return mStartColor;
-        }
-
-        public int getEndColor() {
-            return mEndColor;
-        }
-    }
-
-    public static class setAttributesName {
+    public static class setLocalAttributesName {
         private final String mName;
 
-        public setAttributesName(String name) {
+        public setLocalAttributesName(String name) {
             mName = name;
         }
 
@@ -91,10 +119,10 @@ public class MyEvents {
         }
     }
 
-    public static class setAttributesStartColor {
+    public static class setLocalAttributesStartColor {
         private final int mColor;
 
-        public setAttributesStartColor(int color) {
+        public setLocalAttributesStartColor(int color) {
             mColor = color;
         }
 
@@ -103,10 +131,10 @@ public class MyEvents {
         }
     }
 
-    public static class setAttributesEndColor {
+    public static class setLocalAttributesEndColor {
         private final int mColor;
 
-        public setAttributesEndColor(int color) {
+        public setLocalAttributesEndColor(int color) {
             mColor = color;
         }
 
@@ -115,10 +143,10 @@ public class MyEvents {
         }
     }
 
-    public static class setAttributesTextColor {
+    public static class setLocalAttributesTextColor {
         private final int mColor;
 
-        public setAttributesTextColor(int color) {
+        public setLocalAttributesTextColor(int color) {
             mColor = color;
         }
 
@@ -127,10 +155,10 @@ public class MyEvents {
         }
     }
 
-    public static class setAttributesTextSize {
+    public static class setLocalAttributesTextSize {
         private final int mSelectedTextSize;
 
-        public setAttributesTextSize(int selectedTextSize) {
+        public setLocalAttributesTextSize(int selectedTextSize) {
             mSelectedTextSize = selectedTextSize;
         }
 
@@ -139,10 +167,10 @@ public class MyEvents {
         }
     }
 
-    public static class setAttributesHorizontalPadding {
+    public static class setLocalAttributesHorizontalPadding {
         private final int mHorizontalPadding;
 
-        public setAttributesHorizontalPadding(int selectedHorizontalPadding) {
+        public setLocalAttributesHorizontalPadding(int selectedHorizontalPadding) {
             mHorizontalPadding = selectedHorizontalPadding;
         }
 
@@ -151,10 +179,10 @@ public class MyEvents {
         }
     }
 
-    public static class setAttributesVerticalPadding {
+    public static class setLocalAttributesVerticalPadding {
         private final int mVerticalPadding;
 
-        public setAttributesVerticalPadding(int selectedVerticalPadding) {
+        public setLocalAttributesVerticalPadding(int selectedVerticalPadding) {
             mVerticalPadding = selectedVerticalPadding;
         }
 
@@ -163,10 +191,10 @@ public class MyEvents {
         }
     }
 
-    public static class replaceAttributes {
+    public static class setLocalAttributes {
         private final String mAttributeUuid;
 
-        public replaceAttributes(String attributeUuid) {
+        public setLocalAttributes(String attributeUuid) {
             mAttributeUuid = attributeUuid;
         }
 

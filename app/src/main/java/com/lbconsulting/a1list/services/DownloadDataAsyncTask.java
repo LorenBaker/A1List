@@ -66,10 +66,12 @@ public class DownloadDataAsyncTask extends AsyncTask<Void, Void, Void> {
     protected void onPostExecute(Void aVoid) {
         MyLog.i("DownloadDataAsyncTask", "onPostExecute");
         cancelDownLoadNotification();
-        EventBus.getDefault().post(new MyEvents.updateListUI());
-        if (mRestartA1List) {
-            EventBus.getDefault().post(new MyEvents.startA1List(false));
-        }
+        EventBus.getDefault().post(new MyEvents.refreshSectionsPagerAdapter());
+//        EventBus.getDefault().post(new MyEvents.updateUI());
+//        EventBus.getDefault().post(new MyEvents.updateListUI(null));
+//        if (mRestartA1List) {
+//            EventBus.getDefault().post(new MyEvents.startA1List(false));
+//        }
         super.onPostExecute(aVoid);
     }
 

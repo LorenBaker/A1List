@@ -1,15 +1,12 @@
 package com.lbconsulting.a1list.activities;
 
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.app.FragmentManager;
-import android.content.Context;
-import android.content.DialogInterface;
+
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -17,12 +14,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.Button;
-import android.widget.TextView;
 
 import com.lbconsulting.a1list.R;
-import com.lbconsulting.a1list.adapters.ListAttributesArrayAdapter;
 import com.lbconsulting.a1list.adapters.ListTitleArrayAdapter;
+import com.lbconsulting.a1list.adapters.ThemeNameArrayAdapter;
 import com.lbconsulting.a1list.classes.CommonMethods;
 import com.lbconsulting.a1list.classes.MyEvents;
 import com.lbconsulting.a1list.classes.MyLog;
@@ -50,7 +45,7 @@ public class ManageListsAndThemesActivity extends AppCompatActivity {
     private int mDataType;
     private DynamicListView lvItems;
     private ListTitleArrayAdapter mListTitleArrayAdapter;
-    private ListAttributesArrayAdapter mListAttributesArrayAdapter;
+    private ThemeNameArrayAdapter mThemeNameArrayAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -130,46 +125,46 @@ public class ManageListsAndThemesActivity extends AppCompatActivity {
 
                 lvItems.enableDragAndDrop();
 
-                lvItems.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        TextView tv = (TextView) view.findViewById(R.id.tvItemName);
-                        ListTitle listTitle = (ListTitle) tv.getTag();
-                        FragmentManager fm = getFragmentManager();
-                        dialogEditListTitle dialog = dialogEditListTitle.newInstance(listTitle.getLocalUuid());
-                        dialog.show(fm, "dialogEditListTitle");
-                    }
-                });
+//                lvItems.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//                    @Override
+//                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+//                        TextView tv = (TextView) view.findViewById(R.id.tvItemName);
+//                        ListTitle listTitle = (ListTitle) tv.getTag();
+//                        FragmentManager fm = getSupportFragmentManager();
+//                        dialogEditListTitle dialog = dialogEditListTitle.newInstance(listTitle.getLocalUuid());
+//                        dialog.show(fm, "dialogEditListTitle");
+//                    }
+//                });
 
                 break;
 
             case MANAGE_THEMES:
-                getSupportActionBar().setTitle("Manage Themes");
-                mListAttributesArrayAdapter = new ListAttributesArrayAdapter(this, lvItems);
-                lvItems.setAdapter(mListAttributesArrayAdapter);
+                getSupportActionBar().setTitle("Swipe to Delete Theme");
+                mThemeNameArrayAdapter = new ThemeNameArrayAdapter(this, lvItems);
+                lvItems.setAdapter(mThemeNameArrayAdapter);
                 lvItems.enableSwipeToDismiss(
                         new OnDismissCallback() {
                             @Override
                             public void onDismiss(@NonNull final ViewGroup listView, @NonNull final int[] reverseSortedPositions) {
 
                                 int position = reverseSortedPositions[0];
-                                ListAttributes item = mListAttributesArrayAdapter.getItem(position);
+                                ListAttributes item = mThemeNameArrayAdapter.getItem(position);
                                 deleteListAttributes(item);
                                 updateUI();
                             }
                         }
                 );
 
-                lvItems.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        TextView tv = (TextView) view.findViewById(R.id.tvItemName);
-                        ListAttributes attributes = (ListAttributes) tv.getTag();
-                        FragmentManager fm = getFragmentManager();
-                        dialogEditListAttributesName dialog = dialogEditListAttributesName.newInstance(attributes.getLocalUuid());
-                        dialog.show(fm, "dialogEditListAttributesName");
-                    }
-                });
+//                lvItems.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//                    @Override
+//                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+//                        TextView tv = (TextView) view.findViewById(R.id.tvItemName);
+//                        ListAttributes attributes = (ListAttributes) tv.getTag();
+//                        FragmentManager fm = getSupportFragmentManager();
+//                        dialogEditListAttributesName dialog = dialogEditListAttributesName.newInstance(attributes.getLocalUuid());
+//                        dialog.show(fm, "dialogEditListAttributesName");
+//                    }
+//                });
                 break;
 
         }
@@ -177,8 +172,22 @@ public class ManageListsAndThemesActivity extends AppCompatActivity {
         updateUI();
     }
 
+    public void onEvent(MyEvents.showEditListTitleDialog event) {
+        FragmentManager fm = getSupportFragmentManager();
+        dialogEditListTitle dialog = dialogEditListTitle.newInstance(event.getListTitleUuid());
+        dialog.show(fm, "dialogEditListTitle");
+    }
+
+
+
+    public void onEvent(MyEvents.showEditAttributesNameDialog event) {
+        FragmentManager fm = getSupportFragmentManager();
+        dialogEditListAttributesName dialog = dialogEditListAttributesName.newInstance(event.getAttributesUuid());
+        dialog.show(fm, "dialogEditListAttributesName");
+    }
+
     private void showNewListDialog() {
-        FragmentManager fm = getFragmentManager();
+        FragmentManager fm = getSupportFragmentManager();
         dialogNewListTitle dialog = dialogNewListTitle.newInstance(dialogNewListTitle.SOURCE_FROM_MANAGE_LISTS_ACTIVITY);
         dialog.show(fm, "dialogNewListTitle");
     }
@@ -220,6 +229,7 @@ public class ManageListsAndThemesActivity extends AppCompatActivity {
         // mark the ListTitle for deletion
         listTitle.setMarkedForDeletion(true);
 
+
         if (MySettings.getActiveListTitleUuid().equals(listTitle.getLocalUuid())) {
             // The active ListTitle is being deleted ... so reset the active ListTitle ID
             MySettings.setActiveListTitleUuid(MySettings.NOT_AVAILABLE);
@@ -258,8 +268,8 @@ public class ManageListsAndThemesActivity extends AppCompatActivity {
 
             case MANAGE_THEMES:
                 List<ListAttributes> allAttributes = ListAttributes.getAllListAttributes();
-                mListAttributesArrayAdapter.setData(allAttributes);
-                mListAttributesArrayAdapter.notifyDataSetChanged();
+                mThemeNameArrayAdapter.setData(allAttributes);
+                mThemeNameArrayAdapter.notifyDataSetChanged();
                 MyLog.i("ManageListsAndThemesActivity", "updateUI with " + allAttributes.size() + " ListAttributes.");
                 break;
         }
@@ -314,7 +324,7 @@ public class ManageListsAndThemesActivity extends AppCompatActivity {
     }
 
     private void showListTitleSortingDialog() {
-        FragmentManager fm = getFragmentManager();
+        FragmentManager fm = getSupportFragmentManager();
         dialogListTitleSorting dialog = dialogListTitleSorting.newInstance();
         dialog.show(fm, "dialogListTitleSorting");
     }

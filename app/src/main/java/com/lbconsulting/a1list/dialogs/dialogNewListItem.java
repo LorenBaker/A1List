@@ -1,11 +1,13 @@
 package com.lbconsulting.a1list.dialogs;
 
-import android.app.AlertDialog;
+
 import android.app.Dialog;
-import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputLayout;
+import android.support.v4.app.DialogFragment;
+import android.support.v7.app.AlertDialog;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -19,8 +21,6 @@ import com.lbconsulting.a1list.classes.MyEvents;
 import com.lbconsulting.a1list.classes.MyLog;
 import com.lbconsulting.a1list.database.ListItem;
 import com.lbconsulting.a1list.database.ListTitle;
-import com.parse.ParseException;
-import com.parse.ParseUser;
 
 import de.greenrobot.event.EventBus;
 
@@ -80,7 +80,7 @@ public class dialogNewListItem extends DialogFragment {
                     @Override
                     public void onClick(final View v) {
                         if (addNewItem(txtItemName.getText().toString().trim())) {
-                            EventBus.getDefault().post(new MyEvents.updateListUI());
+                            EventBus.getDefault().post(new MyEvents.updateListUI(mListTitle.getLocalUuid()));
                             dismiss();
                         }
                     }
@@ -92,7 +92,7 @@ public class dialogNewListItem extends DialogFragment {
                     @Override
                     public void onClick(View v) {
                         // Cancel
-                        EventBus.getDefault().post(new MyEvents.updateListUI());
+                        EventBus.getDefault().post(new MyEvents.updateListUI(mListTitle.getLocalUuid()));
                         dismiss();
                     }
                 });
@@ -118,40 +118,20 @@ public class dialogNewListItem extends DialogFragment {
             txtName_input_layout.setError(errorMsg);
 
         } else if (ListItem.itemExists(mListTitle, newItemName)) {
-
             String errorMsg = String.format(getActivity()
                     .getString(R.string.newItemName_itemExists_error), newItemName);
             txtName_input_layout.setError(errorMsg);
 
         } else {
             // ok to create item
-            createNewItem(newItemName);
+            ListItem.newInstance(newItemName, mListTitle);
             result = true;
         }
         return result;
     }
 
-    private void createNewItem(String newItemName) {
-        try {
-            ListItem newItem = new ListItem();
-            newItem.setItemUuid();
-            newItem.setItemID();
-            newItem.setName(newItemName);
-            newItem.setListTitle(mListTitle);
-            newItem.setAttributes(mListTitle.getAttributes());
-            newItem.setAuthor(ParseUser.getCurrentUser());
-            newItem.setChecked(false);
-            newItem.setIsFavorite(true);
-            newItem.setMarkedForDeletion(false);
-            newItem.setIsStruckOut(false);
-            newItem.setListItemManualSortKey(newItem.getItemID());
-            newItem.pin();
-        } catch (ParseException e) {
-            MyLog.e("dialogNewListItem", "createNewItem: ParseException: " + e.getMessage());
-        }
-    }
 
-
+    @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         MyLog.i("dialogNewListItem", "onCreateDialog");

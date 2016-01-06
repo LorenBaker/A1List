@@ -1,11 +1,13 @@
 package com.lbconsulting.a1list.dialogs;
 
-import android.app.AlertDialog;
+
 import android.app.Dialog;
-import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputLayout;
+import android.support.v4.app.DialogFragment;
+import android.support.v7.app.AlertDialog;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -17,11 +19,7 @@ import android.widget.EditText;
 import com.lbconsulting.a1list.R;
 import com.lbconsulting.a1list.classes.MyEvents;
 import com.lbconsulting.a1list.classes.MyLog;
-import com.lbconsulting.a1list.classes.MySettings;
-import com.lbconsulting.a1list.database.ListAttributes;
 import com.lbconsulting.a1list.database.ListTitle;
-import com.parse.ParseException;
-import com.parse.ParseUser;
 
 import de.greenrobot.event.EventBus;
 
@@ -133,35 +131,16 @@ public class dialogNewListTitle extends DialogFragment {
 
         } else {
             // ok to create list
-            createNewList(newListName);
+            ListTitle.newInstance(newListName);
             result = true;
         }
         return result;
     }
 
-    private void createNewList(String newListName) {
-        ListTitle newListTitle = new ListTitle();
-        try {
-            newListTitle.setName(newListName);
-            ListAttributes defaultAttributes = ListAttributes.getDefaultAttributes();
-            newListTitle.setAttributes(defaultAttributes);
-            newListTitle.setLocalUuid();
-            newListTitle.setListID();
-            newListTitle.setAuthor(ParseUser.getCurrentUser());
-            newListTitle.setChecked(false);
-            newListTitle.setListTitleDirty(true);
-            newListTitle.setMarkedForDeletion(false);
-            newListTitle.setSortListItemsAlphabetically(true);
-            MySettings.setActiveListTitleUuid(newListTitle.getLocalUuid());
-            newListTitle.setListTitleManualSortKey(newListTitle.getListID());
-            newListTitle.pin();
-
-        } catch (ParseException e) {
-            MyLog.e("MainActivity", "createNewList; newListTitle.pin(): ParseException: " + e.getMessage());
-        }
-    }
 
 
+
+    @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         MyLog.i("dialogNewListTitle", "onCreateDialog");
