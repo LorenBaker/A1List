@@ -38,7 +38,7 @@ public class ListItemsArrayAdapter extends ArrayAdapter<ListItem> implements Swa
     private final String mListName;
     private ListAttributes mAttributes;
     private ListTitle mListTitle;
-    private  boolean mIsForceViewInflation;
+    private boolean mIsForceViewInflation;
 
     public ListItemsArrayAdapter(Context context, ListView listView, ListTitle listTitle) {
         super(context, 0);
@@ -50,10 +50,11 @@ public class ListItemsArrayAdapter extends ArrayAdapter<ListItem> implements Swa
         MyLog.i("ListItemsArrayAdapter", "Initialized for List: " + mListName);
     }
 
-    public void setData(List<ListItem> data) {
+    public void setData(List<ListItem> data, ListAttributes attributes) {
         if (data == null) {
             MyLog.i("ListItemsArrayAdapter", "setData: data NULL");
         }
+        mAttributes = attributes;
         clear();
         if (data != null) {
             addAll(data);
@@ -96,6 +97,10 @@ public class ListItemsArrayAdapter extends ArrayAdapter<ListItem> implements Swa
         return position;
     }
 
+    public void setAttributes(ListAttributes attributes) {
+        mAttributes = attributes;
+    }
+
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         ListItemViewHolder holder;
@@ -110,7 +115,7 @@ public class ListItemsArrayAdapter extends ArrayAdapter<ListItem> implements Swa
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.row_list_item, parent, false);
             holder = new ListItemViewHolder(convertView);
 
-            mAttributes = item.getAttributes();
+//            mAttributes = item.getAttributes();
             if (mAttributes != null) {
                 holder.tvListItemName.setTextSize(TypedValue.COMPLEX_UNIT_SP, mAttributes.getTextSize());
                 holder.tvListItemName.setTextColor(mAttributes.getTextColor());
@@ -219,6 +224,7 @@ public class ListItemsArrayAdapter extends ArrayAdapter<ListItem> implements Swa
         } else {
             tv.setTypeface(null, Typeface.ITALIC);
         }
+        tv.setTextColor(ContextCompat.getColor(mContext, R.color.crimson));
         tv.setPaintFlags(tv.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
     }
 
@@ -228,6 +234,7 @@ public class ListItemsArrayAdapter extends ArrayAdapter<ListItem> implements Swa
         } else {
             tv.setTypeface(null, Typeface.NORMAL);
         }
+        tv.setTextColor(mAttributes.getTextColor());
         tv.setPaintFlags(tv.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
     }
 

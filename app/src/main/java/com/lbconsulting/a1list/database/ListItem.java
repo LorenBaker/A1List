@@ -48,7 +48,7 @@ public class ListItem extends ParseObject {
             newItem.setAttributes(listTitle.getAttributes());
             newItem.setAuthor(ParseUser.getCurrentUser());
             newItem.setChecked(false);
-            newItem.setIsFavorite(true);
+            newItem.setIsFavorite(false);
             newItem.setMarkedForDeletion(false);
             newItem.setIsStruckOut(false);
             newItem.setListItemManualSortKey(newItem.getItemID());

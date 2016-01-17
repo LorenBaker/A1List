@@ -143,7 +143,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void updateActiveListTitle(int position) {
         mActiveListTitle = mSectionsPagerAdapter.getListTitle(position);
-        if(mActiveListTitle!=null) {
+        if (mActiveListTitle != null) {
             MySettings.setActiveListTitleUuid(mActiveListTitle.getLocalUuid());
             setToolBarTitle(mActiveListTitle.getName());
         }

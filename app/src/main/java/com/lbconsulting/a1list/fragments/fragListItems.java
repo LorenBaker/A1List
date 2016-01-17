@@ -59,18 +59,23 @@ public class fragListItems extends Fragment {
         Bundle args = getArguments();
         if (args.containsKey(ARG_LIST_TITLE_UUID)) {
             mListTitleUuid = args.getString(ARG_LIST_TITLE_UUID);
-            if (mListTitleUuid != null && !mListTitleUuid.equals(MySettings.NOT_AVAILABLE)) {
-                mListTitle = ListTitle.getListTitle(mListTitleUuid);
-            }
-            if (mListTitle != null) {
-                mListTitleName = mListTitle.getName();
-                mAttributes = mListTitle.getAttributes();
-                MyLog.i("fragListItems", "onCreate: " + mListTitleName);
-            }
-
+            refreshListTitle(mListTitleUuid);
         } else {
 
             MyLog.e("fragListItems", "onCreate: No ListTitle found!");
+        }
+    }
+
+    private void refreshListTitle(String listTitleUuid) {
+        if (listTitleUuid != null && !listTitleUuid.equals(MySettings.NOT_AVAILABLE)) {
+            mListTitle = ListTitle.getListTitle(listTitleUuid);
+        }
+        if (mListTitle != null) {
+            mListTitleName = mListTitle.getName();
+//            String attributesUuid = mListTitle.getAttributes().getLocalUuid();
+//            mAttributes = ListAttributes.getAttributes(attributesUuid);
+            mAttributes = mListTitle.getAttributes();
+            MyLog.i("fragListItems", "refreshListTitle: " + mListTitleName);
         }
     }
 
@@ -119,10 +124,10 @@ public class fragListItems extends Fragment {
     }
 
     private void updateListUI() {
-        mAttributes = mListTitle.getAttributes();
+        mAttributes = ListAttributes.getAttributes(mListTitle.getAttributes().getLocalUuid());
         List<ListItem> listItems = ListItem.getAllListItems(mListTitle);
         MyLog.i("fragListItems", "updateListUI List " + mListTitleName + " with " + listItems.size() + " items.");
-        mListItemsArrayAdapter.setData(listItems);
+        mListItemsArrayAdapter.setData(listItems, mAttributes);
         mListItemsArrayAdapter.notifyDataSetChanged();
         llListItems.setBackground(mAttributes.getBackgroundDrawable());
     }
@@ -169,7 +174,7 @@ public class fragListItems extends Fragment {
 //                mAttributes = mListTitle.getAttributes();
 //            }
 //            llListItems.setBackground(mAttributes.getBackgroundDrawable());
-            MyLog.i("fragListItems", "onViewStateRestored: " + mListTitleName);
+        MyLog.i("fragListItems", "onViewStateRestored: " + mListTitleName);
 //        }
     }
 
@@ -177,6 +182,7 @@ public class fragListItems extends Fragment {
     public void onResume() {
         super.onResume();
         MyLog.i("fragListItems", "onResume: " + mListTitleName);
+        refreshListTitle(mListTitleUuid);
         updateListUI();
     }
 
