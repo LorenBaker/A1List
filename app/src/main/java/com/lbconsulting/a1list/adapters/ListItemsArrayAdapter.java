@@ -103,7 +103,7 @@ public class ListItemsArrayAdapter extends ArrayAdapter<ListItem> implements Swa
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        ListItemViewHolder holder;
+        final ListItemViewHolder holder;
 
         // Get the data item for this position
         ListItem item = getItem(position);
@@ -115,7 +115,6 @@ public class ListItemsArrayAdapter extends ArrayAdapter<ListItem> implements Swa
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.row_list_item, parent, false);
             holder = new ListItemViewHolder(convertView);
 
-//            mAttributes = item.getAttributes();
             if (mAttributes != null) {
                 holder.tvListItemName.setTextSize(TypedValue.COMPLEX_UNIT_SP, mAttributes.getTextSize());
                 holder.tvListItemName.setTextColor(mAttributes.getTextColor());
@@ -134,6 +133,7 @@ public class ListItemsArrayAdapter extends ArrayAdapter<ListItem> implements Swa
                     mListView.setDivider(new ColorDrawable(ContextCompat.getColor(mContext, R.color.greyLight3_50Transparent)));
                     mListView.setDividerHeight(1);
                 }
+
             }
             convertView.setTag(holder);
         } else {
