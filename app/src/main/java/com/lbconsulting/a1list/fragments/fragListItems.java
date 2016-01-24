@@ -28,18 +28,13 @@ import de.greenrobot.event.EventBus;
  */
 public class fragListItems extends Fragment {
     private static final String ARG_LIST_TITLE_UUID = "argListTitleUuid";
-    private static final int LOADER_ID = 1;
     private com.nhaarman.listviewanimations.itemmanipulation.DynamicListView lvListItems;
     private String mListTitleUuid;
     private ListTitle mListTitle;
-    //    private String mListTitleName = "Unknown";
     private ListAttributes mAttributes;
     private LinearLayout llListItems;
     private ListItemsArrayAdapter mListItemsArrayAdapter;
 
-//    private LoaderManager mLoaderManager;
-//    // The callbacks through which we will interact with the LoaderManager.
-//    private LoaderManager.LoaderCallbacks<List<ListItem>> mCallbacks;
 
     public fragListItems() {
         // Required empty public constructor
@@ -56,19 +51,16 @@ public class fragListItems extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        MyLog.i("fragListItems", "onCreate");
         mListTitle = null;
         Bundle args = getArguments();
         if (args.containsKey(ARG_LIST_TITLE_UUID)) {
             mListTitleUuid = args.getString(ARG_LIST_TITLE_UUID);
             refreshListTitle(mListTitleUuid, "onCreate");
-//            MyLog.i("fragListItems", "onCreate: " + mListTitle.getName());
         } else {
             MyLog.e("fragListItems", "onCreate: No ListTitle found!");
         }
         EventBus.getDefault().register(this);
         MyLog.i("fragListItems", "onCreate complete: " + mListTitle.getName());
-//        mLoaderManager.initLoader(LOADER_ID, null, mCallbacks);
     }
 
     public void onEvent(MyEvents.updateListUI event) {
@@ -108,15 +100,10 @@ public class fragListItems extends Fragment {
         mListItemsArrayAdapter = new ListItemsArrayAdapter(getActivity(), lvListItems, mListTitle);
         lvListItems.setAdapter(mListItemsArrayAdapter);
 
+        // Load list items async
         new LoadListItems(mListTitle).execute();
 
-        // initialize Loader for lvListItems
-//        mLoaderManager.initLoader(LOADER_ID, null, mCallbacks).forceLoad();
-//        if(!mLoaderManager.getLoader(LOADER_ID).isReset()) {
-//            MyLog.i("fragListItems", "onCreateView; restartLoader");
-//            mLoaderManager.restartLoader(LOADER_ID, null, mCallbacks);
-//        }
-
+        // setup dragDrop
         if (!mListTitle.sortListItemsAlphabetically()) {
             lvListItems.enableDragAndDrop();
             lvListItems.setOnItemLongClickListener(
@@ -171,13 +158,13 @@ public class fragListItems extends Fragment {
             mListTitleUuid = savedInstanceState.getString(ARG_LIST_TITLE_UUID);
             refreshListTitle(mListTitleUuid, "onViewStateRestored");
         }
-//        MyLog.i("fragListItems", "onViewStateRestored: " + mListTitle.getName());
+        MyLog.i("fragListItems", "onViewStateRestored: " + mListTitle.getName());
     }
 
     @Override
     public void onResume() {
         super.onResume();
-//        MyLog.i("fragListItems", "onResume: " + mListTitle.getName());
+        MyLog.i("fragListItems", "onResume: " + mListTitle.getName());
         refreshListTitle(mListTitleUuid, "onResume");
     }
 
@@ -195,19 +182,13 @@ public class fragListItems extends Fragment {
         MyLog.i("fragListItems", "onDestroy: " + mListTitle.getName());
     }
 
-
     private class LoadListItems extends AsyncTask<Void, Void, Void> {
-        private ListTitle mListTitle;
+        private final ListTitle mListTitle;
         private List<ListItem> listItemData;
 
         public LoadListItems(ListTitle listTitle) {
             mListTitle = listTitle;
         }
-
-//        @Override
-//        protected void onPreExecute() {
-//            super.onPreExecute();
-//        }
 
         @Override
         protected Void doInBackground(Void... params) {
@@ -226,28 +207,5 @@ public class fragListItems extends Fragment {
             super.onPostExecute(aVoid);
         }
     }
-//    @Override
-//    public Loader<List<ListItem>> onCreateLoader(int id, Bundle args) {
-//        MyLog.i("fragListItems", "onCreateLoader: " + mListTitle.getName());
-//        mAttributes = ListAttributes.getAttributes(mListTitle.getAttributes().getLocalUuid());
-//        return new ListItemLoader(getActivity(), mListTitle);
-//    }
-//
-//
-//    @Override
-//    public void onLoadFinished(Loader<List<ListItem>> loader, List<ListItem> data) {
-//        if(mListTitle!=null) {
-//            MyLog.i("fragListItems", "onLoadFinished: " + mListTitle.getName() + " with " + data.size() + " items.");
-//        }
-//        mListItemsArrayAdapter.setData(data, mAttributes);
-//        mListItemsArrayAdapter.notifyDataSetChanged();
-//        llListItems.setBackground(mAttributes.getBackgroundDrawable());
-//    }
-//
-//    @Override
-//    public void onLoaderReset(Loader<List<ListItem>> loader) {
-//        MyLog.i("fragListItems", "onLoaderReset: " + mListTitle.getName());
-//        mListItemsArrayAdapter.setData(null, mAttributes);
-//        mListItemsArrayAdapter.notifyDataSetChanged();
-//    }
+
 }

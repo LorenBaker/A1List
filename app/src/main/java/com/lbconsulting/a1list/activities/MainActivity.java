@@ -105,6 +105,7 @@ public class MainActivity extends AppCompatActivity {
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.container);
         mProgressBar =(ProgressBar)findViewById(R.id.progressBar);
+
         // Create the adapter that will return a fragListItems fragment
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
         mViewPager.setAdapter(mSectionsPagerAdapter);
@@ -159,7 +160,6 @@ public class MainActivity extends AppCompatActivity {
         if (mActiveListTitle != null) {
             MySettings.setActiveListTitleUuid(mActiveListTitle.getListTitleUuid());
             setToolBarTitle(mActiveListTitle.getName());
-//            mActiveListTitle.setIsForceViewInflation(false);
             EventBus.getDefault().post(new MyEvents.updateListUI(mActiveListTitle.getListTitleUuid()));
             MyLog.i("MainActivity", "updateActiveListTitle: position = " + position + ": " + mActiveListTitle.getName());
         }else{
@@ -176,8 +176,6 @@ public class MainActivity extends AppCompatActivity {
     public void onEvent(MyEvents.refreshSectionsPagerAdapter event) {
         MyLog.i("MainActivity", "refreshSectionsPagerAdapter");
         mSectionsPagerAdapter.notifyDataSetChanged();
-//        EventBus.getDefault().post(new MyEvents.updateListUI(null));
-
         if(mActiveListTitle!=null) {
             EventBus.getDefault().post(new MyEvents.updateListUI(mActiveListTitle.getListTitleUuid()));
         }
@@ -292,17 +290,8 @@ public class MainActivity extends AppCompatActivity {
     private void upAndDownloadDataFromParse() {
         if (CommonMethods.isNetworkAvailable()) {
             new UpAndDownloadDataAsyncTask(this).execute();
-//            startAsyncTaskInParallel(new UpAndDownloadDataAsyncTask(this));
         }
     }
-
-//    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-//    private void startAsyncTaskInParallel(UpAndDownloadDataAsyncTask task) {
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
-//            task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-//        else
-//            task.execute();
-//    }
 
     private void requestEmailBeVerified() {
         CommonMethods.showOkDialog(this, getString(R.string.requestEmailBeVerified_title),
@@ -458,7 +447,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         MyLog.i("MainActivity", "onRestoreInstanceState");
-//        setupNavigationMenu();
     }
 
     @Override
