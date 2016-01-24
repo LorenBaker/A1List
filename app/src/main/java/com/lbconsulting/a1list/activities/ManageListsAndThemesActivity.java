@@ -131,7 +131,7 @@ public class ManageListsAndThemesActivity extends AppCompatActivity {
 //                        TextView tv = (TextView) view.findViewById(R.id.tvItemName);
 //                        ListTitle listTitle = (ListTitle) tv.getTag();
 //                        FragmentManager fm = getSupportFragmentManager();
-//                        dialogEditListTitle dialog = dialogEditListTitle.newInstance(listTitle.getLocalUuid());
+//                        dialogEditListTitle dialog = dialogEditListTitle.newInstance(listTitle.getListTitleUuid());
 //                        dialog.show(fm, "dialogEditListTitle");
 //                    }
 //                });
@@ -161,7 +161,7 @@ public class ManageListsAndThemesActivity extends AppCompatActivity {
 //                        TextView tv = (TextView) view.findViewById(R.id.tvItemName);
 //                        ListAttributes attributes = (ListAttributes) tv.getTag();
 //                        FragmentManager fm = getSupportFragmentManager();
-//                        dialogEditListAttributesName dialog = dialogEditListAttributesName.newInstance(attributes.getLocalUuid());
+//                        dialogEditListAttributesName dialog = dialogEditListAttributesName.newInstance(attributes.getListTitleUuid());
 //                        dialog.show(fm, "dialogEditListAttributesName");
 //                    }
 //                });
@@ -230,7 +230,7 @@ public class ManageListsAndThemesActivity extends AppCompatActivity {
         listTitle.setMarkedForDeletion(true);
 
 
-        if (MySettings.getActiveListTitleUuid().equals(listTitle.getLocalUuid())) {
+        if (MySettings.getActiveListTitleUuid().equals(listTitle.getListTitleUuid())) {
             // The active ListTitle is being deleted ... so reset the active ListTitle ID
             MySettings.setActiveListTitleUuid(MySettings.NOT_AVAILABLE);
         }

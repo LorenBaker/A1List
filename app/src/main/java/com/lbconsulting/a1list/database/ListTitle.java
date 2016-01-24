@@ -3,7 +3,7 @@ package com.lbconsulting.a1list.database;
 import com.lbconsulting.a1list.activities.App;
 import com.lbconsulting.a1list.classes.MyLog;
 import com.lbconsulting.a1list.classes.MySettings;
-import com.lbconsulting.a1list.services.DownloadDataAsyncTask;
+import com.lbconsulting.a1list.services.UpAndDownloadDataAsyncTask;
 import com.parse.ParseClassName;
 import com.parse.ParseException;
 import com.parse.ParseObject;
@@ -58,7 +58,7 @@ public class ListTitle extends ParseObject {
             newListTitle.setListTitleDirty(true);
             newListTitle.setMarkedForDeletion(false);
             newListTitle.setSortListItemsAlphabetically(true);
-            MySettings.setActiveListTitleUuid(newListTitle.getLocalUuid());
+            MySettings.setActiveListTitleUuid(newListTitle.getListTitleUuid());
             newListTitle.setListTitleManualSortKey(newListTitle.getListID());
             newListTitle.setListLockString(LIST_NOT_LOCK);
             newListTitle.pin();
@@ -109,7 +109,7 @@ public class ListTitle extends ParseObject {
                 mainQuery.orderByAscending(LIST_TITLE_MANUAL_SORT_KEY);
             }
             mainQuery.include(ATTRIBUTES);
-            mainQuery.setLimit(DownloadDataAsyncTask.QUERY_LIMIT_LIST_TITLES);
+            mainQuery.setLimit(UpAndDownloadDataAsyncTask.QUERY_LIMIT_LIST_TITLES);
             mainQuery.fromLocalDatastore();
             allListTitles = mainQuery.find();
         } catch (ParseException e) {
@@ -124,7 +124,7 @@ public class ListTitle extends ParseObject {
             ParseQuery<ListTitle> query = getQuery();
             query.whereEqualTo(ATTRIBUTES, listAttributes);
             query.whereEqualTo(IS_MARKED_FOR_DELETION, false);
-            query.setLimit(DownloadDataAsyncTask.QUERY_LIMIT_LIST_TITLES);
+            query.setLimit(UpAndDownloadDataAsyncTask.QUERY_LIMIT_LIST_TITLES);
             query.fromLocalDatastore();
             allListTitles = query.find();
         } catch (ParseException e) {
@@ -138,7 +138,7 @@ public class ListTitle extends ParseObject {
         try {
             ParseQuery<ListTitle> query = getQuery();
             query.whereEqualTo(IS_LIST_TITLE_DIRTY, true);
-            query.setLimit(DownloadDataAsyncTask.QUERY_LIMIT_LIST_TITLES);
+            query.setLimit(UpAndDownloadDataAsyncTask.QUERY_LIMIT_LIST_TITLES);
             query.fromLocalDatastore();
             allDirtyListTitles = query.find();
         } catch (ParseException e) {
@@ -152,7 +152,7 @@ public class ListTitle extends ParseObject {
         try {
             ParseQuery<ListTitle> query = getQuery();
             query.whereEqualTo(IS_MARKED_FOR_DELETION, true);
-            query.setLimit(DownloadDataAsyncTask.QUERY_LIMIT_LIST_TITLES);
+            query.setLimit(UpAndDownloadDataAsyncTask.QUERY_LIMIT_LIST_TITLES);
             query.fromLocalDatastore();
             allListTitlesMarkedForDeletion = query.find();
         } catch (ParseException e) {
@@ -204,7 +204,7 @@ public class ListTitle extends ParseObject {
             query.whereEqualTo(IS_MARKED_FOR_DELETION, false);
             query.fromLocalDatastore();
             ListTitle existingListTitle = query.getFirst();
-            if (existingListTitle.getLocalUuid().equals(listTitle.getLocalUuid())) {
+            if (existingListTitle.getListTitleUuid().equals(listTitle.getListTitleUuid())) {
                 result = true;
             }
 
@@ -242,7 +242,7 @@ public class ListTitle extends ParseObject {
         setListTitleDirty(true);
     }
 
-    public String getLocalUuid() {
+    public String getListTitleUuid() {
         String uuidString = getString(LOCAL_UUID);
         if (uuidString == null || uuidString.isEmpty()) {
             uuidString = getObjectID();
@@ -291,7 +291,7 @@ public class ListTitle extends ParseObject {
 
     public void setIsForceViewInflation(boolean isForceViewInflation) {
         put(IS_FORCE_VIEW_INFLATION, isForceViewInflation);
-        setListTitleDirty(true);
+//        setListTitleDirty(true);
     }
 
 // --Commented out by Inspection START (1/3/2016 8:32 AM):

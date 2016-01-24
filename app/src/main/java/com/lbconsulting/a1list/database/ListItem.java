@@ -2,7 +2,7 @@ package com.lbconsulting.a1list.database;
 
 import com.lbconsulting.a1list.classes.MyLog;
 import com.lbconsulting.a1list.classes.MySettings;
-import com.lbconsulting.a1list.services.DownloadDataAsyncTask;
+import com.lbconsulting.a1list.services.UpAndDownloadDataAsyncTask;
 import com.parse.ParseClassName;
 import com.parse.ParseException;
 import com.parse.ParseObject;
@@ -89,7 +89,6 @@ public class ListItem extends ParseObject {
     }
 
     public static List<ListItem> getAllListItems(ListTitle listTitle) {
-
         List<ListItem> listItems = new ArrayList<>();
         if (listTitle != null) {
             boolean sortAlphabetically = listTitle.sortListItemsAlphabetically();
@@ -105,6 +104,7 @@ public class ListItem extends ParseObject {
                 }
                 query.fromLocalDatastore();
                 listItems = query.find();
+                MyLog.i("ListItem", "getAllListItems: " + listTitle.getName() + "; found " +listItems.size() + " items.");
             } catch (ParseException e) {
                 MyLog.e("ListItem", "getAllListItems: ParseException" + e.getMessage());
             }
@@ -136,7 +136,7 @@ public class ListItem extends ParseObject {
                 ParseQuery<ListItem> query = getQuery();
                 query.whereEqualTo(ATTRIBUTES, listAttributes);
                 query.whereEqualTo(IS_MARKED_FOR_DELETION, false);
-                query.setLimit(DownloadDataAsyncTask.QUERY_LIMIT_LIST_ITEMS);
+                query.setLimit(UpAndDownloadDataAsyncTask.QUERY_LIMIT_LIST_ITEMS);
                 query.fromLocalDatastore();
                 listItems = query.find();
             } catch (ParseException e) {
@@ -168,7 +168,7 @@ public class ListItem extends ParseObject {
         try {
             ParseQuery<ListItem> query = getQuery();
             query.whereEqualTo(IS_LIST_ITEM_DIRTY, true);
-            query.setLimit(DownloadDataAsyncTask.QUERY_LIMIT_LIST_ITEMS);
+            query.setLimit(UpAndDownloadDataAsyncTask.QUERY_LIMIT_LIST_ITEMS);
             query.fromLocalDatastore();
             listDirtyItems = query.find();
         } catch (ParseException e) {
@@ -185,7 +185,7 @@ public class ListItem extends ParseObject {
             ParseQuery<ListItem> query = getQuery();
             query.whereEqualTo(IS_MARKED_FOR_DELETION, true);
             query.whereEqualTo(IS_FAVORITE, false);
-            query.setLimit(DownloadDataAsyncTask.QUERY_LIMIT_LIST_ITEMS);
+            query.setLimit(UpAndDownloadDataAsyncTask.QUERY_LIMIT_LIST_ITEMS);
             query.fromLocalDatastore();
             listItemsMarkedForDeletion = query.find();
         } catch (ParseException e) {

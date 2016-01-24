@@ -74,7 +74,7 @@ public class dialogEditListItem extends DialogFragment {
                     @Override
                     public void onClick(final View v) {
                         if (reviseItemName(txtListItemName.getText().toString().trim())) {
-                            EventBus.getDefault().post(new MyEvents.updateListUI(mListItem.getListTitle().getLocalUuid()));
+                            EventBus.getDefault().post(new MyEvents.updateListUI(mListItem.getListTitle().getListTitleUuid()));
                             dismiss();
                         }
                     }

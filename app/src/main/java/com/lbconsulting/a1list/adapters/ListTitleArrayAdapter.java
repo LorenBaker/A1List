@@ -65,7 +65,7 @@ public class ListTitleArrayAdapter extends ArrayAdapter<ListTitle> implements Sw
 
     @Override
     public int getPosition(ListTitle soughtItem) {
-        return getItemPosition(soughtItem.getLocalUuid());
+        return getItemPosition(soughtItem.getListTitleUuid());
     }
 
     private int getItemPosition(String soughtAttributesUuid) {
@@ -75,7 +75,7 @@ public class ListTitleArrayAdapter extends ArrayAdapter<ListTitle> implements Sw
         ListTitle item;
         for (position = 0; position < getCount(); position++) {
             item = getItem(position);
-            if (item.getLocalUuid().equals(soughtAttributesUuid)) {
+            if (item.getListTitleUuid().equals(soughtAttributesUuid)) {
                 found = true;
                 break;
             }
@@ -150,7 +150,7 @@ public class ListTitleArrayAdapter extends ArrayAdapter<ListTitle> implements Sw
             @Override
             public void onClick(View v) {
                 ListTitle selectedListTitle = (ListTitle) v.getTag();
-                EventBus.getDefault().post(new MyEvents.showEditListTitleDialog(selectedListTitle.getLocalUuid()));
+                EventBus.getDefault().post(new MyEvents.showEditListTitleDialog(selectedListTitle.getListTitleUuid()));
             }
         });
 

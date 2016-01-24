@@ -8,6 +8,7 @@ import android.os.AsyncTask;
 import android.support.v4.app.NotificationCompat;
 
 import com.lbconsulting.a1list.R;
+import com.lbconsulting.a1list.classes.CommonMethods;
 import com.lbconsulting.a1list.classes.MyEvents;
 import com.lbconsulting.a1list.classes.MyLog;
 import com.lbconsulting.a1list.classes.MySettings;
@@ -26,7 +27,7 @@ import de.greenrobot.event.EventBus;
  * An async task that downloads app data from Parse and initiates an
  * update of the  ListUI
  */
-public class DownloadDataAsyncTask extends AsyncTask<Void, Void, Void> {
+public class UpAndDownloadDataAsyncTask extends AsyncTask<Void, Void, Void> {
 
     public static final int QUERY_LIMIT_ATTRIBUTES = 50;
     public static final int QUERY_LIMIT_LIST_TITLES = 100;
@@ -38,24 +39,38 @@ public class DownloadDataAsyncTask extends AsyncTask<Void, Void, Void> {
     private List<ListItem> mListItems;
     private boolean mRestartA1List;
 
-    public DownloadDataAsyncTask(Context context) {
+    public UpAndDownloadDataAsyncTask(Context context) {
         this.mContext = context;
     }
 
     @Override
     protected void onPreExecute() {
-        MyLog.i("DownloadDataAsyncTask", "onPreExecute");
-        showDownLoadNotification();
+        MyLog.i("UpAndDownloadDataAsyncTask", "onPreExecute");
+        EventBus.getDefault().post(new MyEvents.showProgressBar());
+//        showDownLoadNotification();
         mRestartA1List = true;
     }
 
     @Override
     protected Void doInBackground(Void... params) {
-        MyLog.i("DownloadDataAsyncTask", "doInBackground");
+        MyLog.i("UpAndDownloadDataAsyncTask", "doInBackground");
 
+        // upload any dirty data
+        CommonMethods.uploadDirtyAttributes();
+        CommonMethods.uploadDirtyListTitles();
+        CommonMethods.uploadDirtyListItems();
+
+        // delete marked items
+        CommonMethods.deleteMarkedAttributes();
+        CommonMethods.deleteMarkedListTitles();
+        CommonMethods.deleteMarkedListItems();
+
+        // download data from Parse cloud
         downloadAttributes();
         downloadListTitles();
         downloadListItems();
+
+        // replace the local datastore with downloaded data
         updateLocalDataStore();
 
         return null;
@@ -64,9 +79,10 @@ public class DownloadDataAsyncTask extends AsyncTask<Void, Void, Void> {
 
     @Override
     protected void onPostExecute(Void aVoid) {
-        MyLog.i("DownloadDataAsyncTask", "onPostExecute");
-        cancelDownLoadNotification();
+        MyLog.i("UpAndDownloadDataAsyncTask", "onPostExecute");
+//        cancelDownLoadNotification();
         EventBus.getDefault().post(new MyEvents.refreshSectionsPagerAdapter());
+        EventBus.getDefault().post(new MyEvents.hideProgressBar());
 //        EventBus.getDefault().post(new MyEvents.updateUI());
 //        EventBus.getDefault().post(new MyEvents.updateListUI(null));
 //        if (mRestartA1List) {
@@ -121,23 +137,23 @@ public class DownloadDataAsyncTask extends AsyncTask<Void, Void, Void> {
             if (mAttributes != null && mAttributes.size() > 0) {
 
                 ParseObject.pinAll(mAttributes);
-                MyLog.i("DownloadDataAsyncTask", "pinNewData: " + mAttributes.size() + " Attributes.");
+                MyLog.i("UpAndDownloadDataAsyncTask", "pinNewData: " + mAttributes.size() + " Attributes.");
             }
 
             if (mListTitles != null && mListTitles.size() > 0) {
                 ParseObject.pinAll(mListTitles);
-                MyLog.i("DownloadDataAsyncTask", "pinNewData: " + mListTitles.size() + " ListTitles.");
+                MyLog.i("UpAndDownloadDataAsyncTask", "pinNewData: " + mListTitles.size() + " ListTitles.");
             } else {
                 mRestartA1List = false;
             }
 
             if (mListItems != null && mListItems.size() > 0) {
                 ParseObject.pinAll(mListItems);
-                MyLog.i("DownloadDataAsyncTask", "pinNewData: " + mListItems.size() + " ListItems.");
+                MyLog.i("UpAndDownloadDataAsyncTask", "pinNewData: " + mListItems.size() + " ListItems.");
             }
 
         } catch (ParseException e) {
-            MyLog.e("DownloadDataAsyncTask", "pinNewData: ParseException: " + e.getMessage());
+            MyLog.e("UpAndDownloadDataAsyncTask", "pinNewData: ParseException: " + e.getMessage());
         }
     }
 
@@ -149,10 +165,10 @@ public class DownloadDataAsyncTask extends AsyncTask<Void, Void, Void> {
         // Query for new results from the network.
         try {
             mListItems = query.find();
-            MyLog.i("DownloadDataAsyncTask", "downloaded " + mListItems.size() + " List Items from Parse.");
+            MyLog.i("UpAndDownloadDataAsyncTask", "downloaded " + mListItems.size() + " List Items from Parse.");
 
         } catch (ParseException e) {
-            MyLog.e("DownloadDataAsyncTask", "downloadListItems: ParseException: " + e.getMessage());
+            MyLog.e("UpAndDownloadDataAsyncTask", "downloadListItems: ParseException: " + e.getMessage());
         }
     }
 
@@ -164,10 +180,10 @@ public class DownloadDataAsyncTask extends AsyncTask<Void, Void, Void> {
         // Query for new results from the network.
         try {
             mListTitles = query.find();
-            MyLog.i("DownloadDataAsyncTask", "downloaded " + mListTitles.size() + " List Titles from Parse.");
+            MyLog.i("UpAndDownloadDataAsyncTask", "downloaded " + mListTitles.size() + " List Titles from Parse.");
 
         } catch (ParseException e) {
-            MyLog.e("DownloadDataAsyncTask", "downloadListTitles: ParseException: " + e.getMessage());
+            MyLog.e("UpAndDownloadDataAsyncTask", "downloadListTitles: ParseException: " + e.getMessage());
         }
     }
 
@@ -179,10 +195,10 @@ public class DownloadDataAsyncTask extends AsyncTask<Void, Void, Void> {
         // Query for new results from the network.
         try {
             mAttributes = query.find();
-            MyLog.i("DownloadDataAsyncTask", "downloaded " + mAttributes.size() + " Attributes from Parse.");
+            MyLog.i("UpAndDownloadDataAsyncTask", "downloaded " + mAttributes.size() + " Attributes from Parse.");
 
         } catch (ParseException e) {
-            MyLog.e("DownloadDataAsyncTask", "downloadAttributes: ParseException: " + e.getMessage());
+            MyLog.e("UpAndDownloadDataAsyncTask", "downloadAttributes: ParseException: " + e.getMessage());
         }
     }
 
@@ -194,7 +210,7 @@ public class DownloadDataAsyncTask extends AsyncTask<Void, Void, Void> {
         notificationBuilder.setAutoCancel(false);
         notificationBuilder.setOngoing(true);
         notificationBuilder.setContentIntent(PendingIntent.getActivity(mContext, 0, new Intent(mContext,
-                DownloadDataAsyncTask.class), PendingIntent.FLAG_UPDATE_CURRENT));
+                UpAndDownloadDataAsyncTask.class), PendingIntent.FLAG_UPDATE_CURRENT));
         notificationBuilder.setContentTitle(mContext.getString(R.string.notification_downloading_title));
         notificationBuilder.setContentText(mContext.getString(R.string.notification_downloading_text));
         notificationBuilder.setSmallIcon(android.R.drawable.stat_sys_download);
@@ -211,7 +227,7 @@ public class DownloadDataAsyncTask extends AsyncTask<Void, Void, Void> {
         notificationBuilder.setAutoCancel(false);
         notificationBuilder.setOngoing(true);
         notificationBuilder.setContentIntent(PendingIntent.getActivity(mContext, 0, new Intent(mContext,
-                DownloadDataAsyncTask.class), PendingIntent.FLAG_UPDATE_CURRENT));
+                UpAndDownloadDataAsyncTask.class), PendingIntent.FLAG_UPDATE_CURRENT));
         notificationBuilder.setContentTitle(mContext.getString(R.string.notification_downloading_title));
         notificationBuilder.setContentText(mContext.getString(R.string.notification_downloading_text));
         notificationBuilder.setSmallIcon(android.R.drawable.stat_sys_download);

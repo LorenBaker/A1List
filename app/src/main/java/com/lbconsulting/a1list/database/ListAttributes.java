@@ -5,7 +5,7 @@ import android.graphics.drawable.GradientDrawable;
 import com.lbconsulting.a1list.classes.CommonMethods;
 import com.lbconsulting.a1list.classes.MyLog;
 import com.lbconsulting.a1list.classes.MySettings;
-import com.lbconsulting.a1list.services.DownloadDataAsyncTask;
+import com.lbconsulting.a1list.services.UpAndDownloadDataAsyncTask;
 import com.parse.ParseClassName;
 import com.parse.ParseException;
 import com.parse.ParseObject;
@@ -89,7 +89,7 @@ public class ListAttributes extends ParseObject {
             ParseQuery<ListAttributes> query = getQuery();
             query.whereEqualTo(IS_MARKED_FOR_DELETION, false);
             query.orderByAscending(NAME_LOWERCASE);
-            query.setLimit(DownloadDataAsyncTask.QUERY_LIMIT_ATTRIBUTES);
+            query.setLimit(UpAndDownloadDataAsyncTask.QUERY_LIMIT_ATTRIBUTES);
             query.fromLocalDatastore();
             allAttributes = query.find();
         } catch (ParseException e) {
@@ -128,7 +128,7 @@ public class ListAttributes extends ParseObject {
         try {
             ParseQuery<ListAttributes> query = getQuery();
             query.whereEqualTo(IS_ATTRIBUTES_DIRTY, true);
-            query.setLimit(DownloadDataAsyncTask.QUERY_LIMIT_ATTRIBUTES);
+            query.setLimit(UpAndDownloadDataAsyncTask.QUERY_LIMIT_ATTRIBUTES);
             query.fromLocalDatastore();
             allDirtyAttributes = query.find();
         } catch (ParseException e) {
@@ -142,7 +142,7 @@ public class ListAttributes extends ParseObject {
         try {
             ParseQuery<ListAttributes> query = getQuery();
             query.whereEqualTo(IS_MARKED_FOR_DELETION, true);
-            query.setLimit(DownloadDataAsyncTask.QUERY_LIMIT_ATTRIBUTES);
+            query.setLimit(UpAndDownloadDataAsyncTask.QUERY_LIMIT_ATTRIBUTES);
             query.fromLocalDatastore();
             allAttributesMarkedForDeletion = query.find();
         } catch (ParseException e) {

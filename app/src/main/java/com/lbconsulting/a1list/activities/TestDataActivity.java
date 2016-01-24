@@ -569,7 +569,7 @@ public class TestDataActivity extends AppCompatActivity implements View.OnClickL
                 listItem.setName(listItemName);
                 listItem.setListTitle(listTitle);
                 MyLog.i("uploadTestListItems", "Adding ListItem \"" + listItemName
-                        + "\" to \"" + listTitle.getName() + "\". ListTitleLocalUuid = " + listTitle.getLocalUuid());
+                        + "\" to \"" + listTitle.getName() + "\". ListTitleLocalUuid = " + listTitle.getListTitleUuid());
 
                 ListAttributes att = listTitle.getAttributes();
                 MyLog.i("uploadTestListItems", "Setting attribute \"" + att.getName()

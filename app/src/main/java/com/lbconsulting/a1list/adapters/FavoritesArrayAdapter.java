@@ -51,7 +51,7 @@ public class FavoritesArrayAdapter extends ArrayAdapter<ListItem> {
 //
 //    @Override
 //    public int getPosition(ListAttributes soughtItem) {
-//        return getItemPosition(soughtItem.getLocalUuid());
+//        return getItemPosition(soughtItem.getListTitleUuid());
 //    }
 
 //    private int getItemPosition(String soughtAttributesUuid) {
@@ -61,7 +61,7 @@ public class FavoritesArrayAdapter extends ArrayAdapter<ListItem> {
 //        ListAttributes item;
 //        for (position = 0; position < getCount(); position++) {
 //            item = getItem(position);
-//            if (item.getLocalUuid().equals(soughtAttributesUuid)) {
+//            if (item.getListTitleUuid().equals(soughtAttributesUuid)) {
 //                found = true;
 //                break;
 //            }

@@ -12,14 +12,10 @@ import android.os.Looper;
 import android.os.Message;
 import android.support.annotation.Nullable;
 
+import com.lbconsulting.a1list.classes.CommonMethods;
 import com.lbconsulting.a1list.classes.MyLog;
-import com.lbconsulting.a1list.database.ListAttributes;
-import com.lbconsulting.a1list.database.ListItem;
-import com.lbconsulting.a1list.database.ListTitle;
-import com.parse.ParseException;
 
 import java.text.NumberFormat;
-import java.util.List;
 import java.util.Locale;
 
 /**
@@ -136,13 +132,13 @@ public class UploadDirtyObjectsService extends Service {
         private void uploadDirtyParseObjects() {
             mSeekingNetwork = false;
             long startTime = System.currentTimeMillis();
-            uploadDirtyAttributes();
-            uploadDirtyListTitles();
-            uploadDirtyListItems();
+            CommonMethods.uploadDirtyAttributes();
+            CommonMethods.uploadDirtyListTitles();
+            CommonMethods.uploadDirtyListItems();
 
-            deleteMarkedAttributes();
-            deleteMarkedListTitles();
-            deleteMarkedListItems();
+            CommonMethods.deleteMarkedAttributes();
+            CommonMethods.deleteMarkedListTitles();
+            CommonMethods.deleteMarkedListItems();
 
             long endTime = System.currentTimeMillis();
             long elapsedTime = endTime - startTime;
@@ -155,141 +151,141 @@ public class UploadDirtyObjectsService extends Service {
 
         }
 
-        private void uploadDirtyAttributes() {
-            long startTime = System.currentTimeMillis();
+//        private void uploadDirtyAttributes() {
+//            long startTime = System.currentTimeMillis();
+//
+//            List<ListAttributes> dirtyAttributes = ListAttributes.getAllDirtyListAttributes();
+//            MyLog.i("uploadDirtyListAttributes", "Found " + dirtyAttributes.size() + " dirty Attributes.");
+//            int count = 0;
+//            for (ListAttributes item : dirtyAttributes) {
+//                try {
+//                    item.setAttributesDirty(false);
+//                    item.save();
+//                    count++;
+//                } catch (ParseException e) {
+//                    item.setAttributesDirty(true);
+//                    MyLog.e("uploadDirtyListAttributes", "Error saving dirty Attribute \"" + item.getName()
+//                            + "\" : ParseException" + e.getMessage());
+//                }
+//            }
+//            long endTime = System.currentTimeMillis();
+//            long duration = endTime - startTime;
+//            MyLog.i("uploadDirtyListAttributes", "Saved " + count + " Attributes to Parse. Duration = "
+//                    + NumberFormat.getNumberInstance(Locale.US).format(duration) + " milliseconds.");
+//        }
 
-            List<ListAttributes> dirtyAttributes = ListAttributes.getAllDirtyListAttributes();
-            MyLog.i("uploadDirtyListAttributes", "Found " + dirtyAttributes.size() + " dirty Attributes.");
-            int count = 0;
-            for (ListAttributes item : dirtyAttributes) {
-                try {
-                    item.setAttributesDirty(false);
-                    item.save();
-                    count++;
-                } catch (ParseException e) {
-                    item.setAttributesDirty(true);
-                    MyLog.e("uploadDirtyListAttributes", "Error saving dirty Attribute \"" + item.getName()
-                            + "\" : ParseException" + e.getMessage());
-                }
-            }
-            long endTime = System.currentTimeMillis();
-            long duration = endTime - startTime;
-            MyLog.i("uploadDirtyListAttributes", "Saved " + count + " Attributes to Parse. Duration = "
-                    + NumberFormat.getNumberInstance(Locale.US).format(duration) + " milliseconds.");
-        }
-
-        private void uploadDirtyListTitles() {
-            long startTime = System.currentTimeMillis();
-
-            List<ListTitle> dirtyListTitles = ListTitle.getAllDirtyListTitles();
-            MyLog.i("uploadDirtyListTitles", "Found " + dirtyListTitles.size() + " dirty List Titles.");
-            int count = 0;
-            for (ListTitle item : dirtyListTitles) {
-                try {
-                    item.setListTitleDirty(false);
-                    item.save();
-                    count++;
-                } catch (ParseException e) {
-                    item.setListTitleDirty(true);
-                    MyLog.e("uploadDirtyListTitles", "Error saving dirty List Title \"" + item.getName()
-                            + "\" : ParseException" + e.getMessage());
-                }
-            }
-            long endTime = System.currentTimeMillis();
-            long duration = endTime - startTime;
-            MyLog.i("uploadDirtyListTitles", "Saved " + count + " List Titles to Parse. Duration = "
-                    + NumberFormat.getNumberInstance(Locale.US).format(duration) + " milliseconds.");
-        }
-
-        private void uploadDirtyListItems() {
-            long startTime = System.currentTimeMillis();
-
-            List<ListItem> dirtyListItems = ListItem.getAllDirtyListItems();
-            MyLog.i("uploadDirtyListItems", "Found " + dirtyListItems.size() + " dirty List Items.");
-            int count = 0;
-            for (ListItem item : dirtyListItems) {
-                try {
-                    item.setListItemDirty(false);
-                    item.save();
-                    count++;
-                } catch (ParseException e) {
-                    item.setListItemDirty(true);
-                    MyLog.e("uploadDirtyListItems", "Error saving dirty List Item \"" + item.getName()
-                            + "\" : ParseException" + e.getMessage());
-                }
-            }
-            long endTime = System.currentTimeMillis();
-            long duration = endTime - startTime;
-            MyLog.i("uploadDirtyListItems", "Saved " + count + " List Items to Parse. Duration = "
-                    + NumberFormat.getNumberInstance(Locale.US).format(duration) + " milliseconds.");
-
-        }
-
-        private void deleteMarkedAttributes() {
-            long startTime = System.currentTimeMillis();
-
-            List<ListAttributes> attributesMarkedForDeletion = ListAttributes.getAllAttributesMarkedForDeletion();
-            MyLog.i("deleteMarkedAttributes", "Found " + attributesMarkedForDeletion.size() + " marked Attributes.");
-            int count = 0;
-            for (ListAttributes item : attributesMarkedForDeletion) {
-                try {
-                    item.unpin();
-                    item.delete();
-                    count++;
-                } catch (ParseException e) {
-                    MyLog.e("deleteMarkedAttributes", "Error deleting Attributes \"" + item.getName()
-                            + "\" : ParseException" + e.getMessage());
-                }
-            }
-            long endTime = System.currentTimeMillis();
-            long duration = endTime - startTime;
-            MyLog.i("deleteMarkedAttributes", "Deleted " + count + " Attributes from Parse. Duration = "
-                    + NumberFormat.getNumberInstance(Locale.US).format(duration) + " milliseconds.");
-        }
-
-        private void deleteMarkedListTitles() {
-            long startTime = System.currentTimeMillis();
-
-            List<ListTitle> listTitlesMarkedForDeletion = ListTitle.getAllListTitlesMarkedForDeletion();
-            MyLog.i("deleteMarkedAttributes", "Found " + listTitlesMarkedForDeletion.size() + " marked List Titles.");
-            int count = 0;
-            for (ListTitle item : listTitlesMarkedForDeletion) {
-                try {
-                    item.unpin();
-                    item.delete();
-                    count++;
-                } catch (ParseException e) {
-                    MyLog.e("deleteMarkedAttributes", "Error deleting List Title \"" + item.getName()
-                            + "\" : ParseException" + e.getMessage());
-                }
-            }
-            long endTime = System.currentTimeMillis();
-            long duration = endTime - startTime;
-            MyLog.i("deleteMarkedAttributes", "Deleted " + count + " List Titles from Parse. Duration = "
-                    + NumberFormat.getNumberInstance(Locale.US).format(duration) + " milliseconds.");
-        }
-
-        private void deleteMarkedListItems() {
-            long startTime = System.currentTimeMillis();
-
-            List<ListItem> allListItemsMarkedForDeletion = ListItem.getAllNonFavoriteListItemsMarkedForDeletion();
-            MyLog.i("deleteMarkedListItems", "Found " + allListItemsMarkedForDeletion.size() + " marked List Items.");
-            int count = 0;
-            for (ListItem item : allListItemsMarkedForDeletion) {
-                try {
-                    item.unpin();
-                    item.delete();
-                    count++;
-                } catch (ParseException e) {
-                    MyLog.e("deleteMarkedListItems", "Error deleting List Item \"" + item.getName()
-                            + "\" : ParseException" + e.getMessage());
-                }
-            }
-            long endTime = System.currentTimeMillis();
-            long duration = endTime - startTime;
-            MyLog.i("deleteMarkedListItems", "Deleted " + count + " List Items from Parse. Duration = "
-                    + NumberFormat.getNumberInstance(Locale.US).format(duration) + " milliseconds.");
-        }
+//        private void uploadDirtyListTitles() {
+//            long startTime = System.currentTimeMillis();
+//
+//            List<ListTitle> dirtyListTitles = ListTitle.getAllDirtyListTitles();
+//            MyLog.i("uploadDirtyListTitles", "Found " + dirtyListTitles.size() + " dirty List Titles.");
+//            int count = 0;
+//            for (ListTitle item : dirtyListTitles) {
+//                try {
+//                    item.setListTitleDirty(false);
+//                    item.save();
+//                    count++;
+//                } catch (ParseException e) {
+//                    item.setListTitleDirty(true);
+//                    MyLog.e("uploadDirtyListTitles", "Error saving dirty List Title \"" + item.getName()
+//                            + "\" : ParseException" + e.getMessage());
+//                }
+//            }
+//            long endTime = System.currentTimeMillis();
+//            long duration = endTime - startTime;
+//            MyLog.i("uploadDirtyListTitles", "Saved " + count + " List Titles to Parse. Duration = "
+//                    + NumberFormat.getNumberInstance(Locale.US).format(duration) + " milliseconds.");
+//        }
+//
+//        private void uploadDirtyListItems() {
+//            long startTime = System.currentTimeMillis();
+//
+//            List<ListItem> dirtyListItems = ListItem.getAllDirtyListItems();
+//            MyLog.i("uploadDirtyListItems", "Found " + dirtyListItems.size() + " dirty List Items.");
+//            int count = 0;
+//            for (ListItem item : dirtyListItems) {
+//                try {
+//                    item.setListItemDirty(false);
+//                    item.save();
+//                    count++;
+//                } catch (ParseException e) {
+//                    item.setListItemDirty(true);
+//                    MyLog.e("uploadDirtyListItems", "Error saving dirty List Item \"" + item.getName()
+//                            + "\" : ParseException" + e.getMessage());
+//                }
+//            }
+//            long endTime = System.currentTimeMillis();
+//            long duration = endTime - startTime;
+//            MyLog.i("uploadDirtyListItems", "Saved " + count + " List Items to Parse. Duration = "
+//                    + NumberFormat.getNumberInstance(Locale.US).format(duration) + " milliseconds.");
+//
+//        }
+//
+//        private void deleteMarkedAttributes() {
+//            long startTime = System.currentTimeMillis();
+//
+//            List<ListAttributes> attributesMarkedForDeletion = ListAttributes.getAllAttributesMarkedForDeletion();
+//            MyLog.i("deleteMarkedAttributes", "Found " + attributesMarkedForDeletion.size() + " marked Attributes.");
+//            int count = 0;
+//            for (ListAttributes item : attributesMarkedForDeletion) {
+//                try {
+//                    item.unpin();
+//                    item.delete();
+//                    count++;
+//                } catch (ParseException e) {
+//                    MyLog.e("deleteMarkedAttributes", "Error deleting Attributes \"" + item.getName()
+//                            + "\" : ParseException" + e.getMessage());
+//                }
+//            }
+//            long endTime = System.currentTimeMillis();
+//            long duration = endTime - startTime;
+//            MyLog.i("deleteMarkedAttributes", "Deleted " + count + " Attributes from Parse. Duration = "
+//                    + NumberFormat.getNumberInstance(Locale.US).format(duration) + " milliseconds.");
+//        }
+//
+//        private void deleteMarkedListTitles() {
+//            long startTime = System.currentTimeMillis();
+//
+//            List<ListTitle> listTitlesMarkedForDeletion = ListTitle.getAllListTitlesMarkedForDeletion();
+//            MyLog.i("deleteMarkedAttributes", "Found " + listTitlesMarkedForDeletion.size() + " marked List Titles.");
+//            int count = 0;
+//            for (ListTitle item : listTitlesMarkedForDeletion) {
+//                try {
+//                    item.unpin();
+//                    item.delete();
+//                    count++;
+//                } catch (ParseException e) {
+//                    MyLog.e("deleteMarkedAttributes", "Error deleting List Title \"" + item.getName()
+//                            + "\" : ParseException" + e.getMessage());
+//                }
+//            }
+//            long endTime = System.currentTimeMillis();
+//            long duration = endTime - startTime;
+//            MyLog.i("deleteMarkedAttributes", "Deleted " + count + " List Titles from Parse. Duration = "
+//                    + NumberFormat.getNumberInstance(Locale.US).format(duration) + " milliseconds.");
+//        }
+//
+//        private void deleteMarkedListItems() {
+//            long startTime = System.currentTimeMillis();
+//
+//            List<ListItem> allListItemsMarkedForDeletion = ListItem.getAllNonFavoriteListItemsMarkedForDeletion();
+//            MyLog.i("deleteMarkedListItems", "Found " + allListItemsMarkedForDeletion.size() + " marked List Items.");
+//            int count = 0;
+//            for (ListItem item : allListItemsMarkedForDeletion) {
+//                try {
+//                    item.unpin();
+//                    item.delete();
+//                    count++;
+//                } catch (ParseException e) {
+//                    MyLog.e("deleteMarkedListItems", "Error deleting List Item \"" + item.getName()
+//                            + "\" : ParseException" + e.getMessage());
+//                }
+//            }
+//            long endTime = System.currentTimeMillis();
+//            long duration = endTime - startTime;
+//            MyLog.i("deleteMarkedListItems", "Deleted " + count + " List Items from Parse. Duration = "
+//                    + NumberFormat.getNumberInstance(Locale.US).format(duration) + " milliseconds.");
+//        }
 
 
         private boolean isNetworkAvailable() {

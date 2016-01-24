@@ -1,7 +1,8 @@
 package com.lbconsulting.a1list.adapters;
 
+
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentStatePagerAdapter;
 
 import com.lbconsulting.a1list.classes.MyLog;
 import com.lbconsulting.a1list.classes.MySettings;
@@ -13,7 +14,8 @@ import java.util.List;
 /**
  * A FragmentPagerAdapter that displays fragListItems.
  */
-public class SectionsPagerAdapter extends FragmentPagerAdapter {
+//public class SectionsPagerAdapter extends FragmentPagerAdapter {
+public class SectionsPagerAdapter extends FragmentStatePagerAdapter {
 
     private List<ListTitle> mAllLists = null;
 
@@ -32,11 +34,18 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
         fragListItems frag = null;
         ListTitle listTitle = mAllLists.get(position);
         if (listTitle != null) {
-            String listTitleID = listTitle.getLocalUuid();
-            frag = fragListItems.newInstance(listTitleID);
+            String listTitleUuid = listTitle.getListTitleUuid();
+            MyLog.i("SectionsPagerAdapter", "getItem: position = " + position);
+            frag = fragListItems.newInstance(listTitleUuid);
         }
         return frag;
     }
+
+//    @Override
+//    public int getItemPosition(Object object) {
+//        return POSITION_NONE;
+////        return super.getItemPosition(object);
+//    }
 
     @Override
     public int getCount() {
@@ -65,7 +74,7 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
         int position = 0;
         boolean found = false;
         for (ListTitle listTitle : mAllLists) {
-            if (listTitle.getLocalUuid().equals(listTitleUuid)) {
+            if (listTitle.getListTitleUuid().equals(listTitleUuid)) {
                 found = true;
                 break;
             }

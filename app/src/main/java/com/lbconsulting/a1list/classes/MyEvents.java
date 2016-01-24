@@ -9,6 +9,17 @@ public class MyEvents {
 //        }
 //    }
 
+    public static class showProgressBar {
+        public showProgressBar() {
+
+        }
+    }
+
+    public static class hideProgressBar {
+        public hideProgressBar() {
+
+        }
+    }
 
     public static class refreshSectionsPagerAdapter {
         public refreshSectionsPagerAdapter() {
@@ -65,6 +76,7 @@ public class MyEvents {
         }
 
     }
+
 
     public static class updateListTitleUI {
         public updateListTitleUI() {

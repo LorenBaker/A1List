@@ -52,7 +52,7 @@ public class ListItemsArrayAdapter extends ArrayAdapter<ListItem> implements Swa
 
     public void setData(List<ListItem> data, ListAttributes attributes) {
         if (data == null) {
-            MyLog.i("ListItemsArrayAdapter", "setData: data NULL");
+            MyLog.i("ListItemsArrayAdapter", "setData: data NULL for "+ mListName);
         }
         mAttributes = attributes;
         clear();
@@ -238,11 +238,11 @@ public class ListItemsArrayAdapter extends ArrayAdapter<ListItem> implements Swa
         tv.setPaintFlags(tv.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
     }
 
-    @Override
-    public void notifyDataSetChanged() {
-        super.notifyDataSetChanged();
-        MyLog.i("ListItemsArrayAdapter", "notifyDataSetChanged for List: " + mListName);
-    }
+//    @Override
+//    public void notifyDataSetChanged() {
+//        super.notifyDataSetChanged();
+//        MyLog.i("ListItemsArrayAdapter", "notifyDataSetChanged for List: " + mListName);
+//    }
 
     @Override
     public void swapItems(int positionOne, int positionTwo) {
@@ -258,7 +258,7 @@ public class ListItemsArrayAdapter extends ArrayAdapter<ListItem> implements Swa
         itemOne.setListItemManualSortKey(origItemTwoSortKey);
         itemTwo.setListItemManualSortKey(origItemOneSortKey);
 
-        EventBus.getDefault().post(new MyEvents.updateListUI(mListTitle.getLocalUuid()));
+        EventBus.getDefault().post(new MyEvents.updateListUI(mListTitle.getListTitleUuid()));
     }
 
     private class ListItemViewHolder {

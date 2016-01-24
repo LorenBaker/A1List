@@ -77,7 +77,7 @@ public class dialogSelectFavorites extends DialogFragment {
                     public void onClick(View v) {
                         // Apply
                         mFavoritesArrayAdapter.selectCheckedItems();
-                        EventBus.getDefault().post(new MyEvents.updateListUI(mListTitle.getLocalUuid()));
+                        EventBus.getDefault().post(new MyEvents.updateListUI(mListTitle.getListTitleUuid()));
                         dismiss();
                     }
                 });
@@ -127,7 +127,7 @@ public class dialogSelectFavorites extends DialogFragment {
 //            @Override
 //            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 //                ListAttributes selectedAttributes = mFavoritesArrayAdapter.getItem(position);
-//                EventBus.getDefault().post(new MyEvents.setLocalAttributes(selectedAttributes.getLocalUuid()));
+//                EventBus.getDefault().post(new MyEvents.setLocalAttributes(selectedAttributes.getListTitleUuid()));
 //                dismiss();
 //            }
 //        });

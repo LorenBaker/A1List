@@ -19,6 +19,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ProgressBar;
 
 import com.lbconsulting.a1list.R;
 import com.lbconsulting.a1list.adapters.SectionsPagerAdapter;
@@ -34,7 +35,7 @@ import com.lbconsulting.a1list.dialogs.dialogListItemSorting;
 import com.lbconsulting.a1list.dialogs.dialogNewListItem;
 import com.lbconsulting.a1list.dialogs.dialogNewListTitle;
 import com.lbconsulting.a1list.dialogs.dialogSelectFavorites;
-import com.lbconsulting.a1list.services.DownloadDataAsyncTask;
+import com.lbconsulting.a1list.services.UpAndDownloadDataAsyncTask;
 import com.lbconsulting.a1list.services.UploadDirtyObjectsService;
 import com.parse.DeleteCallback;
 import com.parse.FindCallback;
@@ -61,6 +62,7 @@ public class MainActivity extends AppCompatActivity {
     private static Toolbar mToolbar;
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private ViewPager mViewPager;
+    private ProgressBar mProgressBar;
     private TabLayout mTabLayout;
     private boolean mRefreshDataFromTheCloud;
 
@@ -102,6 +104,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.container);
+        mProgressBar =(ProgressBar)findViewById(R.id.progressBar);
         // Create the adapter that will return a fragListItems fragment
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
         mViewPager.setAdapter(mSectionsPagerAdapter);
@@ -113,8 +116,8 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onPageSelected(int position) {
+                MyLog.i("MainActivity", "onPageSelected: position = " + position);
                 updateActiveListTitle(position);
-                mActiveListTitle.setIsForceViewInflation(false);
             }
 
             @Override
@@ -141,11 +144,26 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private void showProgressBar(){
+        mViewPager.setVisibility(View.GONE);
+        mProgressBar.setVisibility(View.VISIBLE);
+    }
+
+    private void hideProgressBar(){
+        mViewPager.setVisibility(View.VISIBLE);
+        mProgressBar.setVisibility(View.GONE);
+    }
+
     private void updateActiveListTitle(int position) {
         mActiveListTitle = mSectionsPagerAdapter.getListTitle(position);
         if (mActiveListTitle != null) {
-            MySettings.setActiveListTitleUuid(mActiveListTitle.getLocalUuid());
+            MySettings.setActiveListTitleUuid(mActiveListTitle.getListTitleUuid());
             setToolBarTitle(mActiveListTitle.getName());
+//            mActiveListTitle.setIsForceViewInflation(false);
+            EventBus.getDefault().post(new MyEvents.updateListUI(mActiveListTitle.getListTitleUuid()));
+            MyLog.i("MainActivity", "updateActiveListTitle: position = " + position + ": " + mActiveListTitle.getName());
+        }else{
+            MyLog.e("MainActivity", "updateActiveListTitle: Unable to find ListTitle at position = " + position);
         }
     }
 
@@ -156,10 +174,13 @@ public class MainActivity extends AppCompatActivity {
     //region OnEvent
 
     public void onEvent(MyEvents.refreshSectionsPagerAdapter event) {
-        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
-        mViewPager.setAdapter(mSectionsPagerAdapter);
-        mTabLayout.setupWithViewPager(mViewPager);
-        startA1List(false);
+        MyLog.i("MainActivity", "refreshSectionsPagerAdapter");
+        mSectionsPagerAdapter.notifyDataSetChanged();
+//        EventBus.getDefault().post(new MyEvents.updateListUI(null));
+
+        if(mActiveListTitle!=null) {
+            EventBus.getDefault().post(new MyEvents.updateListUI(mActiveListTitle.getListTitleUuid()));
+        }
     }
 
     public void onEvent(MyEvents.showEditListItemDialog event) {
@@ -174,6 +195,14 @@ public class MainActivity extends AppCompatActivity {
 
     public void onEvent(MyEvents.startA1List event) {
         startA1List(event.getRefreshDataFromTheCloud());
+    }
+
+    public void onEvent(MyEvents.showProgressBar event) {
+        showProgressBar();
+    }
+
+    public void onEvent(MyEvents.hideProgressBar event) {
+        hideProgressBar();
     }
 
     //endregion
@@ -253,18 +282,27 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if (refreshDataFromTheCloud) {
-            downloadDataFromParse();
+            upAndDownloadDataFromParse();
         }
 
         MySettings.setRefreshDataFromTheCloud(true);
         MySettings.setIsFirstTimeRun(false);
     }
 
-    private void downloadDataFromParse() {
+    private void upAndDownloadDataFromParse() {
         if (CommonMethods.isNetworkAvailable()) {
-            new DownloadDataAsyncTask(this).execute();
+            new UpAndDownloadDataAsyncTask(this).execute();
+//            startAsyncTaskInParallel(new UpAndDownloadDataAsyncTask(this));
         }
     }
+
+//    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+//    private void startAsyncTaskInParallel(UpAndDownloadDataAsyncTask task) {
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
+//            task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+//        else
+//            task.execute();
+//    }
 
     private void requestEmailBeVerified() {
         CommonMethods.showOkDialog(this, getString(R.string.requestEmailBeVerified_title),
@@ -457,7 +495,7 @@ public class MainActivity extends AppCompatActivity {
         } else if (id == R.id.action_editListTheme) {
             Intent intent = new Intent(this, ListThemeActivity.class);
             Bundle bundle = new Bundle();
-            bundle.putString(MySettings.ARG_LIST_TITLE_ID, mActiveListTitle.getLocalUuid());
+            bundle.putString(MySettings.ARG_LIST_TITLE_ID, mActiveListTitle.getListTitleUuid());
             intent.putExtras(bundle);
             startActivity(intent);
             return true;
@@ -479,7 +517,7 @@ public class MainActivity extends AppCompatActivity {
             return true;
 
         } else if (id == R.id.action_refresh) {
-            downloadDataFromParse();
+            upAndDownloadDataFromParse();
             return true;
 
         } else if (id == R.id.action_logoff) {
@@ -515,7 +553,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void showListItemSortingDialog() {
         FragmentManager fm = getSupportFragmentManager();
-        dialogListItemSorting dialog = dialogListItemSorting.newInstance(mActiveListTitle.getLocalUuid());
+        dialogListItemSorting dialog = dialogListItemSorting.newInstance(mActiveListTitle.getListTitleUuid());
         dialog.show(fm, "dialogListItemSorting");
     }
 
@@ -526,13 +564,13 @@ public class MainActivity extends AppCompatActivity {
                 item.setMarkedForDeletion(true);
                 item.setIsStruckOut(false);
             }
-            EventBus.getDefault().post(new MyEvents.updateListUI(mActiveListTitle.getLocalUuid()));
+            EventBus.getDefault().post(new MyEvents.updateListUI(mActiveListTitle.getListTitleUuid()));
         }
     }
 
     private void showFavoriteItems() {
         FragmentManager fm = getSupportFragmentManager();
-        dialogSelectFavorites dialog = dialogSelectFavorites.newInstance(mActiveListTitle.getLocalUuid());
+        dialogSelectFavorites dialog = dialogSelectFavorites.newInstance(mActiveListTitle.getListTitleUuid());
         dialog.show(fm, "dialogSelectFavorites");
     }
 
@@ -545,7 +583,7 @@ public class MainActivity extends AppCompatActivity {
     private void showNewListItemDialog(ListTitle listTitle) {
         if (listTitle != null) {
             FragmentManager fm = getSupportFragmentManager();
-            dialogNewListItem dialog = dialogNewListItem.newInstance(listTitle.getLocalUuid());
+            dialogNewListItem dialog = dialogNewListItem.newInstance(listTitle.getListTitleUuid());
             dialog.show(fm, "dialogNewListItem");
         }
     }

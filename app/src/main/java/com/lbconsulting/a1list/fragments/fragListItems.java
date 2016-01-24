@@ -1,5 +1,7 @@
 package com.lbconsulting.a1list.fragments;
 
+
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -26,26 +28,27 @@ import de.greenrobot.event.EventBus;
  */
 public class fragListItems extends Fragment {
     private static final String ARG_LIST_TITLE_UUID = "argListTitleUuid";
-
+    private static final int LOADER_ID = 1;
     private com.nhaarman.listviewanimations.itemmanipulation.DynamicListView lvListItems;
     private String mListTitleUuid;
     private ListTitle mListTitle;
-    private String mListTitleName = "Unknown";
+    //    private String mListTitleName = "Unknown";
     private ListAttributes mAttributes;
-
     private LinearLayout llListItems;
-
     private ListItemsArrayAdapter mListItemsArrayAdapter;
+
+//    private LoaderManager mLoaderManager;
+//    // The callbacks through which we will interact with the LoaderManager.
+//    private LoaderManager.LoaderCallbacks<List<ListItem>> mCallbacks;
 
     public fragListItems() {
         // Required empty public constructor
     }
 
-    public static fragListItems newInstance(String listTitleID) {
-        MyLog.i("fragListItems", "newInstance: ListTitleID = " + listTitleID);
+    public static fragListItems newInstance(String listTitleUuid) {
         fragListItems frag = new fragListItems();
         Bundle args = new Bundle();
-        args.putString(ARG_LIST_TITLE_UUID, listTitleID);
+        args.putString(ARG_LIST_TITLE_UUID, listTitleUuid);
         frag.setArguments(args);
         return frag;
     }
@@ -53,36 +56,46 @@ public class fragListItems extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        EventBus.getDefault().register(this);
+        MyLog.i("fragListItems", "onCreate");
         mListTitle = null;
         Bundle args = getArguments();
         if (args.containsKey(ARG_LIST_TITLE_UUID)) {
             mListTitleUuid = args.getString(ARG_LIST_TITLE_UUID);
-            refreshListTitle(mListTitleUuid);
+            refreshListTitle(mListTitleUuid, "onCreate");
+//            MyLog.i("fragListItems", "onCreate: " + mListTitle.getName());
         } else {
-
             MyLog.e("fragListItems", "onCreate: No ListTitle found!");
         }
+        EventBus.getDefault().register(this);
+        MyLog.i("fragListItems", "onCreate complete: " + mListTitle.getName());
+//        mLoaderManager.initLoader(LOADER_ID, null, mCallbacks);
     }
 
-    private void refreshListTitle(String listTitleUuid) {
+    public void onEvent(MyEvents.updateListUI event) {
+        if (event.getListTitleUuid() == null) {
+            new LoadListItems(mListTitle).execute();
+        } else if (mListTitle.getListTitleUuid().equals(event.getListTitleUuid())) {
+            new LoadListItems(mListTitle).execute();
+        }
+    }
+    private void refreshListTitle(String listTitleUuid, String source) {
         if (listTitleUuid != null && !listTitleUuid.equals(MySettings.NOT_AVAILABLE)) {
             mListTitle = ListTitle.getListTitle(listTitleUuid);
-        }
-        if (mListTitle != null) {
-            mListTitleName = mListTitle.getName();
-//            String attributesUuid = mListTitle.getAttributes().getLocalUuid();
-//            mAttributes = ListAttributes.getAttributes(attributesUuid);
-            mAttributes = mListTitle.getAttributes();
-            MyLog.i("fragListItems", "refreshListTitle: " + mListTitleName);
+            if (mListTitle != null) {
+                mAttributes = mListTitle.getAttributes();
+                MyLog.i("fragListItems", source + " refreshListTitle " + mListTitle.getName());
+            } else {
+                MyLog.e("fragListItems", source + ": listTitleUuid = " + listTitleUuid + " Unable to find ListTitle");
+            }
+        } else {
+            MyLog.e("fragListItems", source + ": listTitleUuid in null or NOT_AVAILABLE");
         }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        MyLog.i("fragListItems", "onCreateView: " + mListTitleName);
+        MyLog.i("fragListItems", "onCreateView: " + mListTitle.getName());
         View rootView = inflater.inflate(R.layout.frag_list_items, container, false);
 
         llListItems = (LinearLayout) rootView.findViewById(R.id.llListItems);
@@ -94,6 +107,15 @@ public class fragListItems extends Fragment {
         // Set up the ListView adapter
         mListItemsArrayAdapter = new ListItemsArrayAdapter(getActivity(), lvListItems, mListTitle);
         lvListItems.setAdapter(mListItemsArrayAdapter);
+
+        new LoadListItems(mListTitle).execute();
+
+        // initialize Loader for lvListItems
+//        mLoaderManager.initLoader(LOADER_ID, null, mCallbacks).forceLoad();
+//        if(!mLoaderManager.getLoader(LOADER_ID).isReset()) {
+//            MyLog.i("fragListItems", "onCreateView; restartLoader");
+//            mLoaderManager.restartLoader(LOADER_ID, null, mCallbacks);
+//        }
 
         if (!mListTitle.sortListItemsAlphabetically()) {
             lvListItems.enableDragAndDrop();
@@ -115,35 +137,18 @@ public class fragListItems extends Fragment {
         return rootView;
     }
 
-    public void onEvent(MyEvents.updateListUI event) {
-        if (event.getListTitleUuid() == null) {
-            updateListUI();
-        } else if (mListTitleUuid.equals(event.getListTitleUuid())) {
-            updateListUI();
-        }
-    }
-
-    private void updateListUI() {
-        mAttributes = ListAttributes.getAttributes(mListTitle.getAttributes().getLocalUuid());
-        List<ListItem> listItems = ListItem.getAllListItems(mListTitle);
-        MyLog.i("fragListItems", "updateListUI List " + mListTitleName + " with " + listItems.size() + " items.");
-        mListItemsArrayAdapter.setData(listItems, mAttributes);
-        mListItemsArrayAdapter.notifyDataSetChanged();
-        llListItems.setBackground(mAttributes.getBackgroundDrawable());
-    }
-
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        MyLog.i("fragListItems", "onActivityCreated: " + mListTitleName);
+        MyLog.i("fragListItems", "onActivityCreated: " + mListTitle.getName());
     }
 
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        MyLog.i("fragListItems", "onSaveInstanceState: " + mListTitleName);
-        outState.putString(ARG_LIST_TITLE_UUID, mListTitle.getLocalUuid());
+        MyLog.i("fragListItems", "onSaveInstanceState: " + mListTitle.getName());
+        outState.putString(ARG_LIST_TITLE_UUID, mListTitle.getListTitleUuid());
         /*
         Called to ask the fragment to save its current dynamic state,
         so it can later be reconstructed in a new instance if its process is restarted.
@@ -162,41 +167,87 @@ public class fragListItems extends Fragment {
     @Override
     public void onViewStateRestored(Bundle savedInstanceState) {
         super.onViewStateRestored(savedInstanceState);
-        updateListUI();
-//        EventBus.getDefault().post(new MyEvents.refreshSectionsPagerAdapter());
-//        if(savedInstanceState!=null && savedInstanceState.containsKey(ARG_LIST_TITLE_UUID)){
-//            mListTitleUuid = savedInstanceState.getString(ARG_LIST_TITLE_UUID);
-//            if (mListTitleUuid != null && !mListTitleUuid.equals(MySettings.NOT_AVAILABLE)) {
-//                mListTitle = ListTitle.getListTitle(mListTitleUuid);
-//            }
-//            if (mListTitle != null) {
-//                mListTitleName = mListTitle.getName();
-//                mAttributes = mListTitle.getAttributes();
-//            }
-//            llListItems.setBackground(mAttributes.getBackgroundDrawable());
-        MyLog.i("fragListItems", "onViewStateRestored: " + mListTitleName);
-//        }
+        if (savedInstanceState != null && savedInstanceState.containsKey(ARG_LIST_TITLE_UUID)) {
+            mListTitleUuid = savedInstanceState.getString(ARG_LIST_TITLE_UUID);
+            refreshListTitle(mListTitleUuid, "onViewStateRestored");
+        }
+//        MyLog.i("fragListItems", "onViewStateRestored: " + mListTitle.getName());
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        MyLog.i("fragListItems", "onResume: " + mListTitleName);
-        refreshListTitle(mListTitleUuid);
-        updateListUI();
+//        MyLog.i("fragListItems", "onResume: " + mListTitle.getName());
+        refreshListTitle(mListTitleUuid, "onResume");
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        MyLog.i("fragListItems", "onPause: " + mListTitleName);
+        MyLog.i("fragListItems", "onPause: " + mListTitle.getName());
         mListTitle.setIsForceViewInflation(false);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        MyLog.i("fragListItems", "onDestroy: " + mListTitleName);
         EventBus.getDefault().unregister(this);
+        MyLog.i("fragListItems", "onDestroy: " + mListTitle.getName());
     }
+
+
+    private class LoadListItems extends AsyncTask<Void, Void, Void> {
+        private ListTitle mListTitle;
+        private List<ListItem> listItemData;
+
+        public LoadListItems(ListTitle listTitle) {
+            mListTitle = listTitle;
+        }
+
+//        @Override
+//        protected void onPreExecute() {
+//            super.onPreExecute();
+//        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            listItemData = ListItem.getAllListItems(mListTitle);
+            MyLog.i("LoadListItems", "doInBackground; " + mListTitle.getName() + " found " + listItemData.size() + " items.");
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            mListItemsArrayAdapter.setData(listItemData, mAttributes);
+            mListItemsArrayAdapter.setAttributes(mAttributes);
+
+            mListItemsArrayAdapter.notifyDataSetChanged();
+            llListItems.setBackground(mAttributes.getBackgroundDrawable());
+            super.onPostExecute(aVoid);
+        }
+    }
+//    @Override
+//    public Loader<List<ListItem>> onCreateLoader(int id, Bundle args) {
+//        MyLog.i("fragListItems", "onCreateLoader: " + mListTitle.getName());
+//        mAttributes = ListAttributes.getAttributes(mListTitle.getAttributes().getLocalUuid());
+//        return new ListItemLoader(getActivity(), mListTitle);
+//    }
+//
+//
+//    @Override
+//    public void onLoadFinished(Loader<List<ListItem>> loader, List<ListItem> data) {
+//        if(mListTitle!=null) {
+//            MyLog.i("fragListItems", "onLoadFinished: " + mListTitle.getName() + " with " + data.size() + " items.");
+//        }
+//        mListItemsArrayAdapter.setData(data, mAttributes);
+//        mListItemsArrayAdapter.notifyDataSetChanged();
+//        llListItems.setBackground(mAttributes.getBackgroundDrawable());
+//    }
+//
+//    @Override
+//    public void onLoaderReset(Loader<List<ListItem>> loader) {
+//        MyLog.i("fragListItems", "onLoaderReset: " + mListTitle.getName());
+//        mListItemsArrayAdapter.setData(null, mAttributes);
+//        mListItemsArrayAdapter.notifyDataSetChanged();
+//    }
 }
