@@ -77,7 +77,7 @@ public class dialogSelectFavorites extends DialogFragment {
                     public void onClick(View v) {
                         // Apply
                         mFavoritesArrayAdapter.selectCheckedItems();
-                        EventBus.getDefault().post(new MyEvents.updateListUI(mListTitle.getListTitleUuid()));
+                        EventBus.getDefault().post(new MyEvents.updateListUIAsync(mListTitle.getListTitleUuid()));
                         dismiss();
                     }
                 });

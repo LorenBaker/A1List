@@ -64,6 +64,19 @@ public class MyEvents {
     }
 
 
+    public static class updateListUIAsync {
+        String mListTitleUuid;
+
+        public updateListUIAsync(String listTitleUuid) {
+            mListTitleUuid = listTitleUuid;
+        }
+
+        public String getListTitleUuid() {
+            return mListTitleUuid;
+        }
+
+    }
+
     public static class updateListUI {
         String mListTitleUuid;
 

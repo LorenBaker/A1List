@@ -160,7 +160,7 @@ public class MainActivity extends AppCompatActivity {
         if (mActiveListTitle != null) {
             MySettings.setActiveListTitleUuid(mActiveListTitle.getListTitleUuid());
             setToolBarTitle(mActiveListTitle.getName());
-            EventBus.getDefault().post(new MyEvents.updateListUI(mActiveListTitle.getListTitleUuid()));
+            EventBus.getDefault().post(new MyEvents.updateListUIAsync(mActiveListTitle.getListTitleUuid()));
             MyLog.i("MainActivity", "updateActiveListTitle: position = " + position + ": " + mActiveListTitle.getName());
         }else{
             MyLog.e("MainActivity", "updateActiveListTitle: Unable to find ListTitle at position = " + position);
@@ -177,7 +177,7 @@ public class MainActivity extends AppCompatActivity {
         MyLog.i("MainActivity", "refreshSectionsPagerAdapter");
         mSectionsPagerAdapter.notifyDataSetChanged();
         if(mActiveListTitle!=null) {
-            EventBus.getDefault().post(new MyEvents.updateListUI(mActiveListTitle.getListTitleUuid()));
+            EventBus.getDefault().post(new MyEvents.updateListUIAsync(mActiveListTitle.getListTitleUuid()));
         }
     }
 
@@ -288,7 +288,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void upAndDownloadDataFromParse() {
-        if (CommonMethods.isNetworkAvailable()) {
+        if (CommonMethods.isNetworkAvailable() && MySettings.requiresSyncing()) {
             new UpAndDownloadDataAsyncTask(this).execute();
         }
     }
@@ -552,7 +552,7 @@ public class MainActivity extends AppCompatActivity {
                 item.setMarkedForDeletion(true);
                 item.setIsStruckOut(false);
             }
-            EventBus.getDefault().post(new MyEvents.updateListUI(mActiveListTitle.getListTitleUuid()));
+            EventBus.getDefault().post(new MyEvents.updateListUIAsync(mActiveListTitle.getListTitleUuid()));
         }
     }
 

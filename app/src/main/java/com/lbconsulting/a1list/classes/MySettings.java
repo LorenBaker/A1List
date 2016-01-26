@@ -21,6 +21,10 @@ public class MySettings {
     public static final int TEXT_SIZE_PICKER = 10;
     public static final int HORIZONTAL_PADDING_PICKER = 20;
     public static final int VERTICAL_PADDING_PICKER = 30;
+    public static final long REQUIRED_SYNC_DURATION = 6 * 60 * 60 * 1000; // 6 hours
+    // TODO: 1/25/2016 Make required sync duration a user setting
+//    public static final long REQUIRED_SYNC_DURATION = 60000; // 1 min
+
 
     public static final String ARG_LIST_TITLE_ID = "listTitleID";
 
@@ -34,6 +38,7 @@ public class MySettings {
     private static final String SETTING_NEXT_LIST_TITLE_ID = "nextListTitleID";
     private static final String SETTING_REFRESH_DATA_FROM_THE_CLOUD = "refreshDataFromTheCloud";
     private static final String SETTING_IS_FIRST_TIME_RUN = "isFirstTimeRun";
+    private static final String SETTING_LAST_TIME_SYNCED = "lastTimeSynced";
 
     private static SharedPreferences mPreferences;
 
@@ -161,6 +166,28 @@ public class MySettings {
         SharedPreferences.Editor editor = mPreferences.edit();
         editor.putInt(SETTING_DEFAULT_ATTRIBUTES_ID, defaultAttributesID);
         editor.apply();
+    }
+
+    //endregion
+
+    //region SETTING_LAST_TIME_SYNCED
+    private static long getLastTimeSynced() {
+        return mPreferences.getLong(SETTING_LAST_TIME_SYNCED, 0);
+    }
+
+    public static void setLastTimeSynced(long lastTimeSynced) {
+        SharedPreferences.Editor editor = mPreferences.edit();
+        editor.putLong(SETTING_LAST_TIME_SYNCED, lastTimeSynced);
+        editor.apply();
+    }
+
+    public static boolean requiresSyncing() {
+        boolean result = false;
+        long duration = System.currentTimeMillis() - getLastTimeSynced();
+        if (duration > REQUIRED_SYNC_DURATION) {
+            result = true;
+        }
+        return result;
     }
 
     //endregion

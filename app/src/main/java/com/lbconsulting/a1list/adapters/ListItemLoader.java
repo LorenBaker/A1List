@@ -181,7 +181,7 @@ public class ListItemLoader extends AsyncTaskLoader<List<ListItem>> {
         mObserverRegistered = false;
     }
 
-    public void onEvent(MyEvents.updateListUI event) {
+    public void onEvent(MyEvents.updateListUIAsync event) {
         if (event.getListTitleUuid() == null) {
             onContentChanged();
         } else if (mListTitle.getListTitleUuid().equals(event.getListTitleUuid())) {

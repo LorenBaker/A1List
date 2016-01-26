@@ -1,2 +1,2 @@
 <?xml version="1.0" encoding="utf-8"?>
-<merger version="3"><dataSet config="debug"><source path="C:\Users\Loren\OneDrive\Android_Studio_Projects\A1List\ParseUI-Widget\build\intermediates\bundles\debug\assets"/></dataSet><dataSet config="main"><source path="C:\Users\Loren\OneDrive\Android_Studio_Projects\A1List\ParseUI-Widget\src\androidTest\assets"/></dataSet></merger>
+<merger version="3"><dataSet config="debug"><source path="C:\Users\Loren\LocalAndroidProjects\A1List\ParseUI-Widget\build\intermediates\bundles\debug\assets"/></dataSet><dataSet config="main"><source path="C:\Users\Loren\LocalAndroidProjects\A1List\ParseUI-Widget\src\androidTest\assets"/></dataSet></merger>

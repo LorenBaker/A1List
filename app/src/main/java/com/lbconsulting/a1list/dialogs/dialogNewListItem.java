@@ -80,7 +80,7 @@ public class dialogNewListItem extends DialogFragment {
                     @Override
                     public void onClick(final View v) {
                         if (addNewItem(txtItemName.getText().toString().trim())) {
-                            EventBus.getDefault().post(new MyEvents.updateListUI(mListTitle.getListTitleUuid()));
+                            EventBus.getDefault().post(new MyEvents.updateListUIAsync(mListTitle.getListTitleUuid()));
                             dismiss();
                         }
                     }
@@ -92,7 +92,7 @@ public class dialogNewListItem extends DialogFragment {
                     @Override
                     public void onClick(View v) {
                         // Cancel
-                        EventBus.getDefault().post(new MyEvents.updateListUI(mListTitle.getListTitleUuid()));
+                        EventBus.getDefault().post(new MyEvents.updateListUIAsync(mListTitle.getListTitleUuid()));
                         dismiss();
                     }
                 });

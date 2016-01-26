@@ -73,6 +73,9 @@ public class UpAndDownloadDataAsyncTask extends AsyncTask<Void, Void, Void> {
         // replace the local datastore with downloaded data
         updateLocalDataStore();
 
+        // save the last time synced
+        MySettings.setLastTimeSynced(System.currentTimeMillis());
+
         return null;
     }
 
@@ -84,7 +87,7 @@ public class UpAndDownloadDataAsyncTask extends AsyncTask<Void, Void, Void> {
         EventBus.getDefault().post(new MyEvents.refreshSectionsPagerAdapter());
         EventBus.getDefault().post(new MyEvents.hideProgressBar());
 //        EventBus.getDefault().post(new MyEvents.updateUI());
-//        EventBus.getDefault().post(new MyEvents.updateListUI(null));
+//        EventBus.getDefault().post(new MyEvents.updateListUIAsync(null));
 //        if (mRestartA1List) {
 //            EventBus.getDefault().post(new MyEvents.startA1List(false));
 //        }

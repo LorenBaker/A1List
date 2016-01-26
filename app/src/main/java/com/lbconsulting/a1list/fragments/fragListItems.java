@@ -63,13 +63,22 @@ public class fragListItems extends Fragment {
         MyLog.i("fragListItems", "onCreate complete: " + mListTitle.getName());
     }
 
-    public void onEvent(MyEvents.updateListUI event) {
+    public void onEvent(MyEvents.updateListUIAsync event) {
         if (event.getListTitleUuid() == null) {
             new LoadListItems(mListTitle).execute();
         } else if (mListTitle.getListTitleUuid().equals(event.getListTitleUuid())) {
             new LoadListItems(mListTitle).execute();
         }
     }
+
+    public void onEvent(MyEvents.updateListUI event) {
+        if (mListTitle.getListTitleUuid().equals(event.getListTitleUuid())) {
+            List<ListItem> listItemData = ListItem.getAllListItems(mListTitle);
+            mListItemsArrayAdapter.setData(listItemData, mAttributes);
+            mListItemsArrayAdapter.notifyDataSetChanged();
+        }
+    }
+
     private void refreshListTitle(String listTitleUuid, String source) {
         if (listTitleUuid != null && !listTitleUuid.equals(MySettings.NOT_AVAILABLE)) {
             mListTitle = ListTitle.getListTitle(listTitleUuid);
