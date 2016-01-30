@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.lbconsulting.a1list" >
+    package="com.lbconsulting.a1list">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -11,11 +11,11 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme" >
+        android:theme="@style/AppTheme">
         <activity
             android:name=".activities.DispatchActivity"
             android:label="@string/app_name"
-            android:launchMode="singleTop" >
+            android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -25,12 +25,11 @@
         <activity
             android:name=".activities.MainActivity"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar" >
-        </activity>
+            android:theme="@style/AppTheme.NoActionBar"></activity>
         <activity
             android:name="com.parse.ui.ParseLoginActivity"
             android:label="@string/app_name"
-            android:launchMode="singleTop" >
+            android:launchMode="singleTop">
 
             <!-- For these non-resource options, use android:value -->
             <meta-data
@@ -49,22 +48,21 @@
                 android:value="8" />
         </activity>
 
-        <!--<activity-->
-            <!--android:name=".activities.TestDataActivity"-->
-            <!--android:label="@string/title_activity_test_data"-->
-            <!--android:theme="@style/AppTheme.NoActionBar" >-->
-        <!--</activity>-->
+        <!-- <activity -->
+        <!-- android:name=".activities.TestDataActivity" -->
+        <!-- android:label="@string/title_activity_test_data" -->
+        <!-- android:theme="@style/AppTheme.NoActionBar" > -->
+        <!-- </activity> -->
 
         <service
             android:name=".services.UploadDirtyObjectsService"
-            android:exported="false" >
-        </service>
+            android:exported="false"></service>
 
         <activity
             android:name=".activities.ListThemeActivity"
             android:label="@string/title_activity_test2"
             android:parentActivityName=".activities.MainActivity"
-            android:theme="@style/AppTheme.NoActionBar" >
+            android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.lbconsulting.a1list.activities.MainActivity" />
@@ -73,11 +71,14 @@
             android:name=".activities.ManageListsAndThemesActivity"
             android:label="@string/title_activity_manage_lists_and_themes"
             android:parentActivityName=".activities.MainActivity"
-            android:theme="@style/AppTheme.NoActionBar" >
+            android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.lbconsulting.a1list.activities.MainActivity" />
         </activity>
+        <activity
+            android:name=".activities.SettingsActivity"
+            android:label="@string/title_activity_settings"></activity>
     </application>
 
 </manifest>

@@ -78,7 +78,7 @@ public class ListItemsArrayAdapter extends ArrayAdapter<ListItem> implements Swa
         return getItemPosition(soughtItem.getItemUuid());
     }
 
-    private int getItemPosition(String soughtItemUuid) {
+    public int getItemPosition(String soughtItemUuid) {
         int position;
         boolean found = false;
 
@@ -96,6 +96,7 @@ public class ListItemsArrayAdapter extends ArrayAdapter<ListItem> implements Swa
         }
         return position;
     }
+
 
     public void setAttributes(ListAttributes attributes) {
         mAttributes = attributes;

@@ -9,6 +9,17 @@ public class MyEvents {
 //        }
 //    }
 
+    public static class showListItem{
+        String mListItemUuid;
+        public showListItem(String listItemUuid){
+            mListItemUuid=listItemUuid;
+        }
+
+        public String getListItemUuid(){
+            return mListItemUuid;
+        }
+    }
+
     public static class showProgressBar {
         public showProgressBar() {
 

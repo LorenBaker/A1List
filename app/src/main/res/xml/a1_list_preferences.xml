@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <ListPreference
+        android:title="Time Between Synchronizations"
+        android:summary="Time between synchronizations = "
+        android:key="syncDuration"
+        android:defaultValue="0"
+        android:entries="@array/syncDurationTitles"
+        android:entryValues="@array/syncDurationValues" />
+
+</PreferenceScreen>

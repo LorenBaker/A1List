@@ -38,7 +38,8 @@ public class ListItem extends ParseObject {
         // A default constructor is required.
     }
 
-    public static void newInstance(String newItemName, ListTitle listTitle) {
+    public static String newInstance(String newItemName, ListTitle listTitle) {
+        String newItemUuid = null;
         try {
             ListItem newItem = new ListItem();
             newItem.setItemUuid();
@@ -53,9 +54,11 @@ public class ListItem extends ParseObject {
             newItem.setIsStruckOut(false);
             newItem.setListItemManualSortKey(newItem.getItemID());
             newItem.pin();
+            newItemUuid = newItem.getItemUuid();
         } catch (ParseException e) {
             MyLog.e("ListItem", "newInstance: ParseException: " + e.getMessage());
         }
+        return newItemUuid;
     }
 
     public static ListItem getListItem(String listItemID) {
@@ -77,6 +80,7 @@ public class ListItem extends ParseObject {
         }
         return listItem;
     }
+
     public static void updateListItemAttributes(ListTitle listTitle) {
         List<ListItem> allItems = getAllListItems(listTitle);
         for (ListItem item : allItems) {
@@ -104,7 +108,7 @@ public class ListItem extends ParseObject {
                 }
                 query.fromLocalDatastore();
                 listItems = query.find();
-                MyLog.i("ListItem", "getAllListItems: " + listTitle.getName() + "; found " +listItems.size() + " items.");
+                MyLog.i("ListItem", "getAllListItems: " + listTitle.getName() + "; found " + listItems.size() + " items.");
             } catch (ParseException e) {
                 MyLog.e("ListItem", "getAllListItems: ParseException" + e.getMessage());
             }

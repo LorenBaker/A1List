@@ -79,6 +79,16 @@ public class fragListItems extends Fragment {
         }
     }
 
+    public void onEvent(MyEvents.showListItem event) {
+        int itemPosition = mListItemsArrayAdapter.getItemPosition(event.getListItemUuid());
+        int firstVisible = lvListItems.getFirstVisiblePosition();
+        int lastVisible = lvListItems.getLastVisiblePosition();
+
+        if (itemPosition > lastVisible || itemPosition < firstVisible) {
+            lvListItems.smoothScrollToPosition(itemPosition);
+        }
+    }
+
     private void refreshListTitle(String listTitleUuid, String source) {
         if (listTitleUuid != null && !listTitleUuid.equals(MySettings.NOT_AVAILABLE)) {
             mListTitle = ListTitle.getListTitle(listTitleUuid);

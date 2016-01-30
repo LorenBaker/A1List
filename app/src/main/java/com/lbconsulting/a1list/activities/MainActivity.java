@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -96,6 +97,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         EventBus.getDefault().register(this);
         ParseAnalytics.trackAppOpenedInBackground(getIntent());
+        PreferenceManager.setDefaultValues(this, R.xml.a1_list_preferences, false);
 
         mSnackBarView = (CoordinatorLayout) findViewById(R.id.main_content);
 
@@ -104,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.container);
-        mProgressBar =(ProgressBar)findViewById(R.id.progressBar);
+        mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
 
         // Create the adapter that will return a fragListItems fragment
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
@@ -145,12 +147,12 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void showProgressBar(){
+    private void showProgressBar() {
         mViewPager.setVisibility(View.GONE);
         mProgressBar.setVisibility(View.VISIBLE);
     }
 
-    private void hideProgressBar(){
+    private void hideProgressBar() {
         mViewPager.setVisibility(View.VISIBLE);
         mProgressBar.setVisibility(View.GONE);
     }
@@ -162,7 +164,7 @@ public class MainActivity extends AppCompatActivity {
             setToolBarTitle(mActiveListTitle.getName());
             EventBus.getDefault().post(new MyEvents.updateListUIAsync(mActiveListTitle.getListTitleUuid()));
             MyLog.i("MainActivity", "updateActiveListTitle: position = " + position + ": " + mActiveListTitle.getName());
-        }else{
+        } else {
             MyLog.e("MainActivity", "updateActiveListTitle: Unable to find ListTitle at position = " + position);
         }
     }
@@ -176,7 +178,7 @@ public class MainActivity extends AppCompatActivity {
     public void onEvent(MyEvents.refreshSectionsPagerAdapter event) {
         MyLog.i("MainActivity", "refreshSectionsPagerAdapter");
         mSectionsPagerAdapter.notifyDataSetChanged();
-        if(mActiveListTitle!=null) {
+        if (mActiveListTitle != null) {
             EventBus.getDefault().post(new MyEvents.updateListUIAsync(mActiveListTitle.getListTitleUuid()));
         }
     }
@@ -290,6 +292,15 @@ public class MainActivity extends AppCompatActivity {
     private void upAndDownloadDataFromParse() {
         if (CommonMethods.isNetworkAvailable() && MySettings.requiresSyncing()) {
             new UpAndDownloadDataAsyncTask(this).execute();
+        }
+    }
+
+    private void forceUpAndDownloadDataFromParse() {
+        if (CommonMethods.isNetworkAvailable()) {
+            new UpAndDownloadDataAsyncTask(this).execute();
+        } else {
+            String msg = "Unable to refresh data. Network is not available";
+            showSnackBar(msg);
         }
     }
 
@@ -505,7 +516,7 @@ public class MainActivity extends AppCompatActivity {
             return true;
 
         } else if (id == R.id.action_refresh) {
-            upAndDownloadDataFromParse();
+            forceUpAndDownloadDataFromParse();
             return true;
 
         } else if (id == R.id.action_logoff) {
@@ -525,8 +536,12 @@ public class MainActivity extends AppCompatActivity {
             });
             return true;
 
-            // TODO: Remove action_test_data menu item
+        } else if (id == R.id.action_settings) {
+//            Toast.makeText(this, "action_settings", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivity(intent);
         }
+        // TODO: Remove action_test_data menu item
 //        else if (id == R.id.action_test_data) {
 //
 //            Intent intent = new Intent(this, TestDataActivity.class);

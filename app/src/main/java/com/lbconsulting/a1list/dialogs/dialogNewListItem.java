@@ -10,11 +10,14 @@ import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.lbconsulting.a1list.R;
 import com.lbconsulting.a1list.classes.MyEvents;
@@ -36,6 +39,9 @@ public class dialogNewListItem extends DialogFragment {
 
     private ListTitle mListTitle;
     private AlertDialog mNewListItemDialog;
+
+    private String mNewItemUuid;
+    private boolean mDismissDialog;
 
     public dialogNewListItem() {
         // Empty constructor required for DialogFragment
@@ -63,6 +69,7 @@ public class dialogNewListItem extends DialogFragment {
                 String msg = "ListTitle with uuid = \"" + listUuid + "\" does not exist!";
                 MyLog.e("dialogNewListItem", "onCreate: " + msg);
             }
+            mDismissDialog = false;
         }
     }
 
@@ -74,48 +81,47 @@ public class dialogNewListItem extends DialogFragment {
         mNewListItemDialog.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
             public void onShow(DialogInterface dialog) {
-                Button saveButton = mNewListItemDialog.getButton(Dialog.BUTTON_POSITIVE);
-                saveButton.setTextSize(17);
-                saveButton.setOnClickListener(new View.OnClickListener() {
+
+                Button addNewButton = mNewListItemDialog.getButton(Dialog.BUTTON_POSITIVE);
+                addNewButton.setTextSize(17);
+                addNewButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(final View v) {
-                        if (addNewItem(txtItemName.getText().toString().trim())) {
-                            EventBus.getDefault().post(new MyEvents.updateListUIAsync(mListTitle.getListTitleUuid()));
-                            dismiss();
-                        }
+                        addNewButtonClicked();
                     }
                 });
 
-                Button cancelButton = mNewListItemDialog.getButton(Dialog.BUTTON_NEGATIVE);
+                Button cancelButton = mNewListItemDialog.getButton(Dialog.BUTTON_NEUTRAL);
                 cancelButton.setTextSize(17);
                 cancelButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         // Cancel
-                        EventBus.getDefault().post(new MyEvents.updateListUIAsync(mListTitle.getListTitleUuid()));
                         dismiss();
-                    }
-                });
-
-                Button addNewButton = mNewListItemDialog.getButton(Dialog.BUTTON_NEUTRAL);
-                addNewButton.setTextSize(17);
-                addNewButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(final View v) {
-                        if (addNewItem(txtItemName.getText().toString().trim())) {
-                            txtItemName.setText("");
-                        }
                     }
                 });
             }
         });
     }
 
+    private void addNewButtonClicked() {
+        if (addNewItem(txtItemName.getText().toString().trim())) {
+            txtItemName.setText("");
+            EventBus.getDefault().post(new MyEvents.updateListUI(mListTitle.getListTitleUuid()));
+            EventBus.getDefault().post(new MyEvents.showListItem(mNewItemUuid));
+            txtItemName.requestFocus();
+
+        } else if (mDismissDialog) {
+            dismiss();
+        }
+    }
+
     private boolean addNewItem(String newItemName) {
         boolean result = false;
         if (newItemName.isEmpty()) {
-            String errorMsg = getActivity().getString(R.string.newItemName_isEmpty_error);
-            txtName_input_layout.setError(errorMsg);
+//            String errorMsg = getActivity().getString(R.string.newItemName_isEmpty_error);
+//            txtName_input_layout.setError(errorMsg);
+            mDismissDialog = true;
 
         } else if (ListItem.itemExists(mListTitle, newItemName)) {
             String errorMsg = String.format(getActivity()
@@ -124,7 +130,7 @@ public class dialogNewListItem extends DialogFragment {
 
         } else {
             // ok to create item
-            ListItem.newInstance(newItemName, mListTitle);
+            mNewItemUuid = ListItem.newInstance(newItemName, mListTitle);
             result = true;
         }
         return result;
@@ -161,13 +167,25 @@ public class dialogNewListItem extends DialogFragment {
             }
         });
 
+        txtItemName.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                boolean handled = false;
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    addNewButtonClicked();
+                    handled = true;
+                }
+                return handled;
+            }
+        });
+
         // build the dialog
         mNewListItemDialog = new AlertDialog.Builder(getActivity())
                 .setTitle(R.string.newListItemDialog_title)
                 .setView(view)
-                .setPositiveButton(R.string.btnSave_title, null)
-                .setNegativeButton(R.string.btnCancel_title, null)
-                .setNeutralButton(R.string.btnSaveNew_title, null)
+                .setPositiveButton(R.string.btnSaveNew_title, null)
+//                .setNegativeButton(R.string.btnSave_title, null)
+                .setNeutralButton(R.string.btnCancel_title, null)
                 .create();
 
         return mNewListItemDialog;

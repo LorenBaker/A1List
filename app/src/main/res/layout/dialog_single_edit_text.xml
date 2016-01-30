@@ -14,6 +14,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textCapWords"
+            android:imeOptions="actionDone"
             android:paddingBottom="15dp"
             android:paddingLeft="25dp"
             android:paddingRight="10dp"
